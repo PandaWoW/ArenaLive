@@ -1,30 +1,4 @@
---[[
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
-
 local addonName, L = ...;
-
 local NameText = ArenaLive:GetHandler("NameText");
 
 local matchStatistics = {};
@@ -38,25 +12,7 @@ local HEADER_BASE_HEIGHT = 36;
 local PLAYER_ENTRY_BASE_HEIGHT = 32;
 local DEFAULT_OFFSET = 5;
 
--- Static Popup for clearing match database:
-StaticPopupDialogs["ALSPEC_CONFIRM_CLEAR_MATCH_DB"] = {
-	text = L["Clearing the match statistic database will delete all logged matches. Do you want to proceed?"],
-	button1 = YES,
-	button2 = NO,
-	OnAccept = function (self) ArenaLiveSpectatorMatchStatistic:ClearDatabase(); end,
-	OnCancel = function (self) end,
-	hideOnEscape = 1,
-	timeout = 0,
-	exclusive = 1,
-	whileDead = 1,
-	preferredIndex = STATICPOPUP_NUMDIALOGS, -- Avoid some UI taint.
-};
-
-
 function ArenaLiveSpectatorMatchStatistic:Initialise()
-	-- Set attributes:
-	self.shownScreen = "stats";
-	
 	-- Set Portrait:
 	ArenaLiveSpectatorMatchStatisticTitleText:SetText(L["ArenaLive [Spectator] Match Statistic"]);
 	self.portrait:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\WarGameMenuPortrait");
@@ -64,11 +20,7 @@ function ArenaLiveSpectatorMatchStatistic:Initialise()
 	-- Use this function from the war game menu, to initialise leave arena button:
 	ArenaLiveSpectatorWarGameMenu:InitialiseButton(self.leaveButton, L["Leave Arena"], function(self) LeaveBattlefield(); end);
 	ArenaLiveSpectatorWarGameMenu:InitialiseButton(self.deleteButton, L["Delete Match"]);
-	ArenaLiveSpectatorWarGameMenu:InitialiseButton(self.clearDatabaseButton, L["Clear Match Database"]);
-	ArenaLiveSpectatorWarGameMenu:InitialiseButton(self.screenModeButton, L["Show Talents"]);
 	ArenaLiveSpectatorMatchStatisticDeleteMatchButton:Disable();
-	ArenaLiveSpectatorMatchStatisticScreenModeButton:Disable();
-	
 	-- Set Match Statistic Dropdown:
 	self.dropdown.title:SetText(L["Match:"]);
 	UIDropDownMenu_SetWidth(self.dropdown, 300, 5);
@@ -107,8 +59,7 @@ function ArenaLiveSpectatorMatchStatistic:OnShow()
 	
 	ArenaLiveSpectatorMatchStatistic:UpdateFrameHeightsAndPosition(self.id);
 	
-	local isSpectator, instanceType = IsSpectator();
-	if ( isSpectator and instanceType == "arena" ) then
+	if ( ArenaLiveSpectator.enabled ) then
 		self.leaveButton:Enable();
 	else
 		self.leaveButton:Disable();
@@ -118,16 +69,6 @@ end
 
 function ArenaLiveSpectatorMatchStatistic:OnHide()
 	PlaySound("igCharacterInfoClose");
-end
-
-function ArenaLiveSpectatorMatchStatistic:ClearDatabase()
-	local database = ArenaLive:GetDBComponent(addonName);
-	table.wipe(database.MatchStatistic);
-	self.id = nil;
-	self:UpdateFrameHeightsAndPosition();
-	UIDropDownMenu_SetText(self.dropdown, L["Choose a Match"]);
-	ArenaLiveSpectatorMatchStatisticDeleteMatchButton:Disable();
-	ArenaLiveSpectatorMatchStatisticScreenModeButton:Disable();
 end
 
 function ArenaLiveSpectatorMatchStatistic:GetTeamFrameHeight(numPlayers)
@@ -151,133 +92,34 @@ function ArenaLiveSpectatorMatchStatistic:FillFrameWithPlayerData(matchID, team,
 		local name = database.MatchStatistic[matchID][team].name;
 		local r, g, b = unpack(database[team].Colour);
 		frame.background:SetVertexColor(r, g, b);
-		
 		frame.name:SetText(name);
-		
-		if ( self.shownScreen == "stats") then
-			frame.damage:SetText(L["Damage Dealt:"]);
-			frame.damage:Show();
-			
-			frame.highestDamage:SetText(L["Highest Damage:"]);
-			frame.highestDamage:Show();
-			
-			frame.healing:SetText(L["Healing Done:"]);
-			frame.healing:Show();
-			
-			frame.ccd:SetText(L["Time in CC:"]);
-			frame.ccd:Show();
-			
-			frame.centeredText:Hide();
-		elseif ( self.shownScreen == "talents" or self.shownScreen == "glyphs" ) then
-			frame.damage:Hide();
-			frame.highestDamage:Hide();
-			frame.healing:Hide();
-			frame.ccd:Hide();
-			
-			if ( self.shownScreen == "talents" ) then
-				frame.centeredText:SetText(L["Talent Summary"]);
-			else
-				frame.centeredText:SetText(L["Glyph Summary"]);
-			end
-			frame.centeredText:Show();
-		end
-
+		frame.damage:SetText(L["Damage Dealt:"]);
+		frame.healing:SetText(L["Healing Done:"]);
+		frame.ccd:SetText(L["Time in CC:"]);
 	else
 		frame = self[team]["player"..playerID];
 		
 		local guid = database.MatchStatistic[matchID][team].idToGUID[playerID];
-		if ( guid ) then
-			local name = database.MatchStatistic[matchID][team][guid].name;
-			local class = database.MatchStatistic[matchID][team][guid].class;
-
-			frame.name:SetText(name);
-			frame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[class]));
-			
-			if ( self.shownScreen == "stats" ) then
-				local absorb = database.MatchStatistic[matchID][team][guid].absorb or 0;
-				local damage = database.MatchStatistic[matchID][team][guid].damage or 0;
-				local highestDamage = database.MatchStatistic[matchID][team][guid].highestDamage or 0;
-				local highestDamageAbilityName = database.MatchStatistic[matchID][team][guid].highestDamageAbilityName or "";
-				local healing = database.MatchStatistic[matchID][team][guid].healing or 0;
-				local timeCCd = database.MatchStatistic[matchID][team][guid].timeCCd or 0;
-				local healing = healing + absorb;
-				
-				-- Compute shown time in CC:
-				local minutes, seconds;
-				minutes = math.floor(timeCCd / 60);
-				seconds = timeCCd % 60;
-				if ( seconds < 10 ) then
-					seconds = "0"..tostring(seconds);
-				end
-				local shownTime = string.format(L["%d:%s"], minutes, seconds);
-				
-				-- Set up frame:
-				frame.stats.damage:SetText(BreakUpLargeNumbers(math.floor(damage)));
-				frame.stats.highestDamage:SetText(string.format(L["%s\n(%s)"], BreakUpLargeNumbers(math.floor(highestDamage)), highestDamageAbilityName));
-				frame.stats.healing:SetText(BreakUpLargeNumbers(math.floor(healing)));
-				frame.stats.ccd:SetText(shownTime);
-				
-				frame.talents:Hide();
-				frame.stats:Show();
-			elseif ( self.shownScreen == "talents" ) then
-				frame.stats:Hide();
-				
-				-- Set talent icons:
-				for tier = 1, 7 do
-					local talentFrame = frame.talents["talent"..tier];
-					if ( database.MatchStatistic[matchID][team][guid].talents ) then
-						local talentID = database.MatchStatistic[matchID][team][guid].talents[tier]
-						if ( talentID ) then
-							local _, _, icon = GetTalentInfoByID(talentID);
-							talentFrame.icon:SetTexture(icon);
-							talentFrame.glyphID = nil;
-							talentFrame.talentID = talentID;
-							talentFrame:Show();
-						else
-							talentFrame:Hide();
-						end
-						
-					else
-						talentFrame.icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark");
-						talentFrame.glyphID = nil;
-						talentFrame.talentID = nil;
-						talentFrame:Show();
-					end
-				end
-				
-				frame.talents:Show();
-			elseif ( self.shownScreen == "glyphs" ) then
-				frame.stats:Hide();
-				
-				-- Set glyph icons, I'm reusing
-				-- talent icons here:
-				local glyphOrder = {2,4,6,1,3,5};
-				for slot = 1, 6 do
-					local talentFrame = frame.talents["talent"..slot];
-					if ( database.MatchStatistic[matchID][team][guid].glyphs ) then
-						local glyphID = database.MatchStatistic[matchID][team][guid].glyphs[glyphOrder[slot]];
-						if ( glyphID ) then
-							local _, _, icon = GetSpellInfo(glyphID);
-							talentFrame.icon:SetTexture(icon);
-							talentFrame.talentID = nil;
-							talentFrame.glyphID = glyphID;
-							talentFrame:Show();
-						else
-							talentFrame:Hide();
-						end
-						
-					else
-						talentFrame.icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark");
-						talentFrame.talentID = nil;
-						talentFrame.glyphID = nil;
-						talentFrame:Show();
-					end
-				end				
-				frame.talents.talent7:Hide();
-				
-				frame.talents:Show();
-			end
+		local name = database.MatchStatistic[matchID][team][guid].name;
+		local class = database.MatchStatistic[matchID][team][guid].class;
+		local absorb = database.MatchStatistic[matchID][team][guid].absorb;
+		local damage = database.MatchStatistic[matchID][team][guid].damage;
+		local healing = database.MatchStatistic[matchID][team][guid].healing;
+		local timeCCd = database.MatchStatistic[matchID][team][guid].timeCCd;
+		local healing = healing + absorb;
+		local minutes, seconds;
+		minutes = math.floor(timeCCd / 60);
+		seconds = timeCCd % 60;
+		if ( seconds < 10 ) then
+			seconds = "0"..tostring(seconds);
 		end
+
+		local shownTime = string.format(L["%d:%s"], minutes, seconds);
+		frame.name:SetText(name);
+		frame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[class]));
+		frame.damage:SetText(math.floor(damage));
+		frame.healing:SetText(math.floor(healing));
+		frame.ccd:SetText(shownTime);
 	end
 end
 
@@ -300,7 +142,7 @@ function ArenaLiveSpectatorMatchStatistic:UpdateFrameHeightsAndPosition(matchID)
 		
 	-- Set frame heights:
 	local aHeight = ArenaLiveSpectatorMatchStatistic:GetTeamFrameHeight(numA);
-	local bHeight = ArenaLiveSpectatorMatchStatistic:GetTeamFrameHeight(numB);
+	local bHeight = ArenaLiveSpectatorMatchStatistic:GetTeamFrameHeight(numA);
 		
 	local height = 114 + aHeight + bHeight;
 	self:SetHeight(height);
@@ -359,7 +201,7 @@ function ArenaLiveSpectatorMatchStatistic:SetMatch(id)
 			end
 			
 			frame = self.TeamB["player"..i];
-			if ( i <= numB ) then
+			if ( i <= numA ) then
 				self:FillFrameWithPlayerData(id, "TeamB", i);
 				frame:Show();
 			else
@@ -368,16 +210,15 @@ function ArenaLiveSpectatorMatchStatistic:SetMatch(id)
 		end
 		
 		self.id = id;
-		ArenaLiveSpectatorMatchStatisticDeleteMatchButton:Enable();
-		ArenaLiveSpectatorMatchStatisticScreenModeButton:Enable();
-		UIDropDownMenu_SetText(ArenaLiveSpectatorMatchStatisticMatchDropDown, database.MatchStatistic[id].name or "");
 	end
 end
 
 function ArenaLiveSpectatorMatchStatisticMatchDropDown.OnClick(button, arg1, arg2)
 	local dropDown = UIDROPDOWNMENU_OPEN_MENU;
 	
+	ArenaLiveSpectatorMatchStatisticDeleteMatchButton:Enable();
 	ArenaLiveSpectatorMatchStatistic:SetMatch(button.value);
+	UIDropDownMenu_SetText(dropDown, button:GetText());
 end
 
 local info = {};
@@ -385,7 +226,7 @@ function ArenaLiveSpectatorMatchStatisticMatchDropDown:Refresh()
 	local database = ArenaLive:GetDBComponent(addonName);
 	
 	for matchID, matchInfo in ipairs(database.MatchStatistic) do
-		info.text = string.format(L["%d. %s"], matchID, matchInfo.name);
+		info.text = matchInfo["name"];
 		info.value = matchID;
 		info.func = self.OnClick;
 		if ( self.id and matchID == self.id ) then
@@ -399,12 +240,6 @@ function ArenaLiveSpectatorMatchStatisticMatchDropDown:Refresh()
 	end
 end
 
-function ArenaLiveSpectatorMatchStatisticClearDatabaseButton:OnClick(button, down)
-	if ( button == "LeftButton" ) then
-		StaticPopup_Show("ALSPEC_CONFIRM_CLEAR_MATCH_DB");
-	end
-end
-
 function ArenaLiveSpectatorMatchStatisticDeleteMatchButton:OnClick(button, down)
 	if ( button == "LeftButton" and ArenaLiveSpectatorMatchStatistic.id ) then
 		local id = ArenaLiveSpectatorMatchStatistic.id;
@@ -412,32 +247,10 @@ function ArenaLiveSpectatorMatchStatisticDeleteMatchButton:OnClick(button, down)
 		ArenaLiveSpectatorMatchStatistic:UpdateFrameHeightsAndPosition();
 		UIDropDownMenu_SetText(ArenaLiveSpectatorMatchStatistic.dropdown, L["Choose a Match"]);
 		local database = ArenaLive:GetDBComponent(addonName);
-		table.wipe(database.MatchStatistic[id]);
 		table.remove(database.MatchStatistic, id);
-		
-		ArenaLiveSpectatorMatchStatisticScreenModeButton:Disable();
 		self:Disable();
 	end
 end
-
-function ArenaLiveSpectatorMatchStatisticScreenModeButton:OnClick(button, down)
-	if ( button == "LeftButton" ) then
-		local shownScreen = ArenaLiveSpectatorMatchStatistic.shownScreen;
-		if ( shownScreen == "stats" ) then
-			ArenaLiveSpectatorMatchStatistic.shownScreen = "talents";
-			self:SetText(L["Show Glyphs"]);
-		elseif ( shownScreen == "talents" ) then
-			ArenaLiveSpectatorMatchStatistic.shownScreen = "glyphs";
-			self:SetText(L["Show Statistic"]);
-		else
-			ArenaLiveSpectatorMatchStatistic.shownScreen = "stats";
-			self:SetText(L["Show Talents"]);
-		end
-		ArenaLiveSpectatorMatchStatistic:SetMatch(ArenaLiveSpectatorMatchStatistic.id);
-	end
-end
-
-
 
 --[[
 		MATCH RECORDING FUNCTIONS
@@ -447,15 +260,12 @@ function ArenaLiveSpectatorMatchStatistic:Start()
 	if ( self.record ) then
 		self:Stop();
 	end
-	local numTeamA = ArenaLiveSpectator.UnitCache:GetNumPlayers(1);
-	local numTeamB = ArenaLiveSpectator.UnitCache:GetNumPlayers(2);
+	local numTeamA = CommentatorGetNumPlayers(2);
+	local numTeamB = CommentatorGetNumPlayers(1);
 	if ( numTeamA > 0 and numTeamB > 0 ) then	
 		ArenaLiveSpectatorMatchStatistic:SetUpTeam("TeamA");
 		ArenaLiveSpectatorMatchStatistic:SetUpTeam("TeamB");
 		self.record = true;
-		
-		-- This has to be triggered after self.record is set:
-		ArenaLiveSpectatorMatchStatistic:UpdateTalentsAndGlyphsForAll();
 	end
 end
 
@@ -467,38 +277,23 @@ function ArenaLiveSpectatorMatchStatistic:Stop()
 		local winner = GetBattlefieldWinner();
 		if ( not winner or winner == 255 ) then
 			matchStatistics.winner = "DRAW" 
-		elseif ( winner == 1 ) then
-			matchStatistics.winner = "TeamA"
 		elseif ( winner == 0 ) then
 			matchStatistics.winner = "TeamB"
+		elseif ( winner == 1 ) then
+			matchStatistics.winner = "TeamA"
 		end
 		
 		local numMatch = #database.MatchStatistic + 1;
 		local nameA, nameB = database.TeamA.Name, database.TeamB.Name
 		local scoreA, scoreB = database.TeamA.Score, database.TeamB.Score
-		local temp;
-		
-		-- Fix for match statistic, if team names were swapped:
-		if ( ArenaLiveSpectator.swapTeams ) then
-			temp = nameA;
-			nameA = nameB;
-			nameB = temp;
-			matchStatistics.TeamA.name = nameA;
-			matchStatistics.TeamB.name = nameB;			
-			
-			temp = scoreA;
-			scoreA = scoreB;
-			scoreB = temp;
-		end
-		
 		-- Create Match Name:
-		local name = string.format(L["%s vs %s (%d:%d)"],  nameA, nameB, scoreA, scoreB);
+		local name = string.format(L["%d. %s vs %s (%d:%d)"], numMatch,  nameA, nameB, scoreA, scoreB);
 		
 		-- Add Match to Saved Variables:
 		matchStatistics.name = name;
 		table.insert(database.MatchStatistic, ArenaLive:CopyTable(matchStatistics));
 		
-		ArenaLive:Message("Saved Match %s to SavedVariables...", "debug", name);
+		ArenaLive:Message(L["Saved Match %s to SavedVariables..."], "debug", name);
 		
 		-- Wipe tables:
 		table.wipe(matchStatistics);
@@ -518,17 +313,15 @@ end
 
 function ArenaLiveSpectatorMatchStatistic:SetUpTeam(team)
 	
-	local numMembers, unitMod, petUnitMod;
+	local numMembers, unitMod;
 	if ( team == "TeamA" ) then
-		numMembers = ArenaLiveSpectator.UnitCache:GetNumPlayers(1);
+		
+		numMembers = CommentatorGetNumPlayers(2);
 		unitMod = "spectateda";
-		petUnitMod = "spectatedpeta";
 	elseif ( team == "TeamB") then
-		numMembers = ArenaLiveSpectator.UnitCache:GetNumPlayers(2);
+		numMembers = CommentatorGetNumPlayers(1);
 		unitMod = "spectatedb";
-		petUnitMod = "spectatedpetb";
 	end
-	
 	local database = ArenaLive:GetDBComponent(addonName, nil, team);
 	
 	matchStatistics[team] = {};
@@ -536,10 +329,9 @@ function ArenaLiveSpectatorMatchStatistic:SetUpTeam(team)
 	matchStatistics[team]["name"] = database.Name;
 	matchStatistics[team]['#'] = numMembers;
 	
-	ArenaLive:Message("Team = %s, numMembers = %d", "debug", team, numMembers);
 	for i = 1, numMembers do
 		local unit = unitMod..i;
-		local petUnit = petUnitMod..i;
+		local petUnit = unitMod.."pet"..i;
 		local guid = UnitGUID(unit);
 		local petGUID = UnitGUID(petUnit);
 		if ( guid ) then
@@ -552,19 +344,17 @@ function ArenaLiveSpectatorMatchStatistic:SetUpTeam(team)
 			matchStatistics[team][guid].class = class;
 			matchStatistics[team][guid].absorb = 0;
 			matchStatistics[team][guid].damage = 0;
-			matchStatistics[team][guid].highestDamage = 0;
-			matchStatistics[team][guid].highestDamageAbilityName = "";
 			matchStatistics[team][guid].healing = 0;
 			matchStatistics[team][guid].timeCCd = 0;
-			matchStatistics[team][guid].talents = {};
-			matchStatistics[team][guid].glyphs = {};
-			
+
 			if ( petGUID ) then
 				petGUIDToOwnerGUID[petGUID] = guid;
 				ownerGUIDToPetGUID[guid] = petGUID;
 			end
 			
 			trackedGUIDs[guid] = team;
+			
+
 		end
 	end
 	
@@ -622,7 +412,7 @@ function ArenaLiveSpectatorMatchStatistic:SPELL_AURA_REMOVED (...)
 			amount = absorbWaitingForRemoval[absorbID] - amount;
 			absorbWaitingForRemoval[absorbID] = nil;
 			
-			matchStatistics[team][sourceGUID].absorb = matchStatistics[team][sourceGUID].absorb + amount;
+			matchStatistics[team][sourceGUID].absorb = matchStatistics[team][sourceGUID].absorb + math.floor(amount);
 		end
 	end
 	
@@ -643,43 +433,45 @@ function ArenaLiveSpectatorMatchStatistic:SPELL_DAMAGE (...)
 	end
 	
 	local team = trackedGUIDs[sourceGUID];
-	local amount, overkill = select(15, ...);
-	local absorbed = select(20, ...);
-	if ( absorbed ) then
-		amount = amount + absorbed;
+	local amount = select(15, ...);
+	local overkill = select(16, ...);
+	local resisted = select(18, ...);
+	local blocked = select(19, ...);
+	
+	if ( resisted ) then
+		amount = amount - resisted;
 	end
 	
-	if ( overkill > 0 ) then
+	if ( blocked ) then
+		amount = amount - blocked;
+	end
+	
+	if ( overkill ) then
 		amount = amount - overkill;
 	end
 
-	if ( amount > matchStatistics[team][sourceGUID].highestDamage ) then
-		local name = select(13, ...);
-		matchStatistics[team][sourceGUID].highestDamage = amount;
-		matchStatistics[team][sourceGUID].highestDamageAbilityName = name;
-	end
-	
-	matchStatistics[team][sourceGUID].damage = matchStatistics[team][sourceGUID].damage + amount;
+	matchStatistics[team][sourceGUID].damage = matchStatistics[team][sourceGUID].damage + math.floor(amount);
 end
 
 function ArenaLiveSpectatorMatchStatistic:SPELL_HEAL (...)
 	
 	local sourceGUID = select(4, ...);
+	if ( not sourceGUID or ( not trackedGUIDs[sourceGUID] and not petGUIDToOwnerGUID[sourceGUID] ) ) then
+		return;
+	end
+	
 	if ( petGUIDToOwnerGUID[sourceGUID] ) then
 		sourceGUID = petGUIDToOwnerGUID[sourceGUID];
 	end
 	
-	if ( not sourceGUID or not trackedGUIDs[sourceGUID] ) then
-		return;
-	end
-	
 	local team = trackedGUIDs[sourceGUID];
-	local amount, overHealing = select(15, ...);
+	local amount = select(15, ...);
+	local overHealing = select(16, ...);
 	if ( overHealing ) then
 		amount = amount - overHealing;
 	end
 	
-	matchStatistics[team][sourceGUID].healing = matchStatistics[team][sourceGUID].healing + amount;
+	matchStatistics[team][sourceGUID].healing = matchStatistics[team][sourceGUID].healing + math.floor(amount);
 end
 
 function ArenaLiveSpectatorMatchStatistic:SPELL_PERIODIC_DAMAGE (...)
@@ -690,63 +482,36 @@ function ArenaLiveSpectatorMatchStatistic:SPELL_PERIODIC_HEAL (...)
 	ArenaLiveSpectatorMatchStatistic:SPELL_HEAL(...);
 end
 
-function ArenaLiveSpectatorMatchStatistic:SPELL_MISSED(...)
-	local sourceGUID = select(4, ...);
-	if ( petGUIDToOwnerGUID[sourceGUID] ) then
-		sourceGUID = petGUIDToOwnerGUID[sourceGUID];
-	end
-	
-	if ( not sourceGUID or not trackedGUIDs[sourceGUID] ) then
-		return;
-	end	
-	
-	local missedType, _, _, amount = select(15, ...);
-	if ( missedType == "ABSORB" ) then
-		local team = trackedGUIDs[sourceGUID];
-		matchStatistics[team][sourceGUID].damage = matchStatistics[team][sourceGUID].damage + amount;
-	end
-end
-
 function ArenaLiveSpectatorMatchStatistic:SWING_DAMAGE (...)
 
 	local sourceGUID = select(4, ...);
+	if ( not sourceGUID or ( not trackedGUIDs[sourceGUID] and not petGUIDToOwnerGUID[sourceGUID] ) ) then
+		return;
+	end
+	
 	if ( petGUIDToOwnerGUID[sourceGUID] ) then
 		sourceGUID = petGUIDToOwnerGUID[sourceGUID];
 	end
 	
-	if ( not sourceGUID or not trackedGUIDs[sourceGUID] ) then
-		return;
-	end
-
 	local team = trackedGUIDs[sourceGUID];
-	local amount, overkill = select(12, ...);
-	local absorbed = select(17, ...);
-	if ( absorbed ) then
-		amount = amount + absorbed;
+	local amount = select(12, ...);
+	local overkill = select(13, ...);
+	local resisted = select(15, ...);
+	local blocked = select(16, ...);
+
+	if ( resisted ) then
+		amount = amount - resisted;
 	end
 	
-	if ( overkill > 0 ) then
+	if ( blocked ) then
+		amount = amount - blocked;
+	end
+	
+	if ( overkill ) then
 		amount = amount - overkill;
 	end
 	
-	matchStatistics[team][sourceGUID].damage = matchStatistics[team][sourceGUID].damage + amount;
-end
-
-function ArenaLiveSpectatorMatchStatistic:SWING_MISSED(...)
-	local sourceGUID = select(4, ...);
-	if ( petGUIDToOwnerGUID[sourceGUID] ) then
-		sourceGUID = petGUIDToOwnerGUID[sourceGUID];
-	end
-	
-	if ( not sourceGUID or not trackedGUIDs[sourceGUID] ) then
-		return;
-	end	
-	
-	local missedType, _, _, amount = select(12, ...);
-	if ( missedType == "ABSORB" ) then
-		local team = trackedGUIDs[sourceGUID];
-		matchStatistics[team][sourceGUID].damage = matchStatistics[team][sourceGUID].damage + amount;
-	end
+	matchStatistics[team][sourceGUID].damage = matchStatistics[team][sourceGUID].damage + math.floor(amount);
 end
 
 function ArenaLiveSpectatorMatchStatistic:UNIT_AURA(unit)
@@ -756,7 +521,7 @@ function ArenaLiveSpectatorMatchStatistic:UNIT_AURA(unit)
 		local isInCC;
 		for index = 1, MAX_DEBUFFS do
 			local name, _, _, _, _, _, _, _, _, _, spellID = UnitDebuff(unit, index);
-			if ( ArenaLive.spellDB.DiminishingReturns[spellID] ) then
+			if ( ArenaLive.spellDB["DiminishingReturns"][spellID] ) then
 				isInCC = true;
 				break;
 			end
@@ -775,66 +540,18 @@ end
 function ArenaLiveSpectatorMatchStatistic:UNIT_PET(unit)
 	local guid = UnitGUID(unit);
 	local petUnit = ArenaLive:GetPetUnit(unit);
-	if ( guid and trackedGUIDs[guid] ) then
-		if ( ownerGUIDToPetGUID[guid] ) then
-			-- Reset old GUID:
-			local oldPetGUID = ownerGUIDToPetGUID[guid];
-			petGUIDToOwnerGUID[oldPetGUID] = nil;
-		end
-		
+	if ( guid and trackedGUIDs[guid] and ownerGUIDToPetGUID[guid] ) then
+		local oldPetGUID = ownerGUIDToPetGUID[guid];
 		local petGUID = UnitGUID(petUnit);
+		
+		-- Reset old GUID:
+		petGUIDToOwnerGUID[oldPetGUID] = nil;
+		
 		ownerGUIDToPetGUID[guid] = petGUID;
-		ArenaLive:Message("New GUID \"%s\" for pet unit \"%s\"", "debug", tostring(petGUID), petUnit);
 		if ( petGUID ) then
 			petGUIDToOwnerGUID[petGUID] = guid;
 		end
 	end
-end
-
--- HANDLING PLAYER TALENTS:
-function ArenaLiveSpectatorMatchStatistic:UpdateTalentsAndGlyphsForAll()
-	if ( self:IsRecording() ) then
-		for key, guid in pairs(matchStatistics["TeamA"].idToGUID) do
-			ArenaLiveSpectatorMatchStatistic:UpdatePlayerTalentsAndGlyphs(guid);
-		end
-		
-		for key, guid in pairs(matchStatistics["TeamB"].idToGUID) do
-			ArenaLiveSpectatorMatchStatistic:UpdatePlayerTalentsAndGlyphs(guid);
-		end
-	end
-end
-
-function ArenaLiveSpectatorMatchStatistic:UpdatePlayerTalentsAndGlyphs(guid)
-	if ( not self:IsRecording() ) then
-		return;
-	end
-	
-	local exists, unit, _, _ , teamID = ArenaLiveSpectator.UnitCache:GetUnitInfoByGUID(guid);
-	if ( exists and guid and teamID ) then
-		local team;
-		if ( teamID == 1 ) then
-			team = "TeamA";
-		else
-			team = "TeamB";
-		end
-		
-		if ( matchStatistics[team][guid] ) then
-			for tier = 1, 7 do
-				local talentID = ArenaLiveSpectator.UnitCache:GetUnitSelectedTalentByTier(unit, tier);
-				matchStatistics[team][guid].talents[tier] = talentID;
-			end
-			
-			for slot = 1, 6 do
-				local glyphID = ArenaLiveSpectator.UnitCache:GetUnitSelectedGlyphBySlot(unit, slot);
-				matchStatistics[team][guid].glyphs[slot] = glyphID;
-			end
-		end
-	end
-end
-
-function ArenaLiveSpectatorMatchStatistic:AL_SPEC_PLAYER_SPECIALIZATION_UPDATE(unit)	
-	local guid = UnitGUID(unit);
-	ArenaLiveSpectatorMatchStatistic:UpdatePlayerTalentsAndGlyphs(guid);
 end
 
 function ArenaLiveSpectatorMatchStatistic:OnEvent(event, ...)

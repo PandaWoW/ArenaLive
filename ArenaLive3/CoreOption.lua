@@ -1,25 +1,9 @@
---[[
-    ArenaLive [Core] is an unit frame framework for World of Warcraft.
-    Copyright (C) 2014  Harald Böhm <harald@boehm.agency>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
+--[[ ArenaLive Option Functions
+Created by: Vadrak
+Creation Date: 03.04.2014
+Last Update: 08.06.2014
+This file stores all functions needed for setting up option menu objects (edit boxes, drop downs etc).
+]]--
 
 -- Get addon name and the localisation table:
 local addonName, L = ...;
@@ -141,18 +125,18 @@ function OptionBaseClass:UpdateShownValue()
 	elseif ( self.type == "ColourPicker" ) then
 		local red, green, blue, alpha = self:GetDBValue();
 		self.colour:SetTexture(red, green, blue, alpha or 1);
-	elseif ( ( self.type == "DropDown" or self.type == "DropDownLargeTitle" ) and self.info ) then
+	elseif ( self.type == "DropDown" or self.type == "DropDownLargeTitle" ) then
 		local text;
 		local value = self:GetDBValue();
 		for key, infoData in ipairs(self.info) do
-			if ( infoData["value"] == value and ( not self.ignoreKey or not self.ignoreKey[key] ) ) then
+			if ( infoData["value"] == value ) then
 				text = infoData["text"];
 			end
 		end
 		
 		UIDropDownMenu_SetText(self, text or self.emptyText or "");
 	elseif ( self.type == "EditBox" or self.type == "EditBoxSmall" ) then
-		self:SetText(self:GetDBValue() or "");
+		self:SetText(self:GetDBValue());
 		self:SetCursorPosition(0);
 	elseif ( self.type == "Slider" ) then
 		self:SetValue(self:GetDBValue());
@@ -172,7 +156,7 @@ local CheckButtonClass = {};
 ]]--
 function CheckButtonClass:OnClick ()
 	if ( not self.ignore ) then
-		local newValue = ValueToBoolean(self:GetChecked());
+		local newValue = self:GetChecked();
 		
 		-- Hand over new value to update function to get old value:
 		local oldValue = UpdateDBEntryByOptionFrame(self, newValue);
@@ -251,8 +235,8 @@ function DropDownClass:Refresh(level, menuList)
 	
 	local dbValue = self:GetDBValue();
 	for key, infoData in ipairs(self.info) do
-		-- You can filter certain values for a dropdown via the self.ignoreKey table.
-		if ( not self.ignoreKey or not self.ignoreKey[key] ) then
+		-- You can filter the drop down options for frame groups by adding the group name to the ignoreGroup table.
+		if ( not infoData.ignoreGroup or not infoData.ignoreGroup[self.group] ) then
 			
 			-- Copy info values of this entry:
 			for k, v in pairs(infoData) do
@@ -487,7 +471,7 @@ local function CreateOptionFrame (frameData)
 	
 	frame:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset);
 	
-	--ArenaLive:Message("Created option frame. Type = %s and frame = %s", "debug", frameData.type, frame:GetName() or tostring(frame));
+	--ArenaLive:Message(L["Created option frame. Type = %s and frame = %s"], "debug", frameData.type, frame:GetName() or tostring(frame));
 	return frame;
 end
 
@@ -570,7 +554,7 @@ end
 		NOTE: The initValue is not necessary here, as you need to set the drop down's text etc. in the refresh function anyways.
 ]]--
 local function ConstructDropDown (dropDown, title, emptyText, infoTable, refreshFunc)
-	ArenaLive:CheckArgs(dropDown, "Button", title, "string");
+	ArenaLive:CheckArgs(dropDown, "Button", title, "string", infoTable, "table");
 
 	-- Set Title:
 	dropDown.title:SetText(title);
@@ -611,7 +595,7 @@ local function ConstructEditBox (editBox, title, inputType, maxLetters)
 	
 	-- Set title and initial value:
 	editBox.title:SetText(title);
-	editBox:SetText(editBox:GetDBValue() or "");
+	editBox:SetText(editBox:GetDBValue());
 
 	-- Reset the EditBox's cursor position, so that the text is always shown correctly.
 	editBox:SetCursorPosition(0);
@@ -736,8 +720,6 @@ function ArenaLive:ConstructOptionFrame(frameData, addonName, handlerName, frame
 		ConstructSlider(frame, frameData.title, frameData.inputType, frameData.min, frameData.max, frameData.step);
 	end
 	
-	-- Return the option frame for further use:
-	return frame;
 end
 
 --[[ Method: ConstructOptionObjectByHandler

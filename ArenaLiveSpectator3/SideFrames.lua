@@ -1,46 +1,20 @@
---[[
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
-
 local addonName, L = ...;
-local SmartCamera = ArenaLiveSpectator.SmartCamera;
-
 
 local function initialiseSideFrame(frame, group)
 
 	local prefix = frame:GetName();
 	local id = frame:GetID();
 	
-	ArenaLive:ConstructHandlerObject(frame, "UnitFrame", addonName, group, "target", "target");
+	ArenaLive:ConstructHandlerObject(frame, "UnitFrame", addonName, group, "target");
 	
 	frame.border = _G[prefix.."Border"];
 	frame.background = _G[prefix.."Background"];
+	
 	frame:RegisterHandler(_G[prefix.."HealthBar"], "HealthBar", nil, _G[prefix.."HealthBarHealPredictionBar"], _G[prefix.."HealthBarAbsorbBar"], _G[prefix.."HealthBarAbsorbBarOverlay"], 32, _G[prefix.."HealthBarAbsorbBarFullHPIndicator"], nil, addonName, group);
 	frame:RegisterHandler(_G[prefix.."PowerBar"], "PowerBar", nil, addonName, group);
 	frame:RegisterHandler(_G[prefix.."Portrait"], "Portrait", nil, _G[prefix.."PortraitBackground"], _G[prefix.."PortraitTexture"],  _G[prefix.."PortraitThreeD"], frame);
 	frame:RegisterHandler(_G[prefix.."PortraitCCIndicator"], "CCIndicator", nil, _G[prefix.."PortraitCCIndicatorTexture"], _G[prefix.."PortraitCCIndicatorCooldown"], addonName);
-	frame:RegisterHandler(_G[prefix.."Name"], "NameText", nil, frame, true, true);
+	frame:RegisterHandler(_G[prefix.."Name"], "NameText", nil, frame);
 	frame:RegisterHandler(_G[prefix.."HealthBarText"], "HealthBarText", nil, frame);
 	frame:RegisterHandler(_G[prefix.."PowerBarText"], "PowerBarText", nil, frame);
 	frame:RegisterHandler(_G[prefix.."CastBar"], "CastBar", nil, _G[prefix.."CastBarIcon"], _G[prefix.."CastBarText"], _G[prefix.."CastBarShield"], _G[prefix.."CastBarAnimation"], _G[prefix.."CastBarAnimationFadeOut"], true, addonName, group);
@@ -48,7 +22,6 @@ local function initialiseSideFrame(frame, group)
 	frame:RegisterHandler(_G[prefix.."AuraFrame"], "Aura", nil, _G[prefix.."AuraFrameBuffFrame"], _G[prefix.."AuraFrameDebuffFrame"]);
 	frame:RegisterHandler(_G[prefix.."MainTargetIndicator"], "MainTargetIndicator");
 	frame:RegisterHandler(_G[prefix.."SpiritHealerFrame"], "SpiritHealerFrame");
-	frame:RegisterHandler(_G[prefix.."RoleIcon"], "SpectatorRoleIcon");
 end
 
 function ArenaLiveSpectator:InitialiseSideFrames()
@@ -70,12 +43,12 @@ function ArenaLiveSpectator:SetUpSideFrames(numPlayers)
 			frame = _G["ALSPEC_LeftSideFramesFrame"..i];
 			self:UpdateSideFrameConstituents(frame);
 			frame:Enable();
-			frame:UpdateUnit("spectateda"..i);
-			
+			frame:UpdateUnit("spectateda"..i);--
+
 			frame = _G["ALSPEC_RightSideFramesFrame"..i];
 			self:UpdateSideFrameConstituents(frame)
 			frame:Enable();
-			frame:UpdateUnit("spectatedb"..i);
+			frame:UpdateUnit("spectatedb"..i);--
 		else
 			frame = _G["ALSPEC_LeftSideFramesFrame"..i];
 			frame:Disable();
@@ -90,11 +63,11 @@ function ArenaLiveSpectator:UpdateSideFrameAppearance(frame)
 	if ( not frame.unit or not frame.enabled ) then
 		return;
 	end
-	
 	local database = ArenaLive:GetDBComponent(addonName);
-	if ( database.HideTargetFrames and ( UnitIsUnit(frame.unit, "target") ) or SmartCamera:GetTarget() == frame.unit ) then
+	
+	if ( database.HideTargetFrames and UnitIsUnit(frame.unit, "target") ) then
 		if ( not frame.hasTargetSize ) then
-			frame:SetSize(237, 72);
+			frame:SetSize(235, 72);
 			frame.background:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\TargetFrameBackground");
 			
 			frame.border:SetSize(239, 75);
@@ -104,11 +77,11 @@ function ArenaLiveSpectator:UpdateSideFrameAppearance(frame)
 			frame.MainTargetIndicator:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\TargetIndicatorGlowLarge");
 			
 			if ( frame.group == "Left" ) then
-				frame.background:SetTexCoord(0.037109375, 0.962890625, 0.2109375, 0.7734375);
+				frame.background:SetTexCoord(0.125, 0.865234375, 0.20703125, 0.76953125);
 				frame.border:SetTexCoord(0.037109375, 0.970703125, 0.22265625, 0.8046875);
 				frame.MainTargetIndicator:SetTexCoord(0.0390625, 0.9765625, 0.18359375, 0.80078125);
 			elseif ( frame.group == "Right" ) then
-				frame.background:SetTexCoord(0.962890625, 0.037109375, 0.2109375, 0.7734375);
+				frame.background:SetTexCoord(0.865234375, 0.125, 0.20703125, 0.76953125);
 				frame.border:SetTexCoord(0.970703125, 0.037109375, 0.22265625, 0.8046875);
 				frame.MainTargetIndicator:SetTexCoord(0.9765625, 0.0390625, 0.18359375, 0.80078125);
 			end
@@ -145,32 +118,6 @@ function ArenaLiveSpectator:UpdateSideFrameAppearance(frame)
 		frame.hasTargetSize = nil;
 		
 		frame:Update();
-	end
-end
-
-function ArenaLiveSpectator:UpdateSideFrameByUnit(unit, state)
-	if ( not unit ) then
-		return;
-	end
-	
-	local unitType, unitNumber = string.match(unit, "^([a-z]+)([0-9]+)$");
-	if ( unitType and unitNumber ) then
-		local frame;
-		if ( unitType == "spectateda" ) then
-			frame = _G["ALSPEC_LeftSideFramesFrame"..unitNumber];
-		elseif ( unitType == "spectatedb" ) then
-			frame = _G["ALSPEC_RightSideFramesFrame"..unitNumber];
-		end
-		
-		if ( frame ) then
-			--ArenaLive:Message("Updating side frame GUID for frame %s. unit = %s, state = %s", "debug", tostring(frame:GetName()), unit, tostring(state));
-			frame:UpdateGUID();
-			if ( state ) then
-				frame:Update();
-			else
-				frame:Reset();
-			end
-		end
 	end
 end
 

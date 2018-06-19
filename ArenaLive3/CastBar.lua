@@ -1,30 +1,15 @@
---[[
-    ArenaLive [Core] is an unit frame framework for World of Warcraft.
-    Copyright (C) 2014  Harald Böhm <harald@boehm.agency>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
+--[[ ArenaLive Core Functions: Castbar Handler
+Created by: Vadrak
+Creation Date: 11.04.2014
+Last Update: 10.09.2014
+This file contains all relevant functions for cast bars and their behaviour
+]]--
 
 -- ArenaLive addon Name and localisation table:
 local addonName, L = ...;
 
-
+-- Create table to store casting frames:
+local castBarsCasting = {};
 
 --[[
 **************************************************
@@ -34,12 +19,6 @@ local addonName, L = ...;
 -- Create new Handler:
 local CastBar = ArenaLive:ConstructHandler("CastBar", true, true);
 CastBar.canToggle = true;
-
--- Test values:
-CastBar.testValues = {2061, 5176, 8679, 7328, 64382};
-
--- Create table to store casting frames:
-local castBarsCasting = {};
 
 -- Register the handler for all needed events.
 CastBar:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_INTERRUPT");
@@ -116,11 +95,6 @@ function CastBar:Update(unitFrame)
 		return;
 	end
 	
-	if ( unitFrame.test ) then
-		self:SetTestModeValues(unitFrame);
-		return;
-	end
-	
 	-- Check if unit casts/channels:
 	local spell = UnitCastingInfo(unit);
 	local event;
@@ -141,30 +115,6 @@ function CastBar:Update(unitFrame)
 
 end
 
-function CastBar:SetTestModeValues(unitFrame)
-	if ( unitFrame.test ) then
-		local castBar = unitFrame[self.name];
-		
-		local spellID = self.testValues[unitFrame.test];
-		local name, _, icon, castingTime = GetSpellInfo(spellID);
-		local value = math.random(0, castingTime);
-
-		if ( castBar.text ) then
-			castBar.text:SetText(name);
-		end
-		
-		if ( castBar.icon ) then
-			castBar.icon:SetTexture(icon);
-		end
-		
-		castBar:SetMinMaxValues(0, castingTime);
-		castBar:SetValue(value);
-		
-		castBar:Show();
-	else
-		self:Reset(unitFrame);
-	end
-end
 
 function CastBar:Reset(object)
 	-- This reset function is different from others, as sometimes, it directly receives the castbar instead of the unit frame:
@@ -267,24 +217,19 @@ function CastBar:UpdateCast(castBar, unit, event)
 	local name, subText, text, icon, startTime, endTime, value, maxValue;
 	if ( event == "UNIT_SPELLCAST_DELAYED" ) then
 		name, subText, text, icon, startTime, endTime = UnitCastingInfo(unit);
-		if ( startTime ) then
-			value = (GetTime() - (startTime / 1000));
-		end
+		value = (GetTime() - (startTime / 1000));
 	elseif ( event == "UNIT_SPELLCAST_CHANNEL_UPDATE" ) then
 		name, subText, text, icon, startTime, endTime = UnitChannelInfo(unit);
-		if ( endTime ) then
-			value = ((endTime / 1000) - GetTime());
-		end
+		value = ((endTime / 1000) - GetTime());
 	end
 
 	-- Update Values:
-	if ( endTime and startTime and value ) then
-		maxValue = ((endTime - startTime) / 1000);
-		castBar.value = value;
-		castBar.maxValue = maxValue;
-		castBar:SetMinMaxValues(0, maxValue);
-		castBar:SetValue(value);	
-	end
+	maxValue = ((endTime - startTime) / 1000);
+	castBar.value = value;
+	castBar.maxValue = maxValue;
+	castBar:SetMinMaxValues(0, maxValue);
+	castBar:SetValue(value);	
+	
 end
 
 function CastBar:StopCast(castBar, event, lineID)

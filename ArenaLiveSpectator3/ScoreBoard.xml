@@ -1,154 +1,85 @@
-<!--
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
--->
-
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 
-	<Font name="ArenaLiveSpectatorScoreBoardDampeningFont" outline="NORMAL" font="Fonts\FRIZQT__.TTF" virtual="true">
+	<Font name="ArenaLiveSpectatorScoreBoardDampeningFont" font="Fonts\FRIZQT__.TTF" virtual="true">
 		<FontHeight>
 			<AbsValue val="12"/>
 		</FontHeight>
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>		
+		<Color r="1.0" g="0" b="0"/>
 	</Font>
 
-	<FontFamily name="ArenaLiveSpectatorScoreBoardFont" virtual="true">
-		<Member alphabet="roman">
-			<Font font="Fonts\FRIZQT__.TTF" height="24">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="2" y="-2"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>		
-				<Color r="1" g="1" b="1"/>
-			</Font>
-		</Member>
-		<Member alphabet="korean">
-			<Font name="ArenaLiveSpectatorScoreBoardFont" font="Fonts\2002.TTF" height="24">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="2" y="-2"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>		
-				<Color r="1" g="1" b="1"/>
-			</Font>
-		</Member>
-		<Member alphabet="russian">
-			<Font name="ArenaLiveSpectatorScoreBoardFont" font="Fonts\FRIZQT___CYR.TTF" height="24">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="2" y="-2"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>		
-				<Color r="1" g="1" b="1"/>
-			</Font>
-		</Member>
-		<Member alphabet="simplifiedchinese">
-			<Font name="ArenaLiveSpectatorScoreBoardFont" font="Fonts\ARKai_T.TTF" height="24">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="2" y="-2"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>		
-				<Color r="1" g="1" b="1"/>
-			</Font>
-		</Member>
-		<Member alphabet="traditionalchinese">
-			<Font name="ArenaLiveSpectatorScoreBoardFont" font="Fonts\blei00d.TTF" height="24">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="2" y="-2"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>		
-				<Color r="1" g="1" b="1"/>
-			</Font>
-		</Member>
-	</FontFamily>	
+	<Font name="ArenaLiveSpectatorScoreBoardFont" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="28"/>
+		</FontHeight>
+		<Shadow>
+			<Offset>
+				<AbsDimension x="2" y="-2"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>		
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>	
 
-	<FontFamily name="ArenaLiveSpectatorScoreBoardTimeFont" virtual="true">
-		<Member alphabet="roman">
-			<Font font="Fonts\FRIZQT__.TTF" height="16">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="2" y="-2"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>		
-				<Color r="1" g="1" b="1"/>
-			</Font>
-		</Member>
-		<Member alphabet="korean">
-			<Font name="ArenaLiveSpectatorScoreBoardTimeFont" font="Fonts\2002.TTF" height="16">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="2" y="-2"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>		
-				<Color r="1" g="1" b="1"/>
-			</Font>
-		</Member>
-		<Member alphabet="russian">
-			<Font name="ArenaLiveSpectatorScoreBoardTimeFont" font="Fonts\FRIZQT___CYR.TTF" height="16">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="2" y="-2"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>		
-				<Color r="1" g="1" b="1"/>
-			</Font>
-		</Member>
-		<Member alphabet="simplifiedchinese">
-			<Font name="ArenaLiveSpectatorScoreBoardTimeFont" font="Fonts\ARKai_T.TTF" height="16">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="2" y="-2"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>		
-				<Color r="1" g="1" b="1"/>
-			</Font>
-		</Member>
-		<Member alphabet="traditionalchinese">
-			<Font name="ArenaLiveSpectatorScoreBoardTimeFont" font="Fonts\blei00d.TTF" height="16">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="2" y="-2"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>		
-				<Color r="1" g="1" b="1"/>
-			</Font>
-		</Member>
-	</FontFamily>	
+	<Font name="ArenaLiveSpectatorScoreBoardFontRU" font="Fonts\FRIZQT___CYR.TTF" alternateTo="ALSpec_ScoreBoardFont" alternateAlphabetID="2" virtual="true">
+		<FontHeight>
+			<AbsValue val="28"/>
+		</FontHeight>
+		<Shadow>
+			<Offset>
+				<AbsDimension x="2" y="-2"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>		
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>
+
+	<Font name="ArenaLiveSpectatorScoreBoardFontZH" font="Fonts\ARKai_T.ttf" alternateTo="ALSpec_ScoreBoardFont" alternateAlphabetID="1" virtual="true">
+		<FontHeight>
+			<AbsValue val="28"/>
+		</FontHeight>
+		<Shadow>
+			<Offset>
+				<AbsDimension x="2" y="-2"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>		
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>	
+
+	<Font name="ArenaLiveSpectatorScoreBoardFontKO" font="Fonts\2002.TTF" alternateTo="ALSpec_ScoreBoardFont" alternateAlphabetID="0" virtual="true">
+		<FontHeight>
+			<AbsValue val="28"/>
+		</FontHeight>
+		<Shadow>
+			<Offset>
+				<AbsDimension x="2" y="-2"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>		
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>
+
+	<Font name="ArenaLiveSpectatorScoreBoardTimeFont" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="16"/>
+		</FontHeight>
+		<Shadow>
+			<Offset>
+				<AbsDimension x="2" y="-2"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>		
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>	
 	
-	<Button name="ArenaLiveSpectatorScoreBoard" enableMouse="true" parent="ArenaLiveSpectator">
+	<Frame name="ArenaLiveSpectatorScoreBoard" parent="ArenaLiveSpectator">
 		<Size>
 			<AbsDimension x="640" y="63" />
 		</Size>
@@ -196,7 +127,7 @@
 					<Anchors>
 						<Anchor point="TOPRIGHT" relativeTo="$parentCenterBG">
 							<Offset>
-								<AbsDimension x="0" y="0"/>
+								<AbsDimension x="2" y="0"/>
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -204,12 +135,12 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame name="$parentDampeningIndicator" parentKey="dampeningIndicator">
+			<Button name="$parentDampeningIndicator" parentKey="dampeningIndicator">
 				<Size>
 					<AbsDimension x="32" y="32"/>
 				</Size>
 				<Anchors>
-					<Anchor point="TOP" y="-1" />
+					<Anchor point="TOP" />
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
@@ -221,46 +152,30 @@
 								<Anchor point="TOP" />
 							</Anchors>
 						</Texture>
-						<Texture name="$parentIcon" file="Interface\AddOns\ArenaLiveSpectator3\Textures\DampeningTrackerCross" parentKey="icon" hidden="true">
-							<TexCoords left="0" right="1" top="0" bottom="1"/>
+						<Texture name="$parentIcon" file="Interface\LFGFRAME\UI-LFG-ICON-ROLES" parentKey="icon" hidden="true">
+							<TexCoords left="0.251" right="0.51" top="0" bottom="0.25"/>
 						</Texture>
 					</Layer>
+					<Layer level="OVERLAY">
+						<FontString name="$parentText" inherits="ArenaLiveSpectatorScoreBoardDampeningFont" justifyH="RIGHT" parentKey="text" hidden="true">
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT" relativeTo="$parentIcon">
+									<Offset>
+										<AbsDimension x="5" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
 				</Layers>
-				<Frames>
-					<Frame setAllPoints="true">
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentText" inherits="ArenaLiveSpectatorScoreBoardDampeningFont" justifyH="LEFT" hidden="true">
-									<Anchors>
-										<Anchor point="BOTTOMLEFT" relativeTo="$parentIcon" relaltivePoint="BOTTOMRIGHT">
-											<Offset>
-												<AbsDimension x="13" y="-2"/>
-											</Offset>
-										</Anchor>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-					</Frame>
-					<StatusBar name="$parentStatusBar" orientation="VERTICAL" parentKey="statusBar" hidden="true">
-						<Size>
-							<AbsDimension x="32" y="32"/>
-						</Size>
-						<Anchors>
-							<Anchor point="CENTER" relativeTo="$parentIcon" />
-						</Anchors>
-						<BarTexture file="Interface\AddOns\ArenaLiveSpectator3\Textures\DampeningTrackerCross"/>
-						<BarColor r="1.0" g="0" b="0"/>
-					</StatusBar>
-				</Frames>
 				<Animations>
 					<AnimationGroup looping="NONE" parentKey="anim">
 						<Alpha target="$parentVS" duration="0.3" smoothing="OUT" change="-1" order="1"  />
 						<Alpha target="$parentIcon" duration="0.3" smoothing="OUT" change="1" order="1" />
 					</AnimationGroup>
 				</Animations>
-			</Frame>
-			<Frame name="$parentLeftTeam" parentKey="leftTeam">
+			</Button>
+			<Button name="$parentLeftTeam" parentKey="leftTeam">
 				<Size>
 					<AbsDimension x="256" y="37"/>
 				</Size>
@@ -288,8 +203,8 @@
 						</FontString>
 					</Layer>
 				</Layers>
-			</Frame>
-			<Frame name="$parentRightTeam" parentKey="rightTeam">
+			</Button>
+			<Button name="$parentRightTeam" parentKey="rightTeam">
 				<Size>
 					<AbsDimension x="256" y="37"/>
 				</Size>
@@ -317,9 +232,9 @@
 						</FontString>
 					</Layer>
 				</Layers>
-			</Frame>
+			</Button>
 		</Frames>
-	</Button>
+	</Frame>
 	
 	<Script File="ScoreBoard.lua" />
 </Ui>

@@ -1,86 +1,5 @@
-<!--
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
--->
-
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-
-	<FontFamily name="ArenaLiveSpectatorCastBarText" virtual="true">
-		<Member alphabet="roman">
-			<Font font="Fonts\FRIZQT__.TTF" outline="NORMAL" justifyV="MIDDLE" justifyH="CENTER" height="12">
-				<Color r="1.0" g="1.0" b="1.0"/>
-			</Font>
-		</Member>
-		<Member alphabet="korean">
-			<Font name="ArenaLiveSpectatorCastBarText" font="Fonts\2002.TTF" outline="NORMAL" justifyV="MIDDLE" justifyH="CENTER" height="12">		
-				<Color r="1.0" g="1.0" b="1.0"/>
-			</Font>
-		</Member>
-		<Member alphabet="russian">
-			<Font name="ArenaLiveSpectatorCastBarText" font="Fonts\FRIZQT___CYR.TTF" outline="NORMAL" justifyV="MIDDLE" justifyH="CENTER" height="12">
-				<Color r="1.0" g="1.0" b="1.0"/>
-			</Font>
-		</Member>
-		<Member alphabet="simplifiedchinese">
-			<Font name="ArenaLiveSpectatorCastBarText" font="Fonts\ARKai_T.TTF" outline="NORMAL" justifyV="MIDDLE" justifyH="CENTER" height="12">
-				<Color r="1.0" g="1.0" b="1.0"/>
-			</Font>
-		</Member>
-		<Member alphabet="traditionalchinese">
-			<Font name="ArenaLiveSpectatorCastBarText" font="Fonts\blei00d.TTF" outline="NORMAL" justifyV="MIDDLE" justifyH="CENTER" height="12">
-				<Color r="1.0" g="1.0" b="1.0"/>
-			</Font>
-		</Member>
-	</FontFamily>
-
-	<FontFamily name="ArenaLiveSpectatorCastBarTextSmall" virtual="true">
-		<Member alphabet="roman">
-			<Font font="Fonts\FRIZQT__.TTF" outline="NORMAL" justifyV="MIDDLE" justifyH="CENTER" height="8">
-				<Color r="1.0" g="1.0" b="1.0"/>
-			</Font>
-		</Member>
-		<Member alphabet="korean">
-			<Font name="ArenaLiveSpectatorCastBarTextSmall" font="Fonts\2002.TTF" outline="NORMAL" justifyV="MIDDLE" justifyH="CENTER" height="8">	
-				<Color r="1.0" g="1.0" b="1.0"/>
-			</Font>
-		</Member>
-		<Member alphabet="russian">
-			<Font name="ArenaLiveSpectatorCastBarTextSmall" font="Fonts\FRIZQT___CYR.TTF" outline="NORMAL" justifyV="MIDDLE" justifyH="CENTER" height="8">
-				<Color r="1.0" g="1.0" b="1.0"/>
-			</Font>
-		</Member>
-		<Member alphabet="simplifiedchinese">
-			<Font name="ArenaLiveSpectatorCastBarTextSmall" font="Fonts\ARKai_T.TTF" outline="NORMAL" justifyV="MIDDLE" justifyH="CENTER" height="8">
-				<Color r="1.0" g="1.0" b="1.0"/>
-			</Font>
-		</Member>
-		<Member alphabet="traditionalchinese">
-			<Font name="ArenaLiveSpectatorCastBarTextSmall" font="Fonts\blei00d.TTF" outline="NORMAL" justifyV="MIDDLE" justifyH="CENTER" height="8">
-				<Color r="1.0" g="1.0" b="1.0"/>
-			</Font>
-		</Member>
-	</FontFamily>	
 
 	<StatusBar name="ALSPEC_SideFrameCastBarTemplate" drawLayer="BORDER" hidden="false" virtual="true">
 		<Size>
@@ -93,7 +12,7 @@
 				</Texture>		
 			</Layer>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" setAllPoints="true" inherits="ArenaLiveSpectatorCastBarTextSmall" />
+				<FontString name="$parentText" setAllPoints="true" inherits="ArenaLiveFont_StatusBarTextSmall" />
 				<Texture name="$parentIcon" file="Interface\Icons\INV_Misc_QuestionMark">
 					<Size>
 						<AbsDimension x="21" y="21"/>
@@ -117,7 +36,7 @@
 					</Anchors>
 					<TexCoords left="0.15234375" right="0.85546875" top="0.125" bottom="0.90625"/>
 				</Texture>
-				<Texture name="$parentShield" file="Interface\AddOns\ArenaLiveSpectator3\Textures\SideFrameCastBarGlow" hidden="false" alphaMode="ADD" >
+				<Texture name="$parentShield" file="Interface\AddOns\ArenaLiveSpectator3\Textures\SideFrameCastBarGlow" hidden="false">
 					<Size>
 						<AbsDimension x="92" y="29" />			
 					</Size>
@@ -161,7 +80,7 @@
 				</Texture>		
 			</Layer>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" setAllPoints="true" inherits="ArenaLiveSpectatorCastBarTextSmall" />
+				<FontString name="$parentText" setAllPoints="true" inherits="ArenaLiveFont_StatusBarTextSmall" />
 				<Texture name="$parentIcon" file="Interface\Icons\INV_Misc_QuestionMark">
 					<Size>
 						<AbsDimension x="21" y="21"/>
@@ -185,7 +104,7 @@
 					</Anchors>
 					<TexCoords left="0.85546875" right="0.15234375" top="0.125" bottom="0.90625"/>
 				</Texture>
-				<Texture name="$parentShield" file="Interface\AddOns\ArenaLiveSpectator3\Textures\SideFrameCastBarGlow" hidden="false" alphaMode="ADD">
+				<Texture name="$parentShield" file="Interface\AddOns\ArenaLiveSpectator3\Textures\SideFrameCastBarGlow" hidden="false">
 					<Size>
 						<AbsDimension x="92" y="29" />			
 					</Size>
@@ -229,7 +148,7 @@
 				</Texture>		
 			</Layer>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" setAllPoints="true" inherits="ArenaLiveSpectatorCastBarText" />
+				<FontString name="$parentText" setAllPoints="true" inherits="ArenaLiveFont_StatusBarTextLarge" />
 				<Texture name="$parentIcon" >
 					<Size>
 						<AbsDimension x="21" y="21"/>
@@ -253,7 +172,7 @@
 					</Anchors>
 					<TexCoords left="0.05859375" right="0.9375" top="0.109375" bottom="0.890625"/>
 				</Texture>
-				<Texture name="$parentShield" file="Interface\AddOns\ArenaLiveSpectator3\Textures\TargetFrameCastBarGlow" hidden="true" alphaMode="ADD">
+				<Texture name="$parentShield" file="Interface\AddOns\ArenaLiveSpectator3\Textures\TargetFrameCastBarGlow" hidden="true">
 					<Size>
 						<AbsDimension x="229" y="29" />			
 					</Size>

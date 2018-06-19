@@ -1,25 +1,9 @@
---[[
-    ArenaLive [Core] is an unit frame framework for World of Warcraft.
-    Copyright (C) 2014  Harald Böhm <harald@boehm.agency>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
+--[[ ArenaLive Core Functions: UnitFrame Handler
+Created by: Vadrak
+Creation Date: 03.04.2014
+Last Update: 16.05.2014
+These functions are used to set up every standard unit frame. For grouped unit frames (party/raid/arena) see also GroupHeader.lua.
+]]--
 
 -- ArenaLive addon Name and localisation table:
 local addonName, L = ...;
@@ -121,20 +105,16 @@ end
 	 function args: self, name, value
 ]]
 local onAttributeChangedSnippet = [[
- if ( name ~= "state-unitexists" and name ~= "state-incombat" and name ~= "al_alwaysvisible" and name ~= "al_hideooc" and name ~= "al_framelock" and name ~= "unit" ) then
+ if ( name ~= "state-unitexists" and name ~= "al_alwaysvisible" and name ~= "al_framelock" and name ~= "unit" ) then
   return;
  end
 
  if ( self:GetAttribute("al_alwaysvisible") ) then
   self:Show();
- elseif ( not self:GetAttribute("al_framelock") ) then
+ elseif (not self:GetAttribute("al_framelock") ) then
   self:Show();
  elseif ( self:GetAttribute("state-unitexists") ) then
-  if ( not self:GetAttribute("al_hideooc") or self:GetAttribute("state-incombat") == "true" ) then
-   self:Show();
-  else
-   self:Hide();
-  end
+  self:Show();
  else
   self:Hide();
  end
@@ -155,34 +135,6 @@ UnitFrame.optionSets = {
 					else 
 						unitFrame:Disable();
 					end
-				end
-			end
-		end,
-	},
-	["ClickThrough"] = {
-		["type"] = "CheckButton",
-		["title"] = L["Click Through"],
-		["tooltip"] = L["If checked, the unit frame will not interact with the cursor."],
-		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, "UnitFrame", frame.group); return database.ClickThrough; end,
-		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, "UnitFrame", frame.group); database.ClickThrough = newValue; end,
-		["postUpdate"] = function (frame, newValue, oldValue)
-			for id, unitFrame in ArenaLive:GetAllUnitFrames() do 
-				if ( unitFrame.addon == frame.addon and unitFrame.group == frame.group ) then
-						unitFrame:EnableMouse((not newValue));
-				end
-			end
-		end,
-	},
-	["HideOutOfCombat"] = {
-		["type"] = "CheckButton",
-		["title"] = L["Hide out of Combat"],
-		["tooltip"] = L["If checked, the unit frame will be invisible until you get in combat."],
-		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, "UnitFrame", frame.group); return database.HideOutOfCombat; end,
-		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, "UnitFrame", frame.group); database.HideOutOfCombat = newValue; end,
-		["postUpdate"] = function (frame, newValue, oldValue)
-			for id, unitFrame in ArenaLive:GetAllUnitFrames() do 
-				if ( unitFrame.addon == frame.addon and unitFrame.group == frame.group ) then
-					unitFrame:SetAttribute("al_hideooc", newValue);
 				end
 			end
 		end,
@@ -253,24 +205,18 @@ function UnitFrameClass:Enable ()
 	if ( not self.hasHeader ) then
 		--[[ RegisterUnitWatch with asState = true. 
 			 This way it will change an attribute "state-unitexists" to true if the frame's unit exists.
-			 This will call the onAttributeChangedSnippet I defined above and check whether the frame should be shown or not.
+			 This will call the onAttributeChangedSnippet we defined above and check whether the frame should be shown or not.
 			 For further details see: http://www.wowwiki.com/SecureStateDriver or SecureStateDriver.lua in WoW's FrameXML.
 		]]
 		RegisterUnitWatch(self, true);
-		
-		-- Register in combat state driver:
-		RegisterStateDriver(self, "incombat", "[combat] true; false");
-		
+			
 		-- Wrap secure onAttribute snippet:
 		self:WrapScript(self, "OnAttributeChanged", onAttributeChangedSnippet);
 	end
-	self:SetAttribute("al_hideooc", database.HideOutOfCombat)
+	
 	self:SetAttribute("al_framelock", frameLock);
 	self:SetScale(scale);
 	self.enabled = true;
-	
-	-- Set Clickthrough state:
-	self:EnableMouse((not database.ClickThrough));
 	
 	if ( type(self.OnEnable) == "function" ) then
 		self:OnEnable();
@@ -284,7 +230,6 @@ function UnitFrameClass:Disable ()
 	if ( not self.hasHeader ) then
 		-- Unwrap secure onAttribute snippet:
 		self:UnwrapScript(self, "OnAttributeChanged");
-		UnregisterStateDriver(self, "incombat");
 		UnregisterUnitWatch(self);
 	end
 		
@@ -312,10 +257,10 @@ function UnitFrameClass:UpdateUnit(unit)
 		else
 			-- In case we're affected by combat lockdown the UnitFrame handler will update the unit as soon as combat fades:
 			UnitFrame.updateUnitCallback[self] = unit or "reset";
-			ArenaLive:Message("Tried to change %s's unit during combat lockdown. Adding it to the callback list...", "debug", self:GetName() or tostring(self));
+			ArenaLive:Message(L["Tried to change %s's unit during combat lockdown. Adding it to the callback list..."], "debug", self:GetName() or tostring(self));
 		end
 	else
-		--ArenaLive:Message("Tried to change %s's unit although the frame is disabled. Please enable the frame and try again...", "debug", self:GetName() or tostring(self));
+		--ArenaLive:Message(L["Tried to change %s's unit although the frame is disabled. Please enable the frame and try again..."], "debug", self:GetName() or tostring(self));
 	end
 end
 
@@ -612,7 +557,7 @@ function UnitFrame:ConstructObject(frame, addonName, frameGroup, leftClick, righ
 		frame:SetAttribute("al_alwaysvisible", alwaysVisible);
 	end
 	
-	--ArenaLive:Message("Successfully created new unit frame with the name %s!", "debug", frame:GetName() or tostring(frame));
+	--ArenaLive:Message(L["Successfully created new unit frame with the name %s!"], "debug", frame:GetName() or tostring(frame));
 end
 
 --[[ Method: RegisterClickCast

@@ -1,41 +1,14 @@
---[[
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
-
-local addonName, L = ...;
-
 ArenaLiveSpectator.SpellDB = {
 	["Dispels"] = { -- Dispels only trigger their cooldown when actively dispelling something.
 					-- In Order to account for that in the cooldown tracker I need a fast way
 					-- to know which spell is a dispel and which one is not.
-		[2782] = "Druid: Remove Corruption",
-		[88423] = "Druid: Nature's Cure",
-		[115450] = "Monk: Detox",
-		[4987] = "Paladin: Cleanse",
-		[527] = "Priest: Purify",
-		[51886] = "Shaman: Cleanse Spirit",
-		[77130] = "Shaman: Purify Spirit",
+		[2782] = true,				-- Druid: Remove Corruption
+		[88423] = true,				-- Druid: Nature's Cure
+		[115450] = true,			-- Monk: Detox
+		[4987] = true,				-- Paladin: Cleanse
+		[527] = true,				-- Priest: Purify
+		[51886] = true,				-- Shaman: Cleanse Spirit
+		[77130] = true,				-- Shaman: Purify Spirit
 	},
 	["Resurrects"] = {
 		[50769] = "Revive (Druid)",
@@ -48,15 +21,11 @@ ArenaLiveSpectator.SpellDB = {
 		[42292] = { -- PvP-Insignia
 			[59752] = 120,			-- Human Racial
 			[7744] = 30,			-- Will of the Forsaken
-			[20594] = 30,			-- Stoneform
 		},
 		[59752] = { -- Human Racial
 			[42292] = 120,			-- PvP-Insignia
 		},
 		[7744] = { -- Will of the Forsaken
-			[42292] = 30,			-- PvP-Insignia
-		},
-		[20594] = { -- Stoneform
 			[42292] = 30,			-- PvP-Insignia
 		},
 		[48505] = { -- Starfall
@@ -66,7 +35,7 @@ ArenaLiveSpectator.SpellDB = {
 			[48505] = 30,	-- Starfall
 		},
 		[60192] = { -- Freezing Trap: Trap Launcher
-			[1499] = 30,
+			[1499] = 15,
 		},
 		[2062] = { -- Earth Elemental Totem
 			[2894] = 500,		-- Fire Elemental Totem
@@ -90,1325 +59,464 @@ ArenaLiveSpectator.SpellDB = {
 			[132409] = 24,				-- Spell lock (Warlock)
 		},
 	},
-	["CooldownPriorities"] = {
-		-- Trinket:
-		[42292] = 100,
-
-		-- Racial Abilities:
-		--   NOTE: 3.1.12b brought back the important racials.
-		--[59752] = 99,		-- Human	
-		[20594] = 99,		-- Dwarf
-		--[58984] = 99,		-- Night Elf
-		--[20589] = 99,		-- Gnome
-		--[28880] = 99,		-- Draenei
-		--[59542] = 99,
-		--[59543] = 99,
-		--[59544] = 99,
-		--[59545] = 99,
-		--[59547] = 99,
-		--[59548] = 99,
-		--[121093] = 99,
-		--[68992] = 99,		-- Worgen
-		[20572] = 99,		-- Orc
-		[33697] = 99,
-		[33702] = 99,
-		[7744] = 99,		-- Undead
-		--[20549] = 99,		-- Tauren
-		[26297] = 99,		-- Troll
-		--[69179] = 99,		-- Blood Elf
-		--[28730] = 99,
-		--[80483] = 99,
-		--[25046] = 99,
-		--[50613] = 99,
-		--[129597] = 99,
-		--[69070] = 99,		-- Goblin
-		--[107079] = 99,		-- Pandaren
-		
-		["DEATHKNIGHT"] = {
-			[0] = { -- Unskilled
-				[47568] = 24,		-- Empowered Rune Weapon
-				[48792] = 23,		-- Icbound Fortitude
-				[49206] = 22,		-- Summon Gargoyle
-				[51052] = 21,		-- Anti-Magic Zone
-				[49039] = 20,		-- Lich Borne
-				[48743] = 19,		-- Death Pact
-				[152279] = 18,		-- Breath of Sindragosa
-				[108201] = 17,		-- Desecrated Ground
-				[49222] = 16,		-- Bone Shield
-				[49028] = 15,		-- Dancing Rune Weapon
-				[51271] = 14,		-- Pillar of Frost
-				[55233] = 14,		-- Vampiric Blood
-				[48707] = 13,		-- Anti-Magic Shell
-				[48982] = 12,		-- Rune Tap
-				[108194] = 11,		-- Asphyxiate
-				[47476] = 11,		-- Strangulate
-				[115989] = 10,		-- Unholy Blight
-				[108199] = 9,		-- Gorefiend's Grasp
-				[108200] = 8,		-- Remorsless Winter
-				[77575] = 7,		-- Outbreak
-				[77606] = 6,		-- Dark Simulacrum
-				[43265] = 5,		-- Death and Decay
-				[96268] = 4,		-- Death's Advance
-				[152280] = 3,		-- Defile
-				[49576] = 3,		-- Death Grip
-				[123693] = 2,		-- Plague Leech
-				[47528] = 1,		-- Mind Freeze
-			},
-			[250] = { -- Blood
-				[47568] = 24,		-- Empowered Rune Weapon
-				[48792] = 23,		-- Icbound Fortitude
-				[49206] = 22,		-- Summon Gargoyle
-				[51052] = 21,		-- Anti-Magic Zone
-				[49039] = 20,		-- Lich Borne
-				[48743] = 19,		-- Death Pact
-				[152279] = 18,		-- Breath of Sindragosa
-				[108201] = 17,		-- Desecrated Ground
-				[49222] = 16,		-- Bone Shield
-				[49028] = 15,		-- Dancing Rune Weapon
-				[51271] = 14,		-- Pillar of Frost
-				[55233] = 14,		-- Vampiric Blood
-				[48707] = 13,		-- Anti-Magic Shell
-				[48982] = 12,		-- Rune Tap
-				[108194] = 11,		-- Asphyxiate
-				[47476] = 11,		-- Strangulate
-				[115989] = 10,		-- Unholy Blight
-				[108199] = 9,		-- Gorefiend's Grasp
-				[108200] = 8,		-- Remorsless Winter
-				[77575] = 7,		-- Outbreak
-				[77606] = 6,		-- Dark Simulacrum
-				[43265] = 5,		-- Death and Decay
-				[96268] = 4,		-- Death's Advance
-				[152280] = 3,		-- Defile
-				[49576] = 3,		-- Death Grip
-				[123693] = 2,		-- Plague Leech
-				[47528] = 1,		-- Mind Freeze
-			},
-			[251] = { -- Frost
-				[48792] = 24,		-- Icbound Fortitude
-				[48743] = 23,		-- Death Pact
-				[51271] = 22,		-- Pillar of Frost
-				[48707] = 21,		-- Anti-Magic Shell
-				[108194] = 20,		-- Asphyxiate
-				[47476] = 20,		-- Strangulate
-				[51052] = 19,		-- Anti-Magic Zone
-				[49039] = 18,		-- Lich Borne
-				[152279] = 17,		-- Breath of Sindragosa
-				[108201] = 16,		-- Desecrated Ground
-				[49222] = 15,		-- Bone Shield
-				[49028] = 14,		-- Dancing Rune Weapon
-				[55233] = 13,		-- Vampiric Blood
-				[48982] = 12,		-- Rune Tap
-				[115989] = 11,		-- Unholy Blight
-				[108199] = 10,		-- Gorefiend's Grasp
-				[108200] = 9,		-- Remorsless Winter
-				[77575] = 8,		-- Outbreak
-				[77606] = 7,		-- Dark Simulacrum
-				[43265] = 6,		-- Death and Decay
-				[96268] = 5,		-- Death's Advance
-				[152280] = 4,		-- Defile
-				[49576] = 4,		-- Death Grip
-				[123693] = 3,		-- Plague Leech
-				[47568] = 2,		-- Empowered Rune Weapon
-				[47528] = 1,		-- Mind Freeze
-			},
-			[252] = { -- Unholy
-				[48792] = 24,		-- Icebound Fortitude
-				[48743] = 23,		-- Death Pact
-				[48707] = 22,		-- Anti-Magic Shell
-				[49206] = 21,		-- Summon Gargoyle
-				[51052] = 20,		-- Anti-Magic Zone
-				[108194] = 19,		-- Asphyxiate
-				[47476] = 19,		-- Strangulate
-				[49039] = 18,		-- Lich Borne
-				[152279] = 17,		-- Breath of Sindragosa
-				[108201] = 16,		-- Desecrated Ground
-				[49222] = 15,		-- Bone Shield
-				[49028] = 14,		-- Dancing Rune Weapon
-				[51271] = 13,		-- Pillar of Frost
-				[55233] = 13,		-- Vampiric Blood
-				[48982] = 12,		-- Rune Tap
-				[115989] = 11,		-- Unholy Blight
-				[108199] = 10,		-- Gorefiend's Grasp
-				[108200] = 9,		-- Remorsless Winter
-				[77575] = 8,		-- Outbreak
-				[77606] = 7,		-- Dark Simulacrum
-				[43265] = 6,		-- Death and Decay
-				[96268] = 5,		-- Death's Advance
-				[152280] = 4,		-- Defile
-				[49576] = 4,		-- Death Grip
-				[123693] = 3,		-- Plague Leech
-				[47568] = 2,		-- Empowered Rune Weapon
-				[47528] = 1,		-- Mind Freeze
-			},
-		},
-		["DRUID"] = {
-			[0] = {
-				[108291] = 29,		-- Heart of the Wild: Balance
-				[108292] = 29,		-- Heart of the Wild: Feral
-				[108293] = 29,		-- Heart of the Wild: Guardian
-				[108294] = 29,		-- Heart of the Wild: Restoration
-				[740] = 28,			-- Tranquility
-				[61336] = 27,		-- Survival Insticts
-				[102560] = 26,		-- Incarnation: Chosen of Elune
-				[102543] = 26,		-- Incarnation: King of the Jungle
-				[102558] = 26,		-- Incarnation: Son of Ursoc
-				[33891] = 26,		-- Incarnation: Tree of Life
-				[106951] = 25,		-- Berserk (Feral)
-				[106952] = 24,		-- Berserk (Guardian?)
-				[112071] = 23,		-- Celestial Alignment
-				[108238] = 22,		-- Renewal
-				[102342] = 21,		-- Iron Bark
-				[22812] = 20,		-- Bark Skin
-				[132158] = 19,		-- Nature's Swiftness
-				[78675] = 18,		-- Solar Beam
-				[102793] = 17,		-- Ursol's Vortex
-				[5211] = 16,		-- Mighty Bash
-				[99] = 15,			-- Incapacitating Shout
-				[102359] = 14,		-- Mass Entanglement
-				[132469] = 14,		-- Typhoon
-				[1850] = 13,		-- Dash
-				[106898] = 12,		-- Stampeding Roar
-				[102280] = 11,		-- Displacer Beast
-				[102351] = 10,		-- Cenarion Ward
-				[5217] = 9,			-- Tiger's Fury
-				[48505] = 8,		-- Starfall
-				[78674] = 7,		-- Starsurge
-				[102693] = 6,		-- Force of Nature
-				[62606] = 5,		-- Savage Defense
-				[18562] = 4,		-- Swiftmend
-				[132302] = 3,		-- Wild Charge
-				[48438] = 2,		-- Wild Growth		
-				[88423] = 1,		-- Nature's Cure
-				[106839] = 1,		-- Skull Bash
-				[2782] = 1,			-- Remove Corruption
-			},
-			[102] = { -- Balance
-				[22812] = 17,		-- Bark Skin
-				[108291] = 16,		-- Heart of the Wild: Balance
-				[102560] = 15,		-- Incarnation: Chosen of Elune
-				[112071] = 14,		-- Celestial Alignment
-				[5211] = 13,		-- Mighty Bash
-				[102793] = 13,		-- Ursol's Vortex
-				[99] = 13,			-- Incapacitating Roar
-				[108238] = 12,		-- Renewal
-				[102359] = 11,		-- Mass Entanglement
-				[132469] = 10,		-- Typhoon
-				[1850] = 9,			-- Dash
-				[106898] = 8,		-- Stampeding Roar
-				[102280] = 7,		-- Displacer Beast
-				[102351] = 6,		-- Cenarion Ward
-				[48505] = 5,		-- Starfall
-				[78674] = 4,		-- Starsurge
-				[102693] = 3,		-- Force of Nature
-				[132302] = 2,		-- Wild Charge	
-				[78675] = 1,		-- Solar Beam
-				[2782] = 1,			-- Remove Corruption
-			},
-			[103] = { -- Feral
-				[61336] = 16,		-- Survival Insticts
-				[108292] = 15,		-- Heart of the Wild: Feral
-				[102543] = 14,		-- Incarnation: King of the Jungle
-				[106951] = 13,		-- Berserk (Feral)
-				[5211] = 12,		-- Mighty Bash
-				[102793] = 12,		-- Ursol's Vortex
-				[99] = 12,			-- Incapacitating Shout
-				[108238] = 11,		-- Renewal
-				[102359] = 10,		-- Mass Entanglement
-				[132469] = 9,		-- Typhoon
-				[1850] = 8,			-- Dash
-				[106898] = 7,		-- Stampeding Roar
-				[102280] = 6,		-- Displacer Beast
-				[102351] = 5,		-- Cenarion Ward
-				[5217] = 4,			-- Tiger's Fury
-				[102693] = 3,		-- Force of Nature
-				[132302] = 2,		-- Wild Charge	
-				[106839] = 1,		-- Skull Bash
-				[2782] = 1,			-- Remove Corruption
-			},
-			[104] = { -- Guardian
-				[61336] = 18,		-- Survival Insticts
-				[22812] = 17,		-- Bark Skin
-				[108293] = 16,		-- Heart of the Wild: Guardian
-				[102558] = 15,		-- Incarnation: Son of Ursoc
-				[106952] = 14,		-- Berserk (Guardian)
-				[5211] = 13,		-- Mighty Bash
-				[102793] = 13,		-- Ursol's Vortex
-				[99] = 13,			-- Incapacitating Shout
-				[108238] = 11,		-- Renewal
-				[102359] = 10,		-- Mass Entanglement
-				[132469] = 9,		-- Typhoon
-				[1850] = 8,			-- Dash
-				[106898] = 7,		-- Stampeding Roar
-				[102280] = 6,		-- Displacer Beast
-				[102351] = 5,		-- Cenarion Ward
-				[102693] = 4,		-- Force of Nature
-				[62606] = 3,		-- Savage Defense
-				[132302] = 2,		-- Wild Charge		
-				[106839] = 1,		-- Skull Bash	
-				[2782] = 1,			-- Remove Corruption
-			},
-			[105] = { -- Resto
-				[102342] = 20,		-- Iron Bark
-				[22812] = 19,		-- Bark Skin
-				[108294] = 18,		-- Heart of the Wild: Restoration
-				[33891] = 17,		-- Incarnation: Tree of Life
-				[132158] = 16,		-- Nature's Swiftness
-				[5211] = 15,		-- Mighty Bash
-				[102793] = 15,		-- Ursol's Vortex
-				[99] = 15,			-- Incapacitating Shout
-				[740] = 14,			-- Tranquility
-				[108238] = 13,		-- Renewal
-				[102359] = 12,		-- Mass Entanglement
-				[132469] = 11,		-- Typhoon
-				[1850] = 10,		-- Dash
-				[106898] = 9,		-- Stampeding Roar
-				[102280] = 8,		-- Displacer Beast
-				[102351] = 7,		-- Cenarion Ward
-				[102693] = 6,		-- Force of Nature
-				[62606] = 5,		-- Savage Defense
-				[18562] = 4,		-- Swiftmend
-				[132302] = 3,		-- Wild Charge
-				[48438] = 2,		-- Wild Growth		
-				[88423] = 1,		-- Nature's Cure
-			},
-		},		
-		["HUNTER"] = {
-			[0] = { -- Unskilled
-				[121818] = 24,		-- Stampede
-				[19263] = 23,		-- Deterrence
-				[148467] = 22,		-- Deterrence (Crouching Tiger, Hidden Chimaera)
-				[109304] = 21,		-- Exhilaration
-				[3045] = 20,		-- Rapid Fire
-				[131894] = 19,		-- A Murder of Crows
-				[19574] = 18,		-- Bestial Wrath
-				[19577] = 17,		-- Intimidation
-				[53271] = 16,		-- Master's Call
-				[53480] = 15,		-- Roar of Sacrifice
-				[109248] = 14,		-- Binding Shot
-				[19386] = 14,		-- Wyvern Sting
-				[120679] = 13,		-- Dire Beast
-				[1499] = 12,		-- Freezing Trap
-				[51753] = 10,		-- Camouflage
-				[109259] = 9,		-- Power Shot
-				[120360] = 9,		-- Barrage
-				[5384] = 8,			-- Feign Death
-				[13813] = 7,		-- Explosive Trap
-				[13809] = 6,		-- Ice Trap
-				[3674] = 5,			-- Black Arrow	
-				[781] = 4,			-- Disengage
-				[117050] = 3,		-- Glaive Toss
-				[19801] = 2,		-- Tranquilizing Shot
-				[147362] = 1,		-- Counter Shot
-			},
-			[253] = { -- Beast Mastery
-				[19263] = 21,		-- Deterrence
-				[148467] = 20,		-- Deterrence (Crouching Tiger, Hidden Chimaera)
-				[109304] = 19,		-- Exhilaration
-				[53480] = 18,		-- Roar of Sacrifice
-				[121818] = 17,		-- Stampede
-				[131894] = 17,		-- A Murder of Crows
-				[109248] = 16,		-- Binding Shot
-				[19386] = 16,		-- Wyvern Sting
-				[1499] = 15,		-- Freezing Trap
-				[19574] = 14,		-- Bestial Wrath
-				[19577] = 13,		-- Intimidation
-				[53271] = 12,		-- Master's Call
-				[120679] = 11,		-- Dire Beast
-				[51753] = 10,		-- Camouflage
-				[109259] = 9,		-- Power Shot
-				[120360] = 8,		-- Barrage
-				[5384] = 7,			-- Feign Death
-				[13813] = 6,		-- Explosive Trap
-				[13809] = 5,		-- Ice Trap
-				[781] = 4,			-- Disengage
-				[117050] = 3,		-- Glaive Toss
-				[19801] = 2,		-- Tranquilizing Shot
-				[147362] = 1,		-- Counter Shot
-			},
-			[254] = { -- Marksmanship
-				[19263] = 21,		-- Deterrence
-				[148467] = 20,		-- Deterrence (Crouching Tiger, Hidden Chimaera)
-				[109304] = 19,		-- Exhilaration
-				[53480] = 18,		-- Roar of Sacrifice
-				[121818] = 17,		-- Stampede
-				[3045] = 16,		-- Rapid Fire
-				[131894] = 15,		-- A Murder of Crows
-				[109248] = 14,		-- Binding Shot
-				[19386] = 14,		-- Wyvern Sting
-				[1499] = 14,		-- Freezing Trap
-				[19577] = 13,		-- Intimidation
-				[53271] = 12,		-- Master's Call
-				[120679] = 11,		-- Dire Beast
-				[51753] = 10,		-- Camouflage
-				[109259] = 9,		-- Power Shot
-				[5384] = 8,			-- Feign Death
-				[13813] = 7,		-- Explosive Trap
-				[13809] = 6,		-- Ice Trap
-				[120360] = 5,		-- Barrage
-				[781] = 4,			-- Disengage
-				[117050] = 3,		-- Glaive Toss
-				[19801] = 2,		-- Tranquilizing Shot
-				[147362] = 1,		-- Counter Shot
-			},
-			[255] = { -- Survival
-				[19263] = 21,		-- Deterrence
-				[148467] = 20,		-- Deterrence (Crouching Tiger, Hidden Chimaera)
-				[109304] = 19,		-- Exhilaration
-				[53480] = 18,		-- Roar of Sacrifice
-				[121818] = 17,		-- Stampede
-				[131894] = 17,		-- A Murder of Crows
-				[109248] = 16,		-- Binding Shot
-				[19386] = 16,		-- Wyvern Sting
-				[1499] = 15,		-- Freezing Trap
-				[19577] = 14,		-- Intimidation
-				[53271] = 13,		-- Master's Call
-				[120679] = 12,		-- Dire Beast
-				[51753] = 11,		-- Camouflage
-				[109259] = 10,		-- Power Shot
-				[5384] = 9,			-- Feign Death
-				[13813] = 8,		-- Explosive Trap
-				[13809] = 7,		-- Ice Trap
-				[3674] = 6,			-- Black Arrow
-				[120360] = 5,		-- Barrage
-				[781] = 4,			-- Disengage
-				[117050] = 3,		-- Glaive Toss
-				[19801] = 2,		-- Tranquilizing Shot
-				[147362] = 1,		-- Counter Shot
-			},
-		},
-		["MAGE"] = {
-			[0] = { -- Unskilled
-				[45438] = 34,		-- Ice Block
-				[11958] = 33,		-- Cold Snap
-				[12472] = 32,		-- Icy Veins
-				[159916] = 31,		-- Amplify Magic
-				[55342] = 30,		-- Mirror Images
-				[12042] = 29,		-- Arcane Power
-				[152087] = 28,		-- Prismatic Crystal
-				[84714] = 27,		-- Frozen Orb
-				[108978] = 26,		-- Alter Time
-				[157913] = 25,		-- Evanesce
-				[11129] = 24,		-- Combustion
-				[113724] = 23,		-- Ring of Frost
-				[44572] = 22,		-- Deep Freeze
-				[122] = 21,			-- Frost Nova
-				[31661] = 20,		-- Dragon's Breath
-				[102051] = 19,		-- Frostjaw
-				[66] = 18,			-- Invisibility
-				[12051] = 17,		-- Evocation
-				[110959] = 16,		-- Greater Invisibility
-				[12043] = 15,		-- Presence of Mind
-				[153561] = 14,		-- Meteor
-				[153595] = 13,		-- Comet Storm
-				[11426] = 12,		-- Ice Barrier
-				[108843] = 11,		-- Blazing Speed
-				[157981] = 10,		-- Blast Wave
-				[157980] = 9,		-- Supernova
-				[157997] = 8,		-- Ice Nova
-				[111264] = 7,		-- Ice Ward
-				[1953] = 6,			-- Blink
-				[153626] = 5,		-- Arcane Orb
-				[120] = 4,			-- Cone of Cold
-				[2136] = 3,			-- Fire Blast
-				[108853] = 2,		-- Inferno Blast
-				[2139] = 1,			-- Counterspell
-			},
-			[62] = { -- Arcane
-				[45438] = 24,		-- Ice Block
-				[11958] = 23,		-- Cold Snap
-				[12043] = 22,		-- Presence of Mind
-				[12042] = 21,		-- Arcane Power
-				[159916] = 20,		-- Amplify Magic
-				[55342] = 19,		-- Mirror Images
-				[152087] = 18,		-- Prismatic Crystal
-				[108978] = 17,		-- Alter Time
-				[157913] = 16,		-- Evanesce
-				[113724] = 15,		-- Ring of Frost
-				[122] = 14,			-- Frost Nova
-				[102051] = 13,		-- Frostjaw
-				[66] = 12,			-- Invisibility
-				[12051] = 11,		-- Evocation
-				[110959] = 10,		-- Greater Invisibility
-				[11426] = 9,		-- Ice Barrier
-				[108843] = 8,		-- Blazing Speed
-				[157980] = 7,		-- Supernova
-				[111264] = 6,		-- Ice Ward
-				[1953] = 5,			-- Blink
-				[153626] = 4,		-- Arcane Orb
-				[120] = 3,			-- Cone of Cold
-				[2136] = 2,			-- Fire Blast
-				[2139] = 1,			-- Counterspell
-			},
-			[63] = { -- Fire
-				[45438] = 24,		-- Ice Block
-				[11958] = 23,		-- Cold Snap
-				[153561] = 22,		-- Meteor
-				[11129] = 21,		-- Combustion
-				[31661] = 20,		-- Dragon's Breath
-				[159916] = 19,		-- Amplify Magic
-				[55342] = 18,		-- Mirror Images
-				[152087] = 17,		-- Prismatic Crystal
-				[108978] = 16,		-- Alter Time
-				[157913] = 15,		-- Evanesce
-				[113724] = 14,		-- Ring of Frost
-				[122] = 13,			-- Frost Nova
-				[102051] = 12,		-- Frostjaw
-				[66] = 11,			-- Invisibility
-				[110959] = 10,		-- Greater Invisibility
-				[11426] = 9,		-- Ice Barrier
-				[108843] = 8,		-- Blazing Speed
-				[157981] = 7,		-- Blast Wave
-				[111264] = 6,		-- Ice Ward
-				[1953] = 5,			-- Blink
-				[120] = 4,			-- Cone of Cold
-				[2136] = 3,			-- Fire Blast
-				[108853] = 2,		-- Inferno Blast
-				[2139] = 1,			-- Counterspell
-			},
-			[64] = { -- Frost
-				[45438] = 24,		-- Ice Block
-				[11958] = 23,		-- Cold Snap
-				[84714] = 22,		-- Frozen Orb
-				[44572] = 21,		-- Deep Freeze
-				[12472] = 20,		-- Icy Veins
-				[159916] = 19,		-- Amplify Magic
-				[55342] = 18,		-- Mirror Images
-				[152087] = 17,		-- Prismatic Crystal
-				[108978] = 16,		-- Alter Time
-				[157913] = 15,		-- Evanesce
-				[113724] = 14,		-- Ring of Frost
-				[122] = 13,			-- Frost Nova
-				[102051] = 12,		-- Frostjaw
-				[66] = 11,			-- Invisibility
-				[110959] = 10,		-- Greater Invisibility
-				[153595] = 9,		-- Comet Storm
-				[11426] = 8,		-- Ice Barrier
-				[108843] = 7,		-- Blazing Speed
-				[157997] = 6,		-- Ice Nova
-				[111264] = 5,		-- Ice Ward
-				[1953] = 4,			-- Blink
-				[120] = 3,			-- Cone of Cold
-				[2136] = 2,			-- Fire Blast
-				[2139] = 1,			-- Counterspell
-			},
-		},
-		["MONK"] = {
-			[0] = { -- Unskilled
-				[115310] = 29,		-- Revival
-				[115176] = 29,		-- Zen Meditation
-				[123904] = 28,		-- Invoke Xuen, the White Tiger
-				[115203] = 27,		-- Fortifying Brew
-				[116849] = 26,		-- Life Cocoon
-				[137562] = 25,		-- Nimble Brew
-				[122278] = 24,		-- Dampen Harm
-				[122783] = 24,		-- Diffuse Magic
-				[122470] = 23,		-- Touch of Karma
-				[157535] = 22,		-- Breath of the Serpent
-				[152173] = 21,		-- Serenity
-				[115080] = 20,		-- Touch of Death
-				[115288] = 19,		-- Energizing Brew
-				[116680] = 18,		-- Thunder Focus Tea
-				[119381] = 17,		-- Leg Sweep
-				[116844] = 17,		-- Ring of Peace
-				[119392] = 17,		-- Charging Ox Wave
-				[115295] = 16,		-- Guard
-				[116841] = 15,		-- Tiger's Lust
-				[113656] = 13,		-- Fists of Fury
-				[115078] = 12,		-- Paralysis
-				[115399] = 11,		-- Chi Brew
-				[152175] = 10,		-- Hurricane Strike
-				[123986] = 9,		-- Chi Burst
-				[115098] = 9,		-- Chi Wave
-				[101545] = 8,		-- Flying Serpent Kick
-				[119996] = 7,		-- Transcendence: Transfer
-				[115008] = 6,		-- Chi Torpedo
-				[109132] = 6,		-- Roll
-				[115072] = 4,		-- Expel Harm
-				[123761] = 4,		-- Mana Tea (Glyphed)
-				[124081] = 3,		-- Zen Sphere
-				[116847] = 2,		-- Rushing Jade Wind
-				[116705] = 1,		-- Spear Hand Strike
-				[115450] = 1,		-- Detox
-			},
-			[268] = { -- Brewmaster
-				[115176] = 19,		-- Zen Meditation
-				[123904] = 18,		-- Invoke Xuen, the White Tiger
-				[115203] = 17,		-- Fortifying Brew
-				[137562] = 16,		-- Nimble Brew
-				[122278] = 15,		-- Dampen Harm
-				[122783] = 15,		-- Diffuse Magic
-				[152173] = 14,		-- Serenity
-				[115080] = 13,		-- Touch of Death
-				[119381] = 12,		-- Leg Sweep
-				[116844] = 12,		-- Ring of Peace
-				[119392] = 12,		-- Charging Ox Wave
-				[115295] = 11,		-- Guard
-				[116841] = 10,		-- Tiger's Lust
-				[115078] = 9,		-- Paralysis
-				[115399] = 8,		-- Chi Brew
-				[123986] = 7,		-- Chi Burst
-				[115098] = 7,		-- Chi Wave
-				[124081] = 7,		-- Zen Sphere
-				[119996] = 6,		-- Transcendence: Transfer
-				[115008] = 5,		-- Chi Torpedo
-				[109132] = 5,		-- Roll
-				[115072] = 4,		-- Expel Harm
-				[123761] = 3,		-- Mana Tea (Glyphed)
-				[116847] = 2,		-- Rushing Jade Wind
-				[116705] = 1,		-- Spear Hand Strike
-				[115450] = 1,		-- Detox
-			},
-			[269] = { -- Windwalker
-				[122470] = 23,		-- Touch of Karma
-				[122278] = 22,		-- Dampen Harm
-				[122783] = 22,		-- Diffuse Magic
-				[137562] = 21,		-- Nimble Brew
-				[115203] = 20,		-- Fortifying Brew
-				[115176] = 19,		-- Zen Meditation
-				[123904] = 18,		-- Invoke Xuen, the White Tiger
-				[152173] = 17,		-- Serenity
-				[115080] = 16,		-- Touch of Death
-				[115288] = 15,		-- Energizing Brew
-				[119381] = 14,		-- Leg Sweep
-				[116844] = 14,		-- Ring of Peace
-				[119392] = 14,		-- Charging Ox Wave
-				[116841] = 13,		-- Tiger's Lust
-				[113656] = 12,		-- Fists of Fury
-				[115078] = 11,		-- Paralysis
-				[115399] = 10,		-- Chi Brew
-				[152175] = 9,		-- Hurricane Strike
-				[123986] = 8,		-- Chi Burst
-				[115098] = 8,		-- Chi Wave
-				[124081] = 8,		-- Zen Sphere
-				[101545] = 7,		-- Flying Serpent Kick
-				[119996] = 6,		-- Transcendence: Transfer
-				[115008] = 5,		-- Chi Torpedo
-				[109132] = 5,		-- Roll
-				[115072] = 4,		-- Expel Harm
-				[123761] = 3,		-- Mana Tea (Glyphed)
-				[116847] = 2,		-- Rushing Jade Wind
-				[116705] = 1,		-- Spear Hand Strike
-				[115450] = 1,		-- Detox
-			},
-			[270] = { -- Mistweaver
-				[115310] = 20,		-- Revival
-				[116849] = 19,		-- Life Cocoon
-				[137562] = 18,		-- Nimble Brew
-				[115203] = 17,		-- Fortifying Brew
-				[123904] = 16,		-- Invoke Xuen, the White Tiger
-				[122278] = 15,		-- Dampen Harm
-				[122783] = 15,		-- Diffuse Magic
-				[157535] = 14,		-- Breath of the Serpent
-				[115080] = 13,		-- Touch of Death
-				[116680] = 12,		-- Thunder Focus Tea
-				[119381] = 11,		-- Leg Sweep
-				[116844] = 11,		-- Ring of Peace
-				[119392] = 11,		-- Charging Ox Wave
-				[116841] = 10,		-- Tiger's Lust
-				[115078] = 9,		-- Paralysis
-				[115399] = 8;		-- Chi Brew
-				[123986] = 7,		-- Chi Burst
-				[115098] = 7,		-- Chi Wave
-				[124081] = 7,		-- Zen Sphere
-				[119996] = 6,		-- Transcendence: Transfer
-				[115008] = 5,		-- Chi Torpedo
-				[109132] = 5,		-- Roll
-				[115072] = 4,		-- Expel Harm
-				[123761] = 3,		-- Mana Tea (Glyphed)
-				[116847] = 2,		-- Rushing Jade Wind
-				[116705] = 1,		-- Spear Hand Strike
-				[115450] = 1,		-- Detox
-			},
-		},		
-		["PALADIN"] = {
-			[0] = { -- Unskilled
-				[642] = 20,			-- Divine Shield
-				[1022] = 19,		-- Hand of Protection
-				[31850] = 18,		-- Ardent Defender
-				[31821] = 18,		-- Devotion Aura
-				[86659] = 17,		-- Guardian of the Ancient Kings
-				[31842] = 16,		-- Avenging Wrath: Holy (Off CD in a sense that it increases throughput)
-				[6940] = 15,		-- Hand of Sacrifice
-				[31884] = 14,		-- Avenging Wrath: Retribution
-				[105809] = 13,		-- Holy Avenger
-				[115750] = 12,		-- Blinding Light
-				[498] = 11,			-- Divine Protection
-				[853] = 10,			-- Hammer of Justice
-				[105593] = 10,		-- Fist of Justice
-				[114039] = 9,		-- Hand of Purity
-				[152262] = 8,		-- Seraphim
-				[1044] = 7,			-- Hand of Freedom
-				[20066] = 6,		-- Repentance
-				[114157] = 5,		-- Execution Sentence
-				[114158] = 4,		-- Light's Hammer
-				[85499] = 3,		-- Speed of Light
-				[114165] = 2,		-- Holy Prism		
-				[96231] = 1,		-- Rebuke
-				[4987] = 1,			-- Cleanse
-			},
-			[65] = { -- Holy
-				[642] = 16,			-- Divine Shield
-				[1022] = 15,		-- Hand of Protection
-				[31842] = 14,		-- Avenging Wrath: Holy
-				[114157] = 13,		-- Execution Sentence
-				[853] = 12,			-- Hammer of Justice
-				[105593] = 12,		-- Fist of Justice
-				[31821] = 11,		-- Devotion Aura
-				[6940] = 10,		-- Hand of Sacrifice
-				[105809] = 9,		-- Holy Avenger
-				[115750] = 8,		-- Blinding Light
-				[498] = 7,			-- Divine Protection
-				[114039] = 6,		-- Hand of Purity
-				[1044] = 5,			-- Hand of Freedom
-				[20066] = 5,		-- Repentance
-				[114158] = 4,		-- Light's Hammer
-				[85499] = 3,		-- Speed of Light
-				[114165] = 2,		-- Holy Prism		
-				[96231] = 1,		-- Rebuke
-				[4987] = 1,			-- Cleanse
-			},
-			[66] = { -- Protection
-				[642] = 18,			-- Divine Shield
-				[1022] = 17,		-- Hand of Protection
-				[31850] = 16,		-- Ardent Defender
-				[86659] = 15,		-- Guardian of the Ancient Kings
-				[6940] = 14,		-- Hand of Sacrifice
-				[105809] = 13,		-- Holy Avenger
-				[115750] = 12,		-- Blinding Light
-				[498] = 11,			-- Divine Protection
-				[853] = 10,			-- Hammer of Justice
-				[105593] = 10,		-- Fist of Justice
-				[114039] = 9,		-- Hand of Purity
-				[152262] = 8,		-- Seraphim
-				[1044] = 7,			-- Hand of Freedom
-				[20066] = 6,		-- Repentance
-				[114157] = 5,		-- Execution Sentence
-				[114158] = 4,		-- Light's Hammer
-				[85499] = 3,		-- Speed of Light
-				[114165] = 2,		-- Holy Prism
-				[96231] = 1,		-- Rebuke
-				[4987] = 1,			-- Cleanse
-			},
-			[70] = { -- Retribution
-				[642] = 17,			-- Divine Shield
-				[1022] = 16,		-- Hand of Protection
-				[6940] = 15,		-- Hand of Sacrifice
-				[31884] = 14,		-- Avenging Wrath: Retribution
-				[853] = 13,			-- Hammer of Justice
-				[105593] = 13,		-- Fist of Justice
-				[105809] = 12,		-- Holy Avenger
-				[115750] = 11,		-- Blinding Light
-				[498] = 10,			-- Divine Protection
-				[114039] = 9,		-- Hand of Purity
-				[152262] = 8,		-- Seraphim
-				[1044] = 7,			-- Hand of Freedom
-				[20066] = 6,		-- Repentance
-				[114157] = 5,		-- Execution Sentence
-				[114158] = 4,		-- Light's Hammer
-				[85499] = 3,		-- Speed of Light
-				[114165] = 2,		-- Holy Prism		
-				[96231] = 1,		-- Rebuke
-				[4987] = 1,			-- Cleanse
-			},
-		},
-		["PRIEST"] = {
-			[0] = { -- Unskilled
-				[64843] = 30,		-- Divine Hymn
-				[62618] = 30,		-- Power Word: Barrier
-				[126135] = 29,		-- Light Well
-				[34433] = 28,		-- Shadow Fiend
-				[19236] = 27,		-- Desperate Prayer
-				[33206] = 26,		-- Pain Suppression
-				[47585] = 26,		-- Dispersion
-				[47788] = 26,		-- Guardian Spirit
-				[10060] = 25,		-- Power Infusion
-				[114214] = 23, 		-- Angelic Bulwark
-				[73325] = 22,		-- Leap of Faith
-				[109964] = 21, 		-- Spirit Shell
-				[123040] = 20, 		-- Mind Bender
-				[8122] = 19,		-- Psychic Scream
-				[108920] = 19,		-- Void Tendrils
-				[15487] = 18,		-- Silence
-				[64044] = 17,		-- Psychic Horror
-				[6346] = 16,		-- Fear Ward
-				[120517] = 15,		-- Halo
-				[120644] = 15,		-- Halo (Shadow)
-				[88685] = 14,		-- Holy Word: Sanctuary
-				[81700] = 13,		-- Arch Angel
-				[88625] = 12,		-- Holy Word: Chastise
-				[586] = 11,			-- Fade
-				[112833] = 10, 		-- Shadow Guise
-				[121536] = 9,		-- Angelic Feather
-				[121135] = 8,		-- Cascade
-				[127632] = 8,		-- Cascade (Shadow)
-				[110744] = 7,		-- Divine Star
-				[122121] = 7,		-- Divine Star (Shadow)
-				[34861] = 6,		-- Circle of Healing
-				[14914] = 5,		-- Holy Fire
-				[88684] = 4,		-- Holy Word: Serenity
-				[33076] = 3,		-- Prayer of Mending
-				[129176] = 2,		-- Shadow Word: Death
-				[32375] = 1,		-- Mass Dispel
-				[527] = 1,			-- Purify
-			},
-			[256] = { -- Disc
-				[62618] = 22,		-- Power Word: Barrier
-				[33206] = 21,		-- Pain Suppression
-				[19236] = 20,		-- Desperate Prayer
-				[10060] = 19,		-- Power Infusion
-				[8122] = 18,		-- Psychic Scream
-				[108920] = 18,		-- Void Tendrils
-				[112833] = 17, 		-- Shadow Guise
-				[15487] = 16,		-- Silence
-				[34433] = 15,		-- Shadow Fiend
-				[114214] = 14, 		-- Angelic Bulwark
-				[73325] = 13,		-- Leap of Faith
-				[109964] = 12, 		-- Spirit Shell
-				[123040] = 11, 		-- Mind Bender
-				[6346] = 10,		-- Fear Ward
-				[120517] = 9,		-- Halo
-				[81700] = 8,		-- Arch Angel
-				[586] = 7,			-- Fade
-				[121536] = 6,		-- Angelic Feather
-				[121135] = 5,		-- Cascade
-				[110744] = 4,		-- Divine Star
-				[14914] = 3,		-- Holy Fire
-				[33076] = 2,		-- Prayer of Mending
-				[527] = 1,			-- Purify
-			},
-			[257] = { -- Holy
-				[64843] = 25,		-- Divine Hymn
-				[126135] = 24,		-- Light Well
-				[47788] = 23,		-- Guardian Spirit
-				[19236] = 22,		-- Desperate Prayer
-				[10060] = 21,		-- Power Infusion
-				[8122] = 20,		-- Psychic Scream
-				[108920] = 20,		-- Void Tendrils
-				[112833] = 19, 		-- Shadow Guise
-				[34433] = 18,		-- Shadow Fiend
-				[114214] = 17, 		-- Angelic Bulwark
-				[73325] = 16,		-- Leap of Faith
-				[109964] = 15, 		-- Spirit Shell
-				[123040] = 14, 		-- Mind Bender
-				[6346] = 13,		-- Fear Ward
-				[120517] = 12,		-- Halo
-				[88685] = 11,		-- Holy Word: Sanctuary
-				[88625] = 10,		-- Holy Word: Chastise
-				[586] = 9,			-- Fade
-				[121536] = 8,		-- Angelic Feather
-				[121135] = 7,		-- Cascade
-				[110744] = 6,		-- Divine Star
-				[34861] = 5,		-- Circle of Healing
-				[14914] = 4,		-- Holy Fire
-				[88684] = 3,		-- Holy Word: Serenity
-				[33076] = 2,		-- Prayer of Mending
-				[527] = 1,			-- Purify
-			},
-			[258] = { -- Shadow
-				[47585] = 20,		-- Dispersion
-				[19236] = 19,		-- Desperate Prayer
-				[64044] = 18,		-- Psychic Horror
-				[10060] = 17,		-- Power Infusion
-				[8122] = 16,		-- Psychic Scream
-				[108920] = 16,		-- Void Tendrils
-				[15487] = 15,		-- Silence
-				[34433] = 14,		-- Shadow Fiend
-				[114214] = 13, 		-- Angelic Bulwark
-				[73325] = 12,		-- Leap of Faith
-				[123040] = 11, 		-- Mind Bender
-				[6346] = 10,		-- Fear Ward
-				[120644] = 9,		-- Halo (Shadow)
-				[586] = 8,			-- Fade
-				[112833] = 7, 		-- Shadow Guise
-				[121536] = 6,		-- Angelic Feather
-				[127632] = 5,		-- Cascade (Shadow)
-				[122121] = 4,		-- Divine Star (Shadow)
-				[33076] = 3,		-- Prayer of Mending
-				[129176] = 2,		-- Shadow Word: Death
-				[32375] = 1,		-- Mass Dispel
-			},
-		},		
-		["ROGUE"] = {
-			[0] = { -- Unskilled
-				--[114018] = 98,	-- Shroud of Concealment
-				[14185] = 19,		-- Preparation
-				[76577] = 18,		-- Smoke Bomb
-				[13750] = 17,		-- Adrenaline Rush
-				[74001] = 16,		-- Combat Readiness
-				[5277] = 15,		-- Evasion
-				[1856] = 14,		-- Vanish
-				[51690] = 13,		-- Killing Spree
-				[79140] = 13,		-- Vendetta
-				[152151] = 12,		-- Shadow Reflection
-				[2094] = 11,		-- Blind
-				[31224] = 10,		-- Cloak of Shadows
-				[137619] = 9,		-- Marked for Death
-				[51713] = 8,		-- Shadow Dance
-				[2983] = 7,			-- Sprint
-				[408] = 6,			-- Kidney Shot
-				[152150] = 5,		-- Death form Above
-				[36554] = 4,		-- Shadow Step
-				[1776] = 3,			-- Gouge
-				[5938] = 2,			-- Shiv		
-				[1766] = 1,			-- Kick
-			},
-			[259] = { -- Assassination
-				[5277] = 18,		-- Evasion
-				[31224] = 17,		-- Cloak of Shadows
-				[76577] = 16,		-- Smoke Bomb
-				[79140] = 15,		-- Vendetta
-				[14185] = 14,		-- Preparation
-				[74001] = 13,		-- Combat Readiness
-				[1856] = 12,		-- Vanish
-				[152151] = 11,		-- Shadow Reflection
-				[2094] = 10,		-- Blind
-				[137619] = 9,		-- Marked for Death
-				[51713] = 8,		-- Shadow Dance
-				[2983] = 7,			-- Sprint
-				[408] = 6,			-- Kidney Shot
-				[152150] = 5,		-- Death form Above
-				[36554] = 4,		-- Shadow Step
-				[1776] = 3,			-- Gouge
-				[5938] = 2,			-- Shiv		
-				[1766] = 1,			-- Kick
-			},
-			[260] = { -- Combat
-				[5277] = 18,		-- Evasion
-				[31224] = 17,		-- Cloak of Shadows
-				[76577] = 16,		-- Smoke Bomb
-				[51690] = 15,		-- Killing Spree
-				[14185] = 14,		-- Preparation
-				[13750] = 13,		-- Adrenaline Rush
-				[74001] = 12,		-- Combat Readiness
-				[1856] = 11,		-- Vanish
-				[152151] = 10,		-- Shadow Reflection
-				[2094] = 9,			-- Blind
-				[137619] = 8,		-- Marked for Death
-				[2983] = 7,			-- Sprint
-				[408] = 6,			-- Kidney Shot
-				[152150] = 5,		-- Death form Above
-				[36554] = 4,		-- Shadow Step
-				[1776] = 3,			-- Gouge
-				[5938] = 2,			-- Shiv		
-				[1766] = 1,			-- Kick
-			},
-			[261] = { -- Subtlety
-				[5277] = 17,		-- Evasion
-				[31224] = 16,		-- Cloak of Shadows
-				[76577] = 15,		-- Smoke Bomb
-				[51713] = 14,		-- Shadow Dance
-				[14185] = 13,		-- Preparation
-				[74001] = 12,		-- Combat Readiness
-				[1856] = 11,		-- Vanish
-				[152151] = 10,		-- Shadow Reflection
-				[2094] = 9,			-- Blind
-				[137619] = 8,		-- Marked for Death
-				[2983] = 7,			-- Sprint
-				[408] = 6,			-- Kidney Shot
-				[152150] = 5,		-- Death form Above
-				[36554] = 4,		-- Shadow Step
-				[1776] = 3,			-- Gouge
-				[5938] = 2,			-- Shiv		
-				[1766] = 1,			-- Kick
-			},
-		},		
-		["SHAMAN"] = {
-			[0] = { -- Unskilled
-				[2894] = 33,		-- Fire Elemental Totem
-				[98008] = 32,		-- Spirit Link Totem
-				--[108280] = 32,	-- Healing Tide Totem
-				[114050] = 31,		-- Ascendance: Elemental
-				[114051] = 31,		-- Ascendance: Enhancement
-				[114052] = 31,		-- Ascendance: Restoration
-				[108281] = 30,		-- Ancestral Guidance
-				[16166] = 29,		-- Elemental Mastery
-				[51533] = 28,		-- Feral Spirit
-				[108271] = 27,		-- Astral Shift
-				[16188] = 26,		-- Ancestral Swiftness
-				[30823] = 25,		-- Shamanistic Rage
-				[58875] = 24,		-- Spirit Walk
-				[108273] = 23,		-- Windwalk Totem
-				[108270] = 22,		-- Stone Bulwark Totem
-				[108269] = 21,		-- Capacitor Totem
-				[51514] = 20,		-- Hex		
-				[157153] = 19,		-- Cloud Burst Totem
-				[51485] = 18,		-- Earth Grab Totem
-				[2062] = 17,		-- Earth Elemental Totem
-				[152256] = 16,		-- Storm Elemental Totem
-				[108285] = 15,		-- Call of the Elements (Might change that to Defensive/Offensive)
-				[79206] = 14,		-- Spirit Walker's Grace
-				[8143] = 13,		-- Tremor Totem
-				[5394] = 12,		-- Healing Stream Totem
-				[2484] = 11,		-- Earthbind Totem
-				[152255] = 10,		-- Liquid Magma
-				[51490] = 9,		-- Thunderstorm
-				[8177] = 8,			-- Grounding Totem
-				[165462] = 7,		-- Unleash Flame
-				[117014] = 6,		-- Elemental Blast
-				[73920] = 5,		-- Healing Rain
-				[108287] = 4,		-- Totemic Projection
-				[370] = 3,			-- Purge (Glyphed)
-				[61295] = 2,		-- Riptide		
-				[57994] = 1,		-- Windshear
-				[51886] = 1,		-- Cleanse Spirit
-				[77130] = 1,		-- Purify Spirit
-			},
-			[262] = { -- Elemental
-				[108281] = 29,		-- Ancestral Guidance
-				[30823] = 28,		-- Shamanistic Rage
-				[114050] = 27,		-- Ascendance: Elemental
-				[16166] = 26,		-- Elemental Mastery
-				[108271] = 25,		-- Astral Shift
-				[16188] = 24,		-- Ancestral Swiftness
-				[51514] = 23,		-- Hex
-				[2894] = 22,		-- Fire Elemental Totem
-				[58875] = 21,		-- Spirit Walk
-				[108273] = 20,		-- Windwalk Totem
-				[108270] = 19,		-- Stone Bulwark Totem
-				[108269] = 18,		-- Capacitor Totem
-				[51485] = 17,		-- Earth Grab Totem
-				[2062] = 16,		-- Earth Elemental Totem
-				[152256] = 15,		-- Storm Elemental Totem
-				[108285] = 14,		-- Call of the Elements
-				[79206] = 13,		-- Spiritwalker's Grace
-				[8143] = 12,		-- Tremor Totem
-				[5394] = 11,		-- Healing Stream Totem
-				[2484] = 10,		-- Earthbind Totem
-				[152255] = 9,		-- Liquid Magma
-				[51490] = 8,		-- Thunderstorm
-				[8177] = 7,			-- Grounding Totem
-				[165462] = 6,		-- Unleash Flame
-				[117014] = 5,		-- Elemental Blast
-				[73920] = 4,		-- Healing Rain
-				[108287] = 3,		-- Totemic Projection
-				[370] = 2,			-- Purge (Glyphed)
-				[57994] = 1,		-- Wind Shear
-				[51886] = 1,		-- Cleanse Spirit
-			},
-			[263] = { -- Enhancement
-				[108281] = 29,		-- Ancestral Guidance
-				[30823] = 28,		-- Shamanistic Rage
-				[114051] = 27,		-- Ascendance: Enhancement
-				[51533] = 26,		-- Feral Spirit
-				[58875] = 25,		-- Spirit Walk
-				[108271] = 24,		-- Astral Shift
-				[51514] = 13,		-- Hex
-				[2894] = 22,		-- Fire Elemental Totem
-				[16166] = 21,		-- Elemental Mastery	
-				[16188] = 20,		-- Ancestral Swiftness	
-				[108273] = 19,		-- Windwalk Totem
-				[108270] = 18,		-- Stone Bulwark Totem
-				[108269] = 17,		-- Capacitor Totem
-				[51485] = 16,		-- Earth Grab Totem
-				[2062] = 15,		-- Earth Elemental Totem
-				[152256] = 14,		-- Storm Elemental Totem
-				[108285] = 13,		-- Call of the Elements
-				[8143] = 12,		-- Tremor Totem
-				[5394] = 11,		-- Healing Stream Totem
-				[2484] = 10,		-- Earthbind Totem
-				[152255] = 9,		-- Liquid Magma
-				[8177] = 7,			-- Grounding Totem
-				[165462] = 6,		-- Unleash Flame
-				[117014] = 5,		-- Elemental Blast
-				[73920] = 4,		-- Healing Rain
-				[108287] = 3,		-- Totemic Projection
-				[370] = 2,			-- Purge (Glyphed)	
-				[57994] = 1,		-- Wind Shear
-				[51886] = 1,		-- Cleanse Spirit
-			},
-			[264] = { -- Restoration
-				[98008] = 28,		-- Spirit Link Totem
-				[114052] = 27,		-- Ascendance: Restoration
-				[108281] = 26,		-- Ancestral Guidance
-				[108273] = 25,		-- Windwalk Totem
-				[16188] = 24,		-- Ancestral Swiftness
-				[16166] = 23,		-- Elemental Mastery
-				[108271] = 22,		-- Astral Shift
-				[51514] = 21,		-- Hex
-				[2894] = 20,		-- Fire Elemental Totem
-				[108270] = 19,		-- Stone Bulwark Totem
-				[108269] = 18,		-- Capacitor Totem
-				[157153] = 17,		-- Cloud Burst Totem
-				[51485] = 16,		-- Earth Grab Totem
-				[2062] = 15,		-- Earth Elemental Totem
-				[152256] = 14,		-- Storm Elemental Totem
-				[108285] = 13,		-- Call of the Elements
-				[79206] = 12,		-- Spiritwalker's Grace
-				[8143] = 11,		-- Tremor Totem
-				[5394] = 10,		-- Healing Stream Totem
-				[2484] = 9,		-- Earthbind Totem
-				[8177] = 8,			-- Grounding Totem
-				[165462] = 7,		-- Unleash Flame
-				[117014] = 6,		-- Elemental Blast
-				[73920] = 5,		-- Healing Rain
-				[108287] = 4,		-- Totemic Projection
-				[370] = 3,			-- Purge (Glyphed)
-				[61295] = 2,		-- Riptide		
-				[57994] = 1,		-- Windshear
-				[77130] = 1,		-- Purify Spirit
-			},
-		},
-		["WARLOCK"] = {
-			[0] = { -- Unskilled
-				[110913] = 24,		-- Dark Bargain
-				[104773] = 23,		-- Unending Resolve
-				[108359] = 22,		-- Dark Regeneration
-				[108482] = 21,		-- Unbound Will
-				[113858] = 20,		-- Dark Soul: Instability
-				[113861] = 19,		-- Dark Soul: Knowledge
-				[113860] = 18,		-- Dark Soul: Misery
-				[108501] = 17,		-- Grimoire of Service
-				[108416] = 16,		-- Sacrificial Pact
-				[152108] = 15,		-- Cataclysm
-				[108508] = 14,		-- Mannoroth's Fury
-				[5484] = 11,		-- Howl of Terror
-				[6789] = 11,		-- Mortal Coil
-				[30283] = 11,		-- Shadowfury
-				[120451] = 10,		-- Flames of Xoroth
-				[111397] = 9,		-- Blood Horror
-				[137587] = 8,		-- Kil'jaeden's Cunning
-				[108503] = 7,		-- Grimoire of Sacrifice
-				[80240] = 6,		-- Havoc
-				[105174] = 5,		-- Hand of Gul'dan
-				[17962] = 4,		-- Conflagrate
-				[103958] = 3,		-- Metamorphosis
-				[109151] = 2,		-- Demonic Leap		
-				[132409] = 1,		-- Spell lock (Warlock)
-			},
-			[265] = { -- Affliction
-				[104773] = 13,		-- Unending Resolve
-				[108359] = 12,		-- Dark Regeneration
-				[113860] = 11,		-- Dark Soul: Misery
-				[5484] = 10,		-- Howl of Terror
-				[6789] = 10,		-- Mortal Coil
-				[30283] = 10,		-- Shadowfury
-				[110913] = 9,		-- Dark Bargain
-				[108416] = 9,		-- Sacrificial Pact
-				[108482] = 8,		-- Unbound Will
-				[108501] = 7,		-- Grimoire of Service
-				[152108] = 6,		-- Cataclysm
-				[108508] = 5,		-- Mannoroth's Fury
-				[111397] = 4,		-- Blood Horror
-				[137587] = 3,		-- Kil'jaeden's Cunning
-				[108503] = 2,		-- Grimoire of Sacrifice
-				[132409] = 1,		-- Spell lock (Warlock)
-			},
-			[266] = { -- Demonology
-				[104773] = 18,		-- Unending Resolve
-				[108359] = 17,		-- Dark Regeneration
-				[113861] = 16,		-- Dark Soul: Knowledge
-				[5484] = 15,		-- Howl of Terror
-				[6789] = 14,		-- Mortal Coil
-				[30283] = 13,		-- Shadowfury
-				[110913] = 12,		-- Dark Bargain
-				[108416] = 11,		-- Sacrificial Pact
-				[108482] = 10,		-- Unbound Will
-				[108501] = 9,		-- Grimoire of Service
-				[152108] = 8,		-- Cataclysm
-				[108508] = 7,		-- Mannoroth's Fury
-				[111397] = 6,		-- Blood Horror
-				[105174] = 5,		-- Hand of Gul'dan
-				[137587] = 4,		-- Kil'jaeden's Cunning
-				[103958] = 3,		-- Metamorphosis
-				[109151] = 2,		-- Demonic Leap		
-				[132409] = 1,		-- Spell lock (Warlock)
-			},
-			[267] = { -- Destruction
-				[104773] = 16,		-- Unending Resolve
-				[108359] = 15,		-- Dark Regeneration
-				[113858] = 14,		-- Dark Soul: Instability
-				[5484] = 13,		-- Howl of Terror
-				[6789] = 13,		-- Mortal Coil
-				[30283] = 13,		-- Shadowfury
-				[110913] = 12,		-- Dark Bargain
-				[108416] = 12,		-- Sacrificial Pact
-				[108482] = 11,		-- Unbound Will
-				[108501] = 10,		-- Grimoire of Service
-				[152108] = 9,		-- Cataclysm
-				[108508] = 8,		-- Mannoroth's Fury
-				[120451] = 7,		-- Flames of Xoroth
-				[111397] = 6,		-- Blood Horror
-				[137587] = 5,		-- Kil'jaeden's Cunning
-				[108503] = 4,		-- Grimoire of Sacrifice
-				[80240] = 3,		-- Havoc
-				[17962] = 2,		-- Conflagrate	
-				[132409] = 1,		-- Spell lock (Warlock)
-			},
-		},
-		["WARRIOR"] = {
-			[0] = { -- Unskilled
-				[871] = 32,			-- Shield Wall
-				[97462] = 32,		-- Rallying Cry
-				[12975] = 31,		-- Last Stand
-				[1719] = 30,		-- Recklessness
-				[118038] = 29,		-- Die by the Sword
-				[114030] = 28,		-- Vigilance
-				[107574] = 27,		-- Avatar
-				[12292] = 27,		-- Bloodbath
-				[46924] = 27,		-- Blade Storm
-				[5246] = 26,		-- Intimidating Shout
-				[176289] = 26,		-- Siegebreaker
-				[55694] = 25,		-- Enraged Regeneration
-				[1160] = 24,		-- Demoralizing Shout
-				[118000] = 22,		-- Dragon Roar
-				[46968] = 22,		-- Shockwave
-				[114029] = 21,		-- Safeguard
-				[107570] = 20,		-- Storm Bolt
-				[64382] = 19,		-- Shattering Throw
-				[152277] = 18;		-- Ravager
-				[6544] = 17,		-- Heroic Leap
-				[114028] = 15,		-- Mass Spell Reflection
-				[18499] = 14,		-- Berserker Rage
-				[3411] = 13,		-- Intervene
-				[23920] = 12,		-- Spell Reflection
-				[100] = 11,			-- Charge
-				[167105] = 10,		-- Colossus Smash
-				[156321] = 9,		-- Shield Charge
-				[2565] = 8,			-- Shield Block
-				[12328] = 7,		-- Sweeping Strikes
-				[6572] = 6,			-- Revenge
-				[57755] = 5,		-- Heroic Throw
-				[23922] = 4,		-- Shield Slam
-				[6343] = 3,			-- Thunderclap
-				[23881] = 2,		-- Blood Thirst		
-				[6552] = 1,			-- Pummel
-			},
-			[71] = { -- Arms
-				[97462] = 22,		-- Rallying Cry
-				[118038] = 21,		-- Die by the Sword
-				[1719] = 20,		-- Recklessness
-				[107574] = 19,		-- Avatar
-				[12292] = 19,		-- Bloodbath
-				[46924] = 19,		-- Blade Storm
-				[55694] = 18,		-- Enraged Regeneration
-				[114030] = 17,		-- Vigilance
-				[107570] = 17,		-- Storm Bolt
-				[5246] = 16,		-- Intimidating Shout
-				[176289] = 16,		-- Siegebreaker
-				[118000] = 15,		-- Dragon Roar
-				[46968] = 15,		-- Shockwave
-				[114029] = 14,		-- Safeguard
-				[64382] = 13,		-- Shattering Throw
-				[152277] = 12;		-- Ravager
-				[6544] = 11,		-- Heroic Leap
-				[114028] = 10,		-- Mass Spell Reflection
-				[23920] = 10,		-- Spell Reflection
-				[18499] = 9,		-- Berserker Rage
-				[3411] = 8,			-- Intervene
-				[100] = 7,			-- Charge
-				[167105] = 6,		-- Colossus Smash
-				[156321] = 5,		-- Shield Charge
-				[12328] = 4,		-- Sweeping Strikes
-				[57755] = 3,		-- Heroic Throw
-				[6343] = 2,			-- Thunderclap
-				[6552] = 1,			-- Pummel
-			},
-			[72] = { -- Fury
-				[97462] = 22,		-- Rallying Cry
-				[118038] = 21,		-- Die by the Sword
-				[1719] = 20,		-- Recklessness
-				[107574] = 19,		-- Avatar
-				[12292] = 19,		-- Bloodbath
-				[46924] = 19,		-- Blade Storm
-				[5246] = 18,		-- Intimidating Shout
-				[176289] = 18,		-- Siegebreaker
-				[55694] = 17,		-- Enraged Regeneration
-				[114030] = 16,		-- Vigilance
-				[118000] = 15,		-- Dragon Roar
-				[46968] = 15,		-- Shockwave
-				[114029] = 14,		-- Safeguard
-				[107570] = 13,		-- Storm Bolt
-				[64382] = 12,		-- Shattering Throw
-				[152277] = 11;		-- Ravager
-				[6544] = 10,		-- Heroic Leap
-				[114028] = 9,		-- Mass Spell Reflection
-				[18499] = 8,		-- Berserker Rage
-				[3411] = 7,		-- Intervene
-				[23920] = 6,		-- Spell Reflection
-				[100] = 5,			-- Charge
-				[156321] = 4,		-- Shield Charge
-				[57755] = 3,		-- Heroic Throw
-				[23881] = 2,		-- Bloodthirst		
-				[6552] = 1,			-- Pummel
-			},
-			[73] = { -- Protection
-				[871] = 27,			-- Shield Wall
-				[12975] = 26,		-- Last Stand
-				[1719] = 25,		-- Recklessness
-				[107574] = 24,		-- Avatar
-				[12292] = 24,		-- Bloodbath
-				[46924] = 24,		-- Blade Storm
-				[5246] = 23,		-- Intimidating Shout
-				[55694] = 22,		-- Enraged Regeneration
-				[114030] = 21,		-- Vigilance
-				[1160] = 20,		-- Demoralizing Shout
-				[118000] = 19,		-- Dragon Roar
-				[46968] = 18,		-- Shockwave
-				[114029] = 17,		-- Safeguard
-				[107570] = 16,		-- Storm Bolt
-				[64382] = 15,		-- Shattering Throw
-				[152277] = 14;		-- Ravager
-				[6544] = 13,		-- Heroic Leap
-				[114028] = 12,		-- Mass Spell Reflection
-				[18499] = 11,		-- Berserker Rage
-				[3411] = 10,		-- Intervene
-				[23920] = 9,		-- Spell Reflection
-				[100] = 8,			-- Charge
-				[156321] = 7,		-- Shield Charge
-				[2565] = 6,			-- Shield Block
-				[6572] = 5,			-- Revenge
-				[57755] = 4,		-- Heroic Throw
-				[23922] = 3,		-- Shield Slam
-				[6343] = 2,			-- Thunderclap
-				[6552] = 1,			-- Pummel
-			},
-		},
+	["CooldownTypePriorities"] = {
+		["TRINKET"] = 7,
+		["RACIAL"] = 6,
+		["DEF_CD"] = 5,
+		["OFF_CD"] = 4,
+		["CC"] = 3,
+		["MISC"] = 2,
+		["INTERRUPT"] = 1,
+		["DISPEL"] = 1,
 	},
-	["SpecIDToDispelOrInterrupt"] = {
-		[250] = 47528,		-- Deathknight: Blood
-		[251] = 47528,		-- Deathknight: Frost
-		[252] = 47528,		-- Deathknight: Unholy
+	["CooldownTypes"] = {
+		-- Trinket:
+		[42292] = "TRINKET",
 		
-		[102] = 78675,		-- Druid: Balance
-		[103] = 106839,		-- Druid: Feral
-		[104] = 106839,		-- Druid: Guardian
-		[105] = 88423,		-- Druid: Restoration
 		
-		[253] = 147362,		-- Hunter: Beast Mastery
-		[254] = 147362,		-- Hunter: Marksmanship
-		[255] = 147362,		-- Hunter: Survival
-		
-		[62] = 2139,		-- Mage: Arcane
-		[63] = 2139,		-- Mage: Fire
-		[64] = 2139,		-- Mage: Frost
-		
-		[268] = 116705,		-- Monk: Brewmaster
-		[269] = 116705,		-- Monk: Windwalker
-		[270] = 115450,		-- Monk: Mistweaver
-		
-		[65] = 4987,		-- Paladin: Holy
-		[66] = 96231,		-- Paladin: Protection
-		[70] = 96231,		-- Paladin: Retribution
-		
-		[256] = 527,		-- Priest: Discipline
-		[257] = 527,		-- Priest: Holy
-		[258] = 32375,		-- Priest: Shadow
-		
-		[259] = 1766,		-- Rogue: Assassination
-		[260] = 1766,		-- Rogue: Combat
-		[261] = 1766,		-- Rogue: Sublety
-		
-		[263] = 57994,		-- Shaman: Elemental
-		[263] = 57994,		-- Shaman: Enhancement
-		[264] = 77130,		-- Shaman: Restoration
-		
-		[265] = 132409,		-- Warlock: Affliction 
-		[266] = 132409, 	-- Warlock: Demonology
-		[267] = 132409,		-- Warlock: Destruction
+		-- Racial Abilities:	
+		[59752] = "RACIAL",		-- Human	
+		[20594] = "RACIAL",		-- Dwarf
+		[58984] = "RACIAL",		-- Night Elf
+		[20589] = "RACIAL",		-- Gnome
+		[28880] = "RACIAL",		-- Draenei
+		[59542] = "RACIAL",
+		[59543] = "RACIAL",
+		[59544] = "RACIAL",
+		[59545] = "RACIAL",
+		[59547] = "RACIAL",
+		[59548] = "RACIAL",
+		[121093] = "RACIAL",
+		[68992] = "RACIAL",		-- Worgen
+		[20572] = "RACIAL",		-- Orc
+		[33697] = "RACIAL",
+		[33702] = "RACIAL",
+		[7744] = "RACIAL",		-- Undead
+		[20549] = "RACIAL",		-- Tauren
+		[26297] = "RACIAL",		-- Troll
+		[69179] = "RACIAL",		-- Blood Elf
+		[28730] = "RACIAL",
+		[80483] = "RACIAL",
+		[25046] = "RACIAL",
+		[50613] = "RACIAL",
+		[129597] = "RACIAL",
+		[69070] = "RACIAL",		-- Goblin
+		[107079] = "RACIAL",	-- Pandaren
 
-		[71] = 6552,		-- Warrior: Arms
-		[72] = 6552,		-- Warrior: Furry
-		[73] = 6552,		-- Warrior: Protection		
+		
+		-- Death Knight:
+		[48707] = "DEF_CD",		-- Anti-Magic Shell
+		[51052] = "DEF_CD",		-- Anti-Magic Zone
+		[49222] = "DEF_CD",		-- Bone Shield
+		[48743] = "DEF_CD",		-- Death Pact
+		[108201] = "DEF_CD",	-- Desecrated Ground
+		[48792] = "DEF_CD",		-- Icbound Fortitude
+		[49039] = "DEF_CD",		-- Lich Borne
+		[48982] = "DEF_CD",		-- Rune Tap
+		[55233] = "DEF_CD",		-- Vampiric Blood
+		
+		[152279] = "OFF_CD",	-- Breath of Sindragosa
+		[49028] = "OFF_CD",		-- Dancing Rune Weapon
+		[47568] = "OFF_CD",		-- Empowered Rune Weapon
+		[77575] = "OFF_CD",		-- Outbreak
+		[51271] = "OFF_CD",		-- Pillar of Frost
+		[49206] = "OFF_CD",		-- Summon Gargoyle
+		[115989] = "OFF_CD",	-- Unholy Blight
+		
+		[47528] = "INTERRUPT",	-- Mind Freeze
+		
+		[108194] = "CC",		-- Asphyxiate
+		[49576] = "CC",			-- Death Grip
+		[108199] = "CC",		-- Gorefiend's Grasp
+		[108200] = "CC",		-- Remorsless Winter
+		[47476] = "CC",			-- Strangulate
+		
+		[77606] = "MISC",		-- Dark Simulacrum
+		[43265] = "MISC",		-- Death and Decay
+		[96268] = "MISC",		-- Death's Advance
+		[152280] = "MISC",		-- Defile
+		[123693] = "MISC",		-- Plague Leech
+		
+		
+		-- Druid
+		[102351] = "DEF_CD",		-- Cenarion Ward
+		[22842] = "DEF_CD",			-- Frenzied Regeneration
+		[22812] = "DEF_CD",			-- Bark Skin 
+		[108291] = "DEF_CD",		-- Heart of the Wild: Balance
+		[108292] = "DEF_CD",		-- Heart of the Wild: Feral
+		[108293] = "DEF_CD",		-- Heart of the Wild: Guardian
+		[108294] = "DEF_CD",		-- Heart of the Wild: Restoration
+		[132158] = "DEF_CD",		-- Nature's Swiftness
+		[108238] = "DEF_CD",		-- Renewal
+		[62606] = "DEF_CD",			-- Savage Defense
+		[61336] = "DEF_CD",			-- Survival Insticts
+		[740] = "DEF_CD",			-- Tranquility
+		[102342] = "DEF_CD",		-- Iron Bark
+		
+		[106952] = "OFF_CD",		-- Berserk
+		[112071] = "OFF_CD",		-- Celestial Alignment
+		[102560] = "OFF_CD",		-- Incarnation: Chosen of Elune
+		[102543] = "OFF_CD",		-- Incarnation: King of the Jungle
+		[102558] = "OFF_CD",		-- Incarnation: Son of Ursoc
+		[33891] = "OFF_CD",			-- Incarnation: Tree of Life
+		[5217] = "OFF_CD",			-- Tiger's Fury
+		
+		[2782] = "DISPEL",			-- Remove Corruption
+		[88423] = "DISPEL",			-- Nature's Cure
+		
+		[106839] = "INTERRUPT",		-- Skull Bash
+		
+		[99] = "CC",				-- Incapacitating Shout
+		[102359] = "CC",			-- Mass Entanglement
+		[5211] = "CC",				-- Mighty Bash
+		[78675] = "CC",				-- Solar Beam
+		[132469] = "CC",			-- Typhoon
+		[102793] = "CC",			-- Ursol's Vortex
+		
+		[1850] = "MISC",			-- Dash
+		[102280] = "MISC",			-- Displacer Beast
+		[102693] = "MISC",			-- Force of Nature
+		[106898] = "MISC",			-- Stampeding Roar
+		[48505] = "MISC",			-- Starfall
+		[78674] = "MISC",			-- Starsurge
+		[18562] = "MISC",			-- Swiftmend
+		[132302] = "MISC",			-- Wild Charge
+		[48438] = "MISC",			-- Wild Growth
+		
+		
+		-- Hunter:
+		[19263] = "DEF_CD",				-- Deterrence
+		[148467] = "DEF_CD",			-- Deterrence (Crouching Tiger, Hidden Chimaera)
+		[109304] = "DEF_CD",			-- Exhilaration
+		[53271] = "DEF_CD",				-- Master's Call
+		
+		[131894] = "OFF_CD",			-- A Murder of Crows
+		[120679] = "OFF_CD",			-- Dire Beast
+		[19574] = "OFF_CD",				-- Bestial Wrath
+		[3045] = "OFF_CD",				-- Rapid Fire
+		[121818] = "OFF_CD",			-- Stampede
+		
+		[147362] = "INTERRUPT",			-- Counter Shot
+		
+		[109248] = "CC",				-- Binding Shot
+		[1499] = "CC",					-- Freezing Trap
+		[19577] = "CC",					-- Intimidation
+		[19386] = "CC",					-- Wyvern Sting
+		
+		--[172106] = "MISC",				-- Aspect of the Fox
+		[3674] = "MISC",				-- Black Arrow
+		[120360] = "MISC",				-- Barrage
+		[51753] = "MISC",				-- Camouflage
+		[781] = "MISC",					-- Disengage
+		[13813] = "MISC",				-- Explosive Trap
+		[5384] = "MISC",				-- Feign Death
+		[117050] = "MISC",				-- Glaive Toss
+		[13809] = "MISC",				-- Ice Trap
+		[109259] = "MISC",				-- Power Shot
+
+		
+		-- Mage:
+		[108978] = "DEF_CD",			-- Alter Time
+		[11958] = "DEF_CD",				-- Cold Snap
+		[157913] = "DEF_CD",			-- Evanesce
+		[45438] = "DEF_CD",				-- Ice Block
+		[159916] = "DEF_CD",			-- Amplify Magic
+		[12051] = "DEF_CD",				-- Evocation
+		
+		[153626] = "OFF_CD",			-- Arcane Orb
+		[12042] = "OFF_CD",				-- Arcane Power
+		[11129] = "OFF_CD",				-- Combustion
+		[84714] = "OFF_CD",				-- Frozen Orb
+		[12472] = "OFF_CD",				-- Icy Veins
+		[55342] = "OFF_CD",				-- Mirror Images
+		[152087] = "OFF_CD",			-- Prismatic Crystal
+		
+		[2139] = "INTERRUPT",			-- Counterspell
+		
+		[44572] = "CC",					-- Deep Freeze
+		[31661] = "CC",					-- Dragon's Breath
+		[102051] = "CC",				-- Frostjaw
+		[122] = "CC",					-- Frost Nova
+		[113724] = "CC",				-- Ring of Frost
+		
+		[108843] = "MISC",				-- Blazing Speed
+		[157981] = "MISC",				-- Blast Wave
+		[1953] = "MISC",				-- Blink
+		[153595] = "MISC",				-- Comet Storm
+		[120] = "MISC",					-- Cone of Cold
+		[2136] = "MISC",				-- Fire Blast
+		[110959] = "MISC",				-- Greater Invisibility
+		[11426] = "MISC",				-- Ice Barrier
+		[157997] = "MISC",				-- Ice Nova
+		[111264] = "MISC",				-- Ice Ward
+		[66] = "MISC",					-- Invisibility
+		[153561] = "MISC",				-- Meteor
+		[12043] = "MISC",				-- Presence of Mind
+		[157980] = "MISC",				-- Supernova
+		
+		
+		-- Monk:
+		[157535] = "DEF_CD",			-- Breath of the Serpent
+		[122278] = "DEF_CD",			-- Dampen Harm
+		[122783] = "DEF_CD",			-- Diffuse Magic
+		[115295] = "DEF_CD",			-- Guard
+		[115203] = "DEF_CD",			-- Fortifying Brew
+		[116849] = "DEF_CD",			-- Life Cocoon
+		[137562] = "DEF_CD",			-- Nimble Brew
+		[115310] = "DEF_CD",			-- Revival
+		[122470] = "DEF_CD",			-- Touch of Karma
+		[115176] = "DEF_CD",			-- Zen Meditation
+		[116680] = "DEF_CD",			-- Thunder Focus Tea
+		[116841] = "DEF_CD",			-- Tiger's Lust
+		
+		[115288] = "OFF_CD",			-- Energizing Brew
+		[123904] = "OFF_CD",			-- Invoke Xuen, the White Tiger
+		[152173] = "OFF_CD",			-- Serenity
+		[115080] = "OFF_CD",			-- Touch of Death
+
+		[116705] = "INTERRUPT",			-- Spear Hand Strike
+		
+		[115450] = "DISPEL",			-- Detox
+		
+		[119392] = "CC",				-- Charging Ox Wave
+		[113656] = "CC",				-- Fists of Fury
+		[119381] = "CC",				-- Leg Sweep
+		[115078] = "CC",				-- Paralysis
+		[116844] = "CC",				-- Ring of Peace
+		
+		[115399] = "MISC";				-- Chi Brew
+		[123986] = "MISC",				-- Chi Burst
+		[115008] = "MISC",				-- Chi Torpedo
+		[115098] = "MISC",				-- Chi Wave
+		[115072] = "MISC",				-- Expel Harm
+		[101545] = "MISC",				-- Flying Serpent Kick
+		[152175] = "MISC",				-- Hurricane Strike
+		[109132] = "MISC",				-- Roll
+		[116847] = "MISC",				-- Rushing Jade Wind
+		[119996] = "MISC",				-- Transcendence: Transfer
+		[124081] = "MISC",				-- Zen Sphere
+		
+		
+		-- Paladin:
+		[31850] = "DEF_CD",				-- Ardent Defender
+		[31821] = "DEF_CD",				-- Devotion Aura
+		[498] = "DEF_CD",				-- Divine Protection
+		[642] = "DEF_CD",				-- Divine Shield
+		[86659] = "DEF_CD",				-- Guardian of the Ancient Kings
+		[1044] = "DEF_CD",				-- Hand of Freedom
+		[1022] = "DEF_CD",				-- Hand of Protection
+		[114039] = "DEF_CD",			-- Hand of Purity
+		[6940] = "DEF_CD",				-- Hand of Sacrifice
+		
+		[31842] = "OFF_CD",				-- Avenging Wrath: Holy (Off CD in a sense that it increases throughput)
+		[31884] = "OFF_CD",				-- Avenging Wrath: Retribution
+		[105809] = "OFF_CD",			-- Holy Avenger
+		[152262] = "OFF_CD",			-- Seraphim
+		
+		[96231] = "INTERRUPT",			-- Rebuke
+		
+		[4987] = "DISPEL",				-- Cleanse
+		
+		[853] = "CC",					-- Hammer of Justice
+		[105593] = "CC",				-- Fist of Justice
+		[20066] = "CC",					-- Repentance
+		[115750] = "CC",				-- Blinding Light
+		
+		[114157] = "MISC",				-- Execution Sentence
+		[114165] = "MISC",				-- Holy Prism
+		[114158] = "MISC",				-- Light's Hammer
+		[85499] = "MISC",				-- Speed of Light
+
+
+		-- Priest:
+		[114214] = "DEF_CD", 			-- Angelic Bulwark 
+		[19236] = "DEF_CD", 			-- Desperate Prayer 
+		[47585] = "DEF_CD",				-- Dispersion
+		[64843] = "DEF_CD",				-- Divine Hymn
+		[586] = "DEF_CD",				-- Fade
+		[47788] = "DEF_CD",				-- Guardian Spirit
+		[73325] = "DEF_CD",				-- Leap of Faith
+		[126135] = "DEF_CD",			-- Light Well
+		[33206] = "DEF_CD",				-- Pain Suppression
+		[62618] = "DEF_CD",				-- Power Word: Barrier
+		[109964] = "DEF_CD", 			-- Spirit Shell
+		
+		[123040] = "OFF_CD", 			-- Mind Bender
+		[10060] = "OFF_CD",				-- Power Infusion
+		[34433] = "OFF_CD",				-- Shadow Fiend
+		
+		
+		[32375] = "DISPEL",				-- Mass Dispel
+		[527] = "DISPEL",				-- Purify
+		
+		[88625] = "CC",					-- Holy Word: Chastise
+		[64044] = "CC",					-- Psychic Horror
+		[8122] = "CC",					-- Psychic Scream
+		[15487] = "CC",					-- Silence
+		[108920] = "CC",				-- Void Tendrils
+		
+		[81700] = "MISC",				-- Arch Angel
+		[121135] = "MISC",				-- Cascade
+		[127632] = "MISC",				-- Cascade (Shadow)
+		[34861] = "MISC",				-- Circle of Healing
+		[110744] = "MISC",				-- Divine Star
+		[122121] = "MISC",				-- Divine Star
+		[6346] = "MISC",				-- Fear Ward
+		[120517] = "MISC",				-- Halo
+		[120644] = "MISC",				-- Halo (Shadow)
+		[14914] = "MISC",				-- Holy Fire
+		[88685] = "MISC",				-- Holy Word: Sanctuary
+		[88684] = "MISC",				-- Holy Word: Serenity
+		[33076] = "MISC",				-- Prayer of Mending
+		[112833] = "MISC", 				-- Shadow Guise 
+		[129176] = "MISC",				-- Shadow Word: Death
+		
+		
+		-- Rogue:
+		[74001] = "DEF_CD",				-- Combat Readiness
+		[5277] = "DEF_CD",				-- Evasion
+		[14185] = "DEF_CD",				-- Preparation
+		[1856] = "DEF_CD",				-- Vanish
+		[31224] = "DEF_CD",				-- Cloak of Shadows
+		
+		[13750] = "OFF_CD",				-- Adrenaline Rush
+		[51690] = "OFF_CD",				-- Killing Spree
+		[137619] = "OFF_CD",			-- Marked for Death
+		[51713] = "OFF_CD",				-- Shadow Dance
+		[152151] = "OFF_CD",			-- Shadow Reflection
+		[76577] = "OFF_CD",				-- Smoke Bomb
+		[79140] = "OFF_CD",				-- Vendetta
+		
+		[1766] = "INTERRUPT",			-- Kick
+		
+		[2094] = "CC",					-- Blind
+		[1776] = "CC",					-- Gouge
+		[408] = "CC",					-- Kidney Shot
+		
+		[152150] = "MISC",				-- Death form Above
+		[36554] = "MISC",				-- Shadow Step
+		[5938] = "MISC",				-- Shiv
+		[114018] = "MISC",				-- Shroud of Concealment
+		[2983] = "MISC",				-- Sprint
+		
+		
+		-- Shaman:
+		[108271] = "DEF_CD",			-- Astral Shift
+		[157153] = "DEF_CD",			-- Cloud Burst Totem
+		[30823] = "DEF_CD",				-- Shamanistic Rage
+		[108280] = "DEF_CD",			-- Healing Tide Totem
+		[98008] = "DEF_CD",				-- Spirit Link Totem
+		[58875] = "DEF_CD",				-- Spirit Walk
+		[108270] = "DEF_CD",			-- Stone Bulwark Totem
+		[108273] = "DEF_CD",			-- Windwalk Totem
+		[108281] = "DEF_CD",			-- Ancestral Guidance
+		[16188] = "DEF_CD",				-- Ancestral Swiftness
+		
+		[165339] = "OFF_CD",			-- Ascendance: Elemental
+		[165341] = "OFF_CD",			-- Ascendance: Enhancement
+		[165344] = "OFF_CD",			-- Ascendance: Restoration
+		[16166] = "OFF_CD",				-- Elemental Mastery
+		[51533] = "OFF_CD",				-- Feral Spirit
+		[2894] = "OFF_CD",				-- Fire Elemental Totem
+		
+		[57994] = "INTERRUPT",			-- Windshear
+		
+		[51886] = "DISPEL",				-- Cleanse Spirit
+		[77130] = "DISPEL",				-- Purify Spirit
+		
+		[51485] = "CC",					-- Earth Grab Totem
+		[108269] = "CC",				-- Capacitor Totem
+		[51514] = "CC",					-- Hex
+		
+		[108285] = "MISC",				-- Call of the Elements (Might change that to Defensive/Offensive)
+		[2484] = "MISC",				-- Earthbind Totem
+		[2062] = "MISC",				-- Earth Elemental Totem
+		[117014] = "MISC",				-- Elemental Blast
+		[8177] = "MISC",				-- Grounding Totem
+		[73920] = "MISC",				-- Healing Rain
+		[5394] = "MISC",				-- Healing Stream Totem
+		[152255] = "MISC",				-- Liquid Magma
+		[370] = "MISC",					-- Purge (Glyphed)
+		[61295] = "MISC",				-- Riptide
+		[79206] = "MISC",				-- Spirit Walker's Grace
+		[152256] = "MISC",				-- Storm Elemental Totem
+		[51490] = "MISC",				-- Thunderstorm
+		[108287] = "MISC",				-- Totemic Projection
+		[8143] = "MISC",				-- Tremor Totem
+		[165462] = "MISC",				-- Unleash Flame
+
+		
+		-- Warlock: 
+		[110913] = "DEF_CD",			-- Dark Bargain
+		[108359] = "DEF_CD",			-- Dark Regeneration
+		[108416] = "DEF_CD",			-- Sacrificial Pact
+		[108482] = "DEF_CD",			-- Unbound Will
+		[104773] = "DEF_CD",			-- Unending Resolve
+		
+		[113858] = "OFF_CD",			-- Dark Soul: Instability
+		[113861] = "OFF_CD",			-- Dark Soul: Knowledge
+		[113860] = "OFF_CD",			-- Dark Soul: Misery
+		[152108] = "OFF_CD",			-- Cataclysm
+		[108501] = "OFF_CD",			-- Grimoire of Service
+		[108508] = "OFF_CD",			-- Mannoroth's Fury
+		[103958] = "OFF_CD",			-- Metamorphosis
+
+		[132409] = "INTERRUPT",			-- Spell lock (Warlock)
+		
+		[5484] = "CC",					-- Howl of Terror
+		[6789] = "CC",					-- Mortal Coil
+		[30283] = "CC",					-- Shadowfury
+		
+		[111397] = "MISC",				-- Blood Horror
+		[17962] = "MISC",				-- Conflagrate
+		[109151] = "MISC",				-- Demonic Leap
+		[120451] = "MISC",				-- Flames of Xoroth
+		[108503] = "MISC",				-- Grimoire of Sacrifice
+		[105174] = "MISC",				-- Hand of Gul'dan
+		[80240] = "MISC",				-- Havoc
+		[137587] = "MISC",				-- Kil'jaeden's Cunning
+		[108503] = "MISC",				-- Sacrifice
+		
+		-- Warrior:
+		[18499] = "DEF_CD",				-- Berserker Rage
+		[1160] = "OFF_CD",				-- Demoralizing Shout
+		[118038] = "DEF_CD",			-- Die by the Sword
+		[55694] = "DEF_CD",				-- Enraged Regeneration
+		[12975] = "DEF_CD",				-- Last Stand
+		[97462] = "DEF_CD",				-- Rallying Cry
+		[114029] = "DEF_CD",			-- Safeguard
+		[2565] = "DEF_CD",				-- Shield Block
+		[871] = "DEF_CD",				-- Shield Wall
+		[114030] = "DEF_CD",			-- Vigilance
+		
+		[1719] = "OFF_CD",				-- Recklessness
+		[107574] = "OFF_CD",			-- Avatar
+		[12292] = "OFF_CD",				-- Blood Bath
+		[46924] = "OFF_CD",				-- Blade Storm
+		
+		[6552] = "INTERRUPT",			-- Intervene
+		
+		[118000] = "CC",				-- Dragon Roar
+		[5246] = "CC",					-- Intimidating Shout
+		[46968] = "CC",					-- Shockwave
+		[107570] = "CC",				-- Storm Bolt
+		
+		[23881] = "MISC",				-- Blood Thirst
+		[100] = "MISC",					-- Charge
+		[167105] = "MISC",				-- Colossus Smash
+		[6544] = "MISC",				-- Heroic Leap
+		[57755] = "MISC",				-- Heroic Throw
+		[3411] = "MISC",				-- Intervene
+		[114028] = "MISC",				-- Mass Spell Reflection
+		[152277] = "MISC";				-- Ravager
+		[6572] = "MISC",				-- Revenge
+		[64382] = "MISC",				-- Shattering Throw
+		[156321] = "MISC",				-- Shield Charge
+		[23922] = "MISC",				-- Shield Slam
+		[176289] = "MISC",				-- Siegebreaker
+		[23920] = "MISC",				-- Spell Reflection
+		[12328] = "MISC",				-- Sweeping Strikes
+		[6343] = "MISC",				-- Thunderclap
 	},
 	["CooldownClassSpecInfo"] = {
 		["DEATHKNIGHT"] = {
@@ -1467,11 +575,13 @@ ArenaLiveSpectator.SpellDB = {
 			[0] = {
 				[1850] = 180,		-- Dash
 				[106898] = 120,		-- Stampeding Roar
+				[22842] = 90,		-- Frenzied Regeneration
 			},
 			[102] = { -- Balance
 				[112071] = 180,		-- Celestial Alignment
 				[1850] = 180,		-- Dash
 				[106898] = 120,		-- Stampeding Roar
+				[22842] = 90,		-- Frenzied Regeneration
 				[22812] = 60,		-- Bark Skin
 				[78675] = 60,		-- Solar Beam
 				[48505] = {30, 3},	-- Starfall
@@ -1479,19 +589,21 @@ ArenaLiveSpectator.SpellDB = {
 				[2782] = 8,			-- Remove Corruption
 			},
 			[103] = { -- Feral
-				[106951] = 180,		-- Berserk
+				[106952] = 180,		-- Berserk
 				[1850] = 180,		-- Dash
 				[61336] = {180, 2},	-- Survival Instincts
 				[106898] = 120,		-- Stampeding Roar
+				[22842] = 90,		-- Frenzied Regeneration
 				[5217] = 30,		-- Tiger's Fury
 				[106839] = 15,		-- Skull Bash
 				[2782] = 8,			-- Remove Corruption
 			},
 			[104] = { -- Guardian
-				[106952] = 180,		-- Berserk (Guardian?)
+				[106952] = 180,		-- Berserk
 				[1850] = 180,		-- Dash
 				[61336] = {180, 2},	-- Survival Instincts
 				[106898] = 120,		-- Stampeding Roar
+				[22842] = 90,		-- Frenzied Regeneration
 				[22812] = 60,		-- Bark Skin
 				[106839] = 15,		-- Skull Bash
 				[62606] = {12, 2}, 	-- Savage Defense
@@ -1502,6 +614,7 @@ ArenaLiveSpectator.SpellDB = {
 				[740] = 180,		-- Tranquility (With Malfurion's Gift Passive)
 				[1850] = 180,		-- Dash
 				[106898] = 120,		-- Stampeding Roar
+				[22842] = 90,		-- Frenzied Regeneration
 				[22812] = 60,		-- Bark Skin
 				[102342] = 60,		-- Ironbark
 				[132158] = 60,		-- Nature's Swiftness
@@ -1513,59 +626,55 @@ ArenaLiveSpectator.SpellDB = {
 		},		
 		["HUNTER"] = {
 			[0] = { -- Unskilled
+				--[172106] = 180,			-- Aspect of the Fox
 				[19263] = {180, 2},		-- Deterrence
 				[51753] = 60,			-- Camouflage
-				[53480] = 60,			-- Roar of Sacrifice
 				[53271] = 45,			-- Master's Call
 				[5384] = 30,			-- Feign Death
 				[147362] = 24,			-- Counter Shot
 				[781] = 20,				-- Disengage
 				[13813] = 15,			-- Explosive Trap
-				[1499] = 30,			-- Freezing Trap
+				[1499] = 15,			-- Freezing Trap
 				[13809] = 15,			-- Ice Trap
-				[19801] = 10,			-- Tranquilizing Shot
 			},
 			[253] = { -- Beast Mastery
+				--[172106] = 180,			-- Aspect of the Fox
 				[19263] = {180, 2},		-- Deterrence
 				[19574] = 60,			-- Bestial Wrath
 				[51753] = 60,			-- Camouflage
-				[53480] = 60,			-- Roar of Sacrifice
 				[53271] = 45,			-- Master's Call
 				[5384] = 30,			-- Feign Death
 				[147362] = 24,			-- Counter Shot
 				[781] = 20,				-- Disengage
 				[13813] = 15,			-- Explosive Trap
-				[1499] = 30,			-- Freezing Trap
+				[1499] = 15,			-- Freezing Trap
 				[13809] = 15,			-- Ice Trap
-				[19801] = 10,			-- Tranquilizing Shot
 			},
 			[254] = { -- Marksmanship
+				--[172106] = 180,			-- Aspect of the Fox
 				[19263] = {180, 2},		-- Deterrence
 				[3045] = 120,			-- Rapid Fire
 				[51753] = 60,			-- Camouflage
-				[53480] = 60,			-- Roar of Sacrifice
 				[53271] = 45,			-- Master's Call
 				[5384] = 30,			-- Feign Death
 				[147362] = 24,			-- Counter Shot
 				[781] = 20,				-- Disengage
 				[13813] = 15,			-- Explosive Trap
-				[1499] = 30,			-- Freezing Trap
+				[1499] = 15,			-- Freezing Trap
 				[13809] = 15,			-- Ice Trap
-				[19801] = 10,			-- Tranquilizing Shot
 			},
 			[255] = { -- Survival
+				--[172106] = 180,			-- Aspect of the Fox
 				[19263] = {180, 2},		-- Deterrence
 				[51753] = 60,			-- Camouflage
-				[53480] = 60,			-- Roar of Sacrifice
 				[53271] = 45,			-- Master's Call
 				[3674] = 30,			-- Black Arrow
 				[5384] = 30,			-- Feign Death
 				[147362] = 24,			-- Counter Shot
 				[781] = 20,				-- Disengage
 				[13813] = 12,			-- Explosive Trap
-				[1499] = 20,			-- Freezing Trap
+				[1499] = 12,			-- Freezing Trap
 				[13809] = 12,			-- Ice Trap
-				[19801] = 10,			-- Tranquilizing Shot
 			},
 		},
 		["MAGE"] = {
@@ -1772,13 +881,13 @@ ArenaLiveSpectator.SpellDB = {
 		},		
 		["ROGUE"] = {
 			[0] = { -- Unskilled
-				--[114018] = 300,			-- Shroud of Concealment
+				[114018] = 300,			-- Shroud of Concealment
 				[14185] = 300,			-- Preparation
 				[76577] = 180,			-- Smoke Bomb
 				[2094] = 120,			-- Blind
 				[5277] = 120,			-- Evasion
 				[1856] = 120,			-- Vanish
-				[31224] = 90,			-- Cloak of Shadows
+				[31224] = 60,			-- Cloak of Shadows
 				[2983] = 60,			-- Sprint
 				[408] = 20,				-- Kidney Shot
 				[1766] = 15,			-- Kick
@@ -1786,14 +895,14 @@ ArenaLiveSpectator.SpellDB = {
 				[5938] = 10,			-- Shiv
 			},
 			[259] = { -- Assassination
-				--[114018] = 300,			-- Shroud of Concealment
+				[114018] = 300,			-- Shroud of Concealment
 				[14185] = 300,			-- Preparation
 				[76577] = 180,			-- Smoke Bomb
 				[2094] = 120,			-- Blind
 				[5277] = 120,			-- Evasion
 				[1856] = 120,			-- Vanish
 				[79140] = 120,			-- Vendetta
-				[31224] = 90,			-- Cloak of Shadows
+				[31224] = 60,			-- Cloak of Shadows
 				[2983] = 60,			-- Sprint
 				[408] = 20,				-- Kidney Shot
 				[1766] = 15,			-- Kick
@@ -1801,7 +910,7 @@ ArenaLiveSpectator.SpellDB = {
 				[5938] = 10,			-- Shiv
 			},
 			[260] = { -- Combat
-				--[114018] = 300,			-- Shroud of Concealment
+				[114018] = 300,			-- Shroud of Concealment
 				[14185] = 300,			-- Preparation
 				[13750] = 180,			-- Adrenaline Rush
 				[76577] = 180,			-- Smoke Bomb
@@ -1809,21 +918,21 @@ ArenaLiveSpectator.SpellDB = {
 				[5277] = 120,			-- Evasion
 				[51690] = 120,			-- Killing Spree
 				[1856] = 120,			-- Vanish
-				[31224] = 90,			-- Cloak of Shadows
+				[31224] = 60,			-- Cloak of Shadows
 				[2983] = 60,			-- Sprint
 				[408] = 20,				-- Kidney Shot
 				[1766] = 15,			-- Kick
 				[1776] = 10,			-- Gouge
 				[5938] = 10,			-- Shiv
 			},
-			[261] = { -- Subtlety
-				--[114018] = 300,			-- Shroud of Concealment
+			[261] = { -- Sublety
+				[114018] = 300,			-- Shroud of Concealment
 				[14185] = 300,			-- Preparation
 				[76577] = 180,			-- Smoke Bomb
 				[2094] = 120,			-- Blind
 				[5277] = 120,			-- Evasion
 				[1856] = 120,			-- Vanish
-				[31224] = 90,			-- Cloak of Shadows
+				[31224] = 60,			-- Cloak of Shadows
 				[51713] = 60,			-- Shadow Dance
 				[2983] = 60,			-- Sprint
 				[408] = 20,				-- Kidney Shot
@@ -1849,7 +958,7 @@ ArenaLiveSpectator.SpellDB = {
 			[262] = { -- Elemental
 				[2894] = 300,			-- Fire Elemental Totem
 				[2062] = 300,			-- Earth Elemental Totem
-				[114050] = 180,			-- Ascendance: Elemental
+				[165339] = 180,			-- Ascendance: Elemental
 				[79206] = 120,			-- Spirit Walker's Grace
 				[8143] = 60,			-- Tremor Totem
 				[30823] = 60,			-- Shamanistic Rage
@@ -1867,7 +976,7 @@ ArenaLiveSpectator.SpellDB = {
 			[263] = { -- Enhancement
 				[2894] = 300,			-- Fire Elemental Totem
 				[2062] = 300,			-- Earth Elemental Totem
-				[114051] = 180,			-- Ascendance: Enhancement
+				[165341] = 180,			-- Ascendance: Enhancement
 				[51533] = 120,			-- Feral Spirit
 				[58875] = 60,			-- Spirit Walk
 				[30823] = 60,			-- Shamanistic Rage
@@ -1884,8 +993,8 @@ ArenaLiveSpectator.SpellDB = {
 			[264] = { -- Restoration
 				[2894] = 300,			-- Fire Elemental Totem
 				[2062] = 300,			-- Earth Elemental Totem
-				[114052] = 180,			-- Ascendance: Restoration
-				--[108280] = 180,			-- Healing Tide Totem
+				[165344] = 180,			-- Ascendance: Restoration
+				[108280] = 180,			-- Healing Tide Totem
 				[98008] = 180,			-- Spirit Link Totem
 				[79206] = 120,			-- Spirit Walker's Grace
 				[8143] = 60,			-- Tremor Totem
@@ -1899,7 +1008,7 @@ ArenaLiveSpectator.SpellDB = {
 				[77130] = 8,			-- Purify Spirit
 				[61295] = 5,			-- Riptide (with Improved Riptide Passive)
 			},
-		},
+		},		
 		["WARLOCK"] = {
 			[0] = { -- Unskilled
 				[104773] = 180,			-- Unending Resolve
@@ -1926,7 +1035,7 @@ ArenaLiveSpectator.SpellDB = {
 				[17962] = {12, 2},		-- Conflagrate
 				[132409] = 24,			-- Spell lock (Warlock)
 			},
-		},
+		},		
 		["WARRIOR"] = {
 			[0] = { -- Unskilled
 				[64382] = 300,			-- Shattering Throw
@@ -1958,7 +1067,7 @@ ArenaLiveSpectator.SpellDB = {
 				[57755] = 6,			-- Heroic Throw
 				[6343] = 6,				-- Thunder Clap
 			},
-			[72] = { -- Fury
+			[72] = { -- Furry
 				[64382] = 300,			-- Shattering Throw
 				[97462] = 180,			-- Rallying Cry
 				[1719] = 180,			-- Recklessness
@@ -2024,7 +1133,7 @@ ArenaLiveSpectator.SpellDB = {
 			[19223] = { -- Asphyxiate
 				["action"] = "REPLACE",
 				["spellID"] = 108194,
-				["replace"] = 47476,
+				["replace"] = 49576,
 				["value"] = 30,				
 			},  
 			[19226] = { -- Death Pact
@@ -2155,11 +1264,12 @@ ArenaLiveSpectator.SpellDB = {
 				["value"] = 90,				
 			}, 	
 		},  
-		["HUNTER"] = {
+		["HUNTER"] = { 
 			[19364] = { -- Crouching Tiger, Hidden Chimaera
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = {781, 19263},
-				["value"] = {-10, -60},
+				["action"] = {"MODIFY_COOLDOWN", "REPLACE"},
+				["spellID"] = {781, 148467},
+				["replace"] = { nil, 19263},
+				["value"] = {-10, {120, 2}},
 			},  
 			[19347] = { -- Binding Shot
 				["action"] = "ADD",
@@ -2472,11 +1582,6 @@ ArenaLiveSpectator.SpellDB = {
 				["spellID"] = 114214,
 				["value"] = 90,
 			},
-			[19757] = { -- Angelic Feather
-				["action"] = "ADD",
-				["spellID"] = 121536,
-				["value"] = {10, 3},
-			},
 			[19769] = { -- Mind Bender
 				["action"] = "REPLACE",
 				["spellID"] = 123040,
@@ -2491,7 +1596,7 @@ ArenaLiveSpectator.SpellDB = {
 			[19768] = { -- Psychic Scream
 				["action"] = "ADD",
 				["spellID"] = 8122,
-				["value"] = 30,				-- With PvP-Glove Bonus
+				["value"] = 42,				-- With PvP-Glove Bonus
 			},								
 			[19765] = { -- Power Infusion
 				["action"] = "ADD",
@@ -2586,7 +1691,7 @@ ArenaLiveSpectator.SpellDB = {
 				["action"] = "ADD",
 				["spellID"] = 108285,
 				["value"] = 180,
-			},	
+			},
 			[19276] = { -- Totemic Projection
 				["action"] = "ADD",
 				["spellID"] = 108287,
@@ -2601,11 +1706,6 @@ ArenaLiveSpectator.SpellDB = {
 				["action"] = "ADD",
 				["spellID"] = 16188,
 				["value"] = 90,
-			},
-			[19273] = { -- Echo of the Elements
-				["action"] = "MODIFY_CHARGES",
-				["spellID"] = {61295, 98008},
-				["value"] = 1,
 			},
 			[19269] = { -- Ancestral Guidance
 				["action"] = "ADD",
@@ -2707,7 +1807,7 @@ ArenaLiveSpectator.SpellDB = {
 		},
 		["WARRIOR"] = {
 			[15775] = { -- Juggernaut
-				["action"] = "MODIFY_COOLDOWN",
+				["action"] = "MODIFY",
 				["spellID"] = 100,
 				["value"] = -8,
 			},
@@ -2754,7 +1854,7 @@ ArenaLiveSpectator.SpellDB = {
 			[19138] = { -- Avatar
 				["action"] = "ADD",
 				["spellID"] = 107574,
-				["value"] = 90,
+				["value"] = 180,
 			},   
 			[19139] = { -- Bloodbath
 				["action"] = "ADD",
@@ -2780,7 +1880,7 @@ ArenaLiveSpectator.SpellDB = {
 	},
 	["CooldownGlyphInfo"] = {
 		["DEATHKNIGHT"] = {
-			[63331] = { -- Glyph of Dark Simulacrum
+			[62210] = { -- Glyph of Dark Simulacrum
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 77606,
 				["value"] = -30,
@@ -2796,8 +1896,9 @@ ArenaLiveSpectator.SpellDB = {
 				["value"] = -1,
 			},
 			[59332] = { -- Glyph of Outbreak
-				["action"] = "REMOVE",
+				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 77575,
+				["value"] = function(baseValue) return 0; end,
 			},
 			[159428] = { -- Glyph of Rune Tap
 				["action"] = "MODIFY_COOLDOWN",
@@ -2806,11 +1907,6 @@ ArenaLiveSpectator.SpellDB = {
 			},
 		},		
 		["DRUID"] = {
-			[171924] = { -- Glyph of Nature's Cure
-				["action"] = {"MODIFY_COOLDOWN", "MODIFY_CHARGES"},
-				["spellID"] = {88423, 88423},
-				["value"] = {4, 1},
-			},
 			[116216] = { -- Glyph of Skull Bash
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 106839,
@@ -2829,8 +1925,9 @@ ArenaLiveSpectator.SpellDB = {
 		},
 		["HUNTER"] = {
 			[119384] = { -- Glyph of Tranquilizing Shot (it adds a 10 sec cooldown to a spell normally not having a CD. That's why I use "ADD" here)
-				["action"] = "REMOVE",
-				["spellID"] = 19801,
+				["action"] = "ADD",
+				["spellID"] = 1850,
+				["value"] = 19801,
 			},
 		},
 		["MAGE"] = {
@@ -2856,15 +1953,11 @@ ArenaLiveSpectator.SpellDB = {
 			},
 		},
 		["MONK"] = {
-			[123763] = { -- Glyph of Mana Tea
-				["action"] = "ADD",
+			[123761] = { -- Glyph of Mana Tea
+				["action"] = "REPLACE",
 				["spellID"] = 123761,
+				["replace"] = 115294,
 				["value"] = 10,
-			},
-			[171926] = { -- Glyph of Detoxing
-				["action"] = {"MODIFY_COOLDOWN", "MODIFY_CHARGES"},
-				["spellID"] = {115450, 115450},
-				["value"] = {4, 1},
 			},
 			[123391] = { -- Glyph of Touch of Death
 				["action"] = "MODIFY_COOLDOWN",
@@ -2883,11 +1976,6 @@ ArenaLiveSpectator.SpellDB = {
 				["spellID"] = 31821,
 				["value"] = -60,
 			},
-			[171929] = { -- Glyph of Cleanse
-				["action"] = {"MODIFY_COOLDOWN", "MODIFY_CHARGES"},
-				["spellID"] = {4987, 4987},
-				["value"] = {4, 1},
-			},
 			[162604] = { -- Glyph of Merciful Wrath
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 31842,
@@ -2900,16 +1988,10 @@ ArenaLiveSpectator.SpellDB = {
 				["spellID"] = 6346,
 				["value"] = -60,
 			},
-			[171921] = { -- Glyph of Purification
-				["action"] = {"MODIFY_COOLDOWN", "MODIFY_CHARGES"},
-				["spellID"] = {527, 527},
-				["value"] = {4, 1},
-			},
 			[159628] = { -- Glyph of Shadow Magic
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 586,
 				["value"] = 60,
-				["newPriority"] = 23,
 			},
 			[63229] = { -- Glyph of Dispersion
 				["action"] = "MODIFY_COOLDOWN",
@@ -2965,11 +2047,6 @@ ArenaLiveSpectator.SpellDB = {
 				["action"] = "ADD",
 				["spellID"] = 370,
 				["value"] = 6,
-			},
-			[171933] = { -- Glyph of Purify Spirit
-				["action"] = {"MODIFY_COOLDOWN", "MODIFY_CHARGES"},
-				["spellID"] = {77130, 77130},
-				["value"] = {4, 1},
 			},
 			[63273] = { -- Glyph of Riptide
 				["action"] = "MODIFY_COOLDOWN",
@@ -3034,8 +2111,9 @@ ArenaLiveSpectator.SpellDB = {
 				["value"] = 35,
 			},
 			[148683] = { -- Glyph of Eternal Resolve
-				["action"] = "REMOVE",
-				["spellID"] = 104773,
+				["action"] = "MODIFY_COOLDOWN",
+				["spellID"] = 148688,
+				["value"] = function(baseValue) return 0; end,
 			},
 			[63309] = { -- Glyph of Demonic Circle
 				["action"] = "MODIFY_COOLDOWN",
@@ -3044,12 +2122,12 @@ ArenaLiveSpectator.SpellDB = {
 			},
 		},
 		["WARRIOR"] = {
-			[63325] = { -- Glyph of Death from Above (Heroic Leap)
+			[63325] = { -- Glyph of Death From Above
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 6544,
 				["value"] = -15,
 			},
-			[58356] = { -- Glyph of Resonating Power
+			[63325] = { -- Glyph of Resonating Power
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 6343,
 				["value"] = function(baseValue) return baseValue * 1.5; end,
@@ -3067,18 +2145,9 @@ ArenaLiveSpectator.SpellDB = {
 		},
 	},
 };
-function ArenaLiveSpectator:GetCooldownPriority (spellID, class, specID)
-	
-	if ( ArenaLiveSpectator.SpellDB.CooldownPriorities[spellID] ) then
-		return ArenaLiveSpectator.SpellDB.CooldownPriorities[spellID];
-	elseif ( not class or not specID or not spellID ) then
-		ArenaLive:Message(L["%s: Usage %s"], "error", "ArenaLiveSpectator:GetCooldownPriority()", "ArenaLiveSpectator:GetCooldownPriority(class, specID, spellID)");
-	else
-		return ArenaLiveSpectator.SpellDB.CooldownPriorities[class][specID][spellID];
-	end
-end
 
-function ArenaLiveSpectator:GetCooldownInfo (class, infoType, id)
+
+function ArenaLiveSpectator:GetCooldownInfo(class, infoType, id)
 
 	local tableMod;
 	if ( infoType == "glyph" ) then
@@ -3090,7 +2159,7 @@ function ArenaLiveSpectator:GetCooldownInfo (class, infoType, id)
 	end
 
 	if ( ArenaLiveSpectator.SpellDB[tableMod][class] and ArenaLiveSpectator.SpellDB[tableMod][class][id] ) then
-		return ArenaLiveSpectator.SpellDB[tableMod][class][id].action, ArenaLiveSpectator.SpellDB[tableMod][class][id].spellID, ArenaLiveSpectator.SpellDB[tableMod][class][id].value, ArenaLiveSpectator.SpellDB[tableMod][class][id].replace, ArenaLiveSpectator.SpellDB[tableMod][class][id].newPriority;
+		return ArenaLiveSpectator.SpellDB[tableMod][class][id]["action"], ArenaLiveSpectator.SpellDB[tableMod][class][id]["spellID"], ArenaLiveSpectator.SpellDB[tableMod][class][id]["value"], ArenaLiveSpectator.SpellDB[tableMod][class][id]["replace"];
 	else
 		return nil;
 	end

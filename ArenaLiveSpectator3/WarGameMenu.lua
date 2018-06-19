@@ -1,62 +1,10 @@
---[[
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
-
 local addonName, L = ...;
 
 local WARGAME_MENU_PLAYER_BUTTON_HEIGHT = 32;
 local panels = {
 	{ name="ArenaLiveSpectatorWarGameMenuWarGames", tabTitle = L["Spectated War Games"] },
 	{ name="ArenaLiveSpectatorWarGameMenuSettings", tabTitle = L["Settings"], },
-	{ name="ArenaLiveSpectatorWarGameMenuNicknameDatabase", tabTitle = L["Nickname Database"], },
 };
-
-local function updateMapDropDown (playModeDD, newValue, oldValue)
-	local database = ArenaLive:GetDBComponent(addonName);
-	if ( not newValue ) then
-		newValue = database.PlayMode;
-	end
-	
-	local mapDD = _G["ArenaLiveSpectatorWarGameMenuWarGamesMapDropDown"];
-	for i = 1, 20 do
-		if ( ( newValue > 0 and i < 8 ) or ( newValue == 0 and i > 7 ) ) then
-			mapDD.ignoreKey[i] = nil;
-		else
-			if ( database.Map == mapDD.info[i].value ) then
-				database.Map = nil;
-			end
-			mapDD.ignoreKey[i] = true;
-		end
-	end
-			
-	mapDD:Refresh();
-	mapDD:UpdateShownValue();
-			
-	if ( newValue > 0 ) then
-		ArenaLiveSpectator:SetNumPlayers(newValue);
-	end
-end
 
 local availablePlayerInfo = { count = 0 };
 local CURRENT_CURSOR_SELECT;
@@ -72,88 +20,36 @@ local OPTION_ITEMS_SETTINGS = {
 		["relativePoint"] = "TOPRIGHT",
 		["xOffset"] = 5,
 		["yOffset"] = 0,
-		["title"] = L["Map:"],
-		["tooltip"] = L["Choose the map the war game will take place on."],
+		["title"] = L["Arena:"],
+		["tooltip"] = L["Choose the arena the war game will take place on."],
 		["emptyText"] = L["All Arenas"],
 		["infoTable"] = {
 			[1] = {
 				["text"] = L["Blade's Edge Arena"],
-				["value"] = L["Blade's Edge Arena"],
+				["value"] = "bladesedge",
 			},
 			[2] = {
 				["text"] = L["Dalaran Sewers"],
-				["value"] = L["Dalaran Sewers"],
+				["value"] = "dalaran",
 			},
 			[3] = {
 				["text"] = L["Nagrand Arena"],
-				["value"] = L["Nagrand Arena"],
+				["value"] = "nagrand",
 			},
 			[4] = {
 				["text"] = L["Ruins of Lordaeron"],
-				["value"] = L["Ruins of Lordaeron"],
+				["value"] = "lordaeron",
 			},
 			[5] = {
 				["text"] = L["The Tiger's Peak"],
-				["value"] = L["The Tiger's Peak"],
+				["value"] = "tigerspeak",
 			},
 			[6] = {
 				["text"] = L["Tol'Viron Arena"],
-				["value"] = L["Tol'Viron Arena"],
+				["value"] = "tolviron",
 			},
 			[7] = {
 				["text"] = L["All Arenas"],
-				["value"] = nil,
-			},
-			[8] = {
-				["text"] = L["Alterac Valley"],
-				["value"] = L["Alterac Valley"],
-			},
-			[9] = {
-				["text"] = L["Warsong Gulch"],
-				["value"] = L["Warsong Gulch"],
-			},
-			[10] = {
-				["text"] = L["Twin Peaks"],
-				["value"] = L["Twin Peaks"],
-			},
-			[11] = {
-				["text"] = L["The Battle for Gilneas"],
-				["value"] = L["The Battle for Gilneas"],
-			},
-			[12] = {
-				["text"] = L["Temple of Kotmogu"],
-				["value"] = L["Temple of Kotmogu"],
-			},
-			[13] = {
-				["text"] = L["Silvershard Mines"],
-				["value"] = L["Silvershard Mines"],
-			},
-			[14] = {
-				["text"] = L["Arathi Basin"],
-				["value"] = L["Arathi Basin"],
-			},
-			[15] = {
-				["text"] = L["Eye of the Storm"],
-				["value"] = "rated",
-			},
-			[16] = {
-				["text"] = L["Strand of the Ancients"],
-				["value"] = L["Strand of the Ancients"],
-			},
-			[17] = {
-				["text"] = L["Isle of Conquest"],
-				["value"] = L["Isle of Conquest"],
-			},
-			[18] = {
-				["text"] = L["Deepwind Gorge"],
-				["value"] = L["Deepwind Gorge"],
-			},
-			[19] = {
-				["text"] = L["Southshore vs Tarren Mill"],
-				["value"] = L["Southshore vs Tarren Mill"],
-			},
-			[20] = {
-				["text"] = L["Random Battleground"],
 				["value"] = nil,
 			},
 		},
@@ -164,35 +60,31 @@ local OPTION_ITEMS_SETTINGS = {
 		["type"] = "DropDownLargeTitle",
 		["name"] = "ArenaLiveSpectatorWarGameMenuWarGamesPlayModeDropDown",
 		["parent"] = "ArenaLiveSpectatorWarGameMenuWarGames",
-		["width"] = 100,
+		["width"] = 50,
 		["point"] = "TOPLEFT",
 		["relativeTo"] = "ArenaLiveSpectatorWarGameMenuWarGames",
 		["relativePoint"] = "TOPLEFT",
-		["xOffset"] = 243,
+		["xOffset"] = 75,
 		["yOffset"] = 0,
 		["title"] = L["Bracket:"],
 		["tooltip"] = L["Choose the number of players per team."],
 		["infoTable"] = {
 			[1] = {
-				["text"] = L["Battleground"],
-				["value"] = 0,
-			},
-			[2] = {
 				["text"] = L["2v2"],
 				["value"] = 2,
 			},
-			[3] = {
+			[2] = {
 				["text"] = L["3v3"],
 				["value"] = 3,
 			},
-			[4] = {
+			[3] = {
 				["text"] = L["5v5"],
 				["value"] = 5,
 			},
 		},
 		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon); return database.PlayMode; end,
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon); database.PlayMode = newValue; end,
-		["postUpdate"] = updateMapDropDown,
+		["postUpdate"] = function (frame, newValue, oldValues) ArenaLiveSpectator:SetNumPlayers(newValue); end
 	},
 	["TournamentRules"] = {
 		["type"] = "CheckButton",
@@ -201,7 +93,7 @@ local OPTION_ITEMS_SETTINGS = {
 		["point"] = "BOTTOMLEFT",
 		["relativeTo"] = "ArenaLiveSpectatorWarGameMenuWarGames",
 		["relativePoint"] = "BOTTOMLEFT",
-		["xOffset"] = 180,
+		["xOffset"] = 12,
 		["yOffset"] = 2,
 		["title"] = L["Tournament Rules"],
 		["tooltip"] = L["If checked, participants will only be allowed to use Tournament Gear. Other equipment will be disabled."],
@@ -217,20 +109,14 @@ local OPTION_ITEMS_SETTINGS = {
 		["point"] = "TOPLEFT",
 		["relativeTo"] = "ArenaLiveSpectatorWarGameMenuWarGames",
 		["relativePoint"] = "TOPLEFT",
-		["xOffset"] = 198,
+		["xOffset"] = 28,
 		["yOffset"] = -50,
 		["maxLetters"] = 19,
 		["title"] = L["Team Name:"],
 		["tooltip"] = L["Enter the name of the team. The name will be shown on the scoreboard and on the match statistic."],
 		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); return database.Name; end,
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); database.Name = newValue; end,
-		["postUpdate"] = function (frame, newValue, oldValue)
-			ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamA");
-		
-			if ( IsAddOnLoaded("BGLive") ) then
-				BGLiveScoreBoard:UpdateTeamName("TeamA");
-			end		
-		end,
+		["postUpdate"] = function (frame, newValue, oldValue) ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamA");  end
 	},
 	["RightTeamName"] = {
 		["type"] = "EditBox",
@@ -248,13 +134,7 @@ local OPTION_ITEMS_SETTINGS = {
 		["tooltip"] = L["Enter the name of the team. The name will be shown on the scoreboard and on the match statistic."],
 		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); return database.Name; end,
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); database.Name = newValue; end,
-		["postUpdate"] = function (frame, newValue, oldValue)
-			ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamB");
-
-			if ( IsAddOnLoaded("BGLive") ) then
-				BGLiveScoreBoard:UpdateTeamName("TeamB");
-			end			
-		end,
+		["postUpdate"] = function (frame, newValue, oldValue) ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamB");  end
 	},
 	["LeftTeamScore"] = {
 		["type"] = "EditBox",
@@ -273,13 +153,7 @@ local OPTION_ITEMS_SETTINGS = {
 		["tooltip"] = L["Enter the score of the team. It will be shown on the scoreboard."],
 		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); return database.Score; end,
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); database.Score = newValue; end,
-		["postUpdate"] = function (frame, newValue, oldValue)
-			ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
-			
-			if ( IsAddOnLoaded("BGLive") ) then
-				BGLiveScoreBoard:UpdateTeamScore("TeamA");
-			end
-		end,
+		["postUpdate"] = function (frame, newValue, oldValue) ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");  end
 	},
 	["RightTeamScore"] = {
 		["type"] = "EditBox",
@@ -298,13 +172,7 @@ local OPTION_ITEMS_SETTINGS = {
 		["tooltip"] = L["Enter the score of the team. It will be shown on the scoreboard."],
 		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); return database.Score; end,
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); database.Score = newValue; end,
-		["postUpdate"] = function (frame, newValue, oldValue)
-			ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
-			
-			if ( IsAddOnLoaded("BGLive") ) then
-				BGLiveScoreBoard:UpdateTeamScore("TeamB");
-			end
-		end,
+		["postUpdate"] = function (frame, newValue, oldValue) ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");  end
 	},
 	["Broadcast"] = {
 		["type"] = "CheckButton",
@@ -339,48 +207,16 @@ local OPTION_ITEMS_SETTINGS = {
 		["type"] = "CheckButton",
 		["name"] = "ArenaLiveSpectatorWarGameMenuSettingsFollowTargetCheckButton",
 		["parent"] = "ArenaLiveSpectatorWarGameMenuSettings",
-		["point"] = "TOPLEFT",
-		["relativeTo"] = "ArenaLiveSpectatorWarGameMenuSettingsBroadcastCheckButton",
-		["relativePoint"] = "BOTTOMLEFT",
-		["xOffset"] = 0,
-		["yOffset"] = -5,
-		["title"] = L["Follow Target"],
-		["tooltip"] = L["If checked, ArenaLive will fixate the camera on your current target."],
-		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon); return database.FollowTarget; end,
-		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon); database.FollowTarget = newValue; end,
-		["postUpdate"] = function (frame, newValue, oldValue) if ( newValue ) then C_Commentator.FollowUnit("target"); else C_Commentator.FollowUnit(); end end,
-	},
-	["UseBlizzSmartCam"] = {
-		["type"] = "CheckButton",
-		["name"] = "ArenaLiveSpectatorWarGameMenuSettingsUseBlizzSmartCamCheckButton",
-		["parent"] = "ArenaLiveSpectatorWarGameMenuSettings",
 		["point"] = "LEFT",
-		["relativeTo"] = "ArenaLiveSpectatorWarGameMenuSettingsFollowTargetCheckButtonText",
+		["relativeTo"] = "ArenaLiveSpectatorWarGameMenuSettingsShowScoreBoardCheckButtonText",
 		["relativePoint"] = "RIGHT",
 		["xOffset"] = 10,
 		["yOffset"] = -2,
-		["title"] = L["Smart Camera"],
-		["tooltip"] = L["Toggles Blizzard's smart camera feature, which allows smoother camera control via keyboard. Turn this off if you want to use the regular third person view."],
-		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon); return database.UseBlizzSmartCam; end,
-		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon); database.UseBlizzSmartCam = newValue; end,
-		["postUpdate"] = function (frame, newValue, oldValue) C_Commentator.SetUseSmartCamera(newValue); C_Commentator.SetSmartCameraLocked(newValue); end,
-	},
-	["TournamentIcon"] = {
-		["type"] = "EditBox",
-		["name"] = "ArenaLiveSpectatorWarGameMenuSettingsTournamentIconEditBox",
-		["parent"] = "ArenaLiveSpectatorWarGameMenuSettings",
-		["width"] = 150,
-		["height"] = 24,
-		["point"] = "TOPLEFT",
-		["relativeTo"] = "ArenaLiveSpectatorWarGameMenuSettingsFollowTargetCheckButton",
-		["relativePoint"] = "BOTTOMLEFT",
-		["xOffset"] = 3,
-		["yOffset"] = -15,
-		["title"] = L["SET_CUSTOM_TOURNAMENT_ICON_TITLE"],
-		["tooltip"] = L["SET_CUSTOM_TOURNAMENT_ICON_TOOLTIP"],
-		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, frame.handler, frame.group); return database.TournamentIcon; end,
-		["SetDBValue"] = function (frame, newValue) if ( newValue == "" ) then newValue = nil; end local database = ArenaLive:GetDBComponent(frame.addon, frame.handler, frame.group); database.TournamentIcon = newValue; end,
-		["postUpdate"] = function (frame, newValue, oldValue) ArenaLiveSpectatorScoreBoardDampeningIndicator:UpdateTournamentIcon(); end,
+		["title"] = L["Follow Target"],
+		["tooltip"] = L["If checked, ArenaLive will fixate the camera on your current target. Note: When following a player, nameplates are disabled by the WoW client."],
+		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon); return database.FollowTarget; end,
+		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon); database.FollowTarget = newValue; end,
+		["postUpdate"] = function (frame, newValue, oldValue) if ( newValue ) then CommentatorFollowUnit("target"); else CommentatorFollowUnit(); end end,
 	},
 	["DisableTargetFrames"] = {
 		["type"] = "CheckButton",
@@ -470,15 +306,13 @@ function ArenaLiveSpectatorWarGameMenu:Initialise()
 	self.portrait:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\WarGameMenuPortrait");
 	
 	-- Setup drop down menus:
-	local frame = ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["Map"], addonName);
-	frame.ignoreKey = {};
-	frame = ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["PlayMode"], addonName);
-	updateMapDropDown(frame);
+	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["Map"], addonName);
+	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["PlayMode"], addonName);
 	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["TournamentRules"], addonName);
 	
 	-- Setup player (friend) list:
-	self.warGames.playerScrollFrame.scrollBar.doNotHide = true;
-	HybridScrollFrame_CreateButtons(self.warGames.playerScrollFrame, "ArenaLiveSpectatorWarGamePlayerButtonTemplate", 0, -2);
+	self.playerScrollFrame.scrollBar.doNotHide = true;
+	HybridScrollFrame_CreateButtons(self.playerScrollFrame, "ArenaLiveSpectatorWarGamePlayerButtonTemplate", 0, -2);
 	
 	-- Setup Team Name Editboxes:
 	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["LeftTeamName"], addonName, nil, "TeamA");
@@ -525,12 +359,7 @@ function ArenaLiveSpectatorWarGameMenu:Initialise()
 	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["ShowScoreBoard"], addonName);
 	ArenaLiveSpectatorWarGameMenuSettingsShowScoreBoardCheckButtonText:SetTextColor(1,1,1);
 	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["FollowTarget"], addonName);
-	ArenaLiveSpectatorWarGameMenuSettingsFollowTargetCheckButtonText:SetTextColor(1,1,1);
-	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["UseBlizzSmartCam"], addonName);
-	ArenaLiveSpectatorWarGameMenuSettingsUseBlizzSmartCamCheckButtonText:SetTextColor(1,1,1);	
-	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["TournamentIcon"], addonName);
-	
-	
+	ArenaLiveSpectatorWarGameMenuSettingsFollowTargetCheckButtonText:SetTextColor(1,1,1);	
 	
 	-- Setup Target Frames' Option Frames:
 	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["DisableTargetFrames"], addonName);
@@ -540,7 +369,7 @@ function ArenaLiveSpectatorWarGameMenu:Initialise()
 	ArenaLive:ConstructOptionFrameByHandler(OPTION_ITEMS_SETTINGS["EnableTargetFrameCastHistory"], addonName, "CastHistory", "Enable", "TargetFrame");
 	ArenaLiveSpectatorWarGameMenuSettingsEnableTargetFrameCastHistoryCheckButtonText:SetTextColor(1,1,1);	
 	
-	-- Setup Side Frames' Option Frames:
+	-- Setup Side Frames'  Option Frames:
 	ArenaLive:ConstructOptionFrameByHandler(OPTION_ITEMS_SETTINGS["EnableSideFrameCastBar"], addonName, "CastBar", "Enable", "TargetFrame");
 	ArenaLiveSpectatorWarGameMenuSettingsEnableSideFrameCastBarCheckButtonText:SetTextColor(1,1,1);
 	ArenaLive:ConstructOptionFrameByHandler(OPTION_ITEMS_SETTINGS["EnableSideFrameCastHistory"], addonName, "CastHistory", "Enable", "TargetFrame");
@@ -549,6 +378,11 @@ function ArenaLiveSpectatorWarGameMenu:Initialise()
 	-- Setup Cooldown Tracker Option Frames:
 	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["ShowCDTrackerTooltip"], addonName, "CooldownTracker", "Left");
 	ArenaLiveSpectatorWarGameMenuSettingsShowCDTrackerTooltipCheckButtonText:SetTextColor(1,1,1);
+	-- Setup Nickname Option Frames:
+	ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:Initialise();
+	ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:Initialise();
+	ArenaLiveSpectatorWarGameMenu:InitialiseButton(self.settings.resetNicknameButton, L["Reset Nickname"]);
+	ArenaLiveSpectatorWarGameMenu:InitialiseButton(self.settings.clearNicknameDBButton, L["Clear Database"]);
 	
 	-- Setup tabs:
 	PanelTemplates_SetNumTabs(self, #panels);
@@ -616,14 +450,17 @@ function ArenaLiveSpectatorWarGameMenu:UpdateNumPlayers()
 	local numPlayers = 0;
 
 	for i = 1, totalFriends do
-		local presenceID, presenceName, battleTag, _, _, gameAccountID, client, isOnline = BNGetFriendInfo(i);
+		local presenceID, presenceName, battleTag, _, _, toonID, client, isOnline = BNGetFriendInfo(i);
 		local clientTexture = BNet_GetClientTexture(client);
 		if ( battleTag ) then
 			local name, realm, infoText;
-			if ( gameAccountID ) then
-				_, name, _, realm = BNGetGameAccountInfo(gameAccountID);
+			if ( toonID ) then
+				_, name, _, realm = BNGetToonInfo(toonID);
 				if ( client == BNET_CLIENT_WOW ) then
 					infoText = name.."-"..realm;
+					
+					-- Update Nickname database if necessary:
+					
 				else
 					infoText = name;
 				end
@@ -642,7 +479,7 @@ function ArenaLiveSpectatorWarGameMenu:UpdateNumPlayers()
 			availablePlayerInfo[numPlayers].name = presenceName;
 			availablePlayerInfo[numPlayers].battleTag = battleTag;
 			availablePlayerInfo[numPlayers].infoText = infoText;
-			availablePlayerInfo[numPlayers].gameAccountID = gameAccountID;
+			availablePlayerInfo[numPlayers].toonID = toonID;
 			availablePlayerInfo[numPlayers].client = client;
 			availablePlayerInfo[numPlayers].clientTexture = clientTexture;
 			availablePlayerInfo[numPlayers].isOnline = isOnline;	
@@ -651,7 +488,7 @@ function ArenaLiveSpectatorWarGameMenu:UpdateNumPlayers()
 	end
 	
 	availablePlayerInfo.count = numPlayers;
-	self.warGames.playerScrollFrame:update();
+	self.playerScrollFrame:update();
 end
 
 function ArenaLiveSpectatorWarGameMenu:GetPlayerDataByBattleTag(battleTag)
@@ -661,7 +498,7 @@ function ArenaLiveSpectatorWarGameMenu:GetPlayerDataByBattleTag(battleTag)
 				availablePlayerInfo[id].name,
 				availablePlayerInfo[id].battleTag, 
 				availablePlayerInfo[id].infoText,
-				availablePlayerInfo[id].gameAccountID,
+				availablePlayerInfo[id].toonID,
 				availablePlayerInfo[id].client,
 				availablePlayerInfo[id].clientTexture,
 				availablePlayerInfo[id].isOnline;
@@ -676,7 +513,7 @@ function ArenaLiveSpectatorWarGameMenu:GetPlayerDataByID(id)
 				availablePlayerInfo[id].name,
 				availablePlayerInfo[id].battleTag, 
 				availablePlayerInfo[id].infoText,
-				availablePlayerInfo[id].gameAccountID,
+				availablePlayerInfo[id].toonID,
 				availablePlayerInfo[id].client,
 				availablePlayerInfo[id].clientTexture,
 				availablePlayerInfo[id].isOnline;
@@ -723,13 +560,17 @@ function ArenaLiveSpectatorWarGameMenu:ShowTab(tabName)
 			local height = panel:GetHeight();
 			height = height + 70;
 			self:SetHeight(height);
+			height = height - 77;
+			self.playerFrameInset:SetHeight(height);
+			height = height - 7;
+			self.playerScrollFrame:SetHeight(height);
 		elseif ( panel ) then
 			panel:Hide();
 		end
 	end
 	
 	-- Update player scroll frame to show info text depending on open tab:
-	self.warGames.playerScrollFrame:update();
+	self.playerScrollFrame:update();
 end
 
 function ArenaLiveSpectatorWarGameMenu.TabOnClick(tab)
@@ -750,7 +591,16 @@ function ArenaLiveSpectatorWarGamePlayerCursorButton:SetPlayer(battleTag)
 		self.name:SetText(presenceName);
 		self.gameIcon:SetTexture(clientTexture);
 
-		if ( client ~= BNET_CLIENT_WOW and isOnline ) then
+		-- Show nicknames instead of info text, if nickname database active:
+		if ( ArenaLiveSpectatorWarGameMenu.activeTabIndex == 2 ) then
+			local database = ArenaLive:GetDBComponent(addonName);
+					
+			if ( battleTag and database.NicknameDatabase[battleTag] ) then
+				infoText = database.NicknameDatabase[battleTag];
+			else
+				infoText = L["No Nickname Assigned"];
+			end
+		elseif ( client ~= BNET_CLIENT_WOW and isOnline ) then
 			self.info:SetText(L["Not logged into WoW"]);
 		end
 		
@@ -786,7 +636,7 @@ end
 --[[
 		PLAYER SCROLL FRAME
 ]]--
-function ArenaLiveSpectatorWarGameMenuWarGamesPlayerScrollFrame:update()
+function ArenaLiveSpectatorWarGameMenuPlayerScrollFrame:update()
 	if ( ArenaLiveSpectatorWarGameMenu:IsShown() ) then
 		local buttons = self.buttons;
 		local offset = HybridScrollFrame_GetOffset(self);
@@ -798,9 +648,21 @@ function ArenaLiveSpectatorWarGameMenuWarGamesPlayerScrollFrame:update()
 			button = buttons[i];
 			index = offset + i;
 			if ( index <= numPlayers ) then
-				local presenceID, presenceName, battleTag, infoText, gameAccountID, client, clientTexture, isOnline = ArenaLiveSpectatorWarGameMenu:GetPlayerDataByID(index);
+				local presenceID, presenceName, battleTag, infoText, toonID, client, clientTexture, isOnline = ArenaLiveSpectatorWarGameMenu:GetPlayerDataByID(index);
 				button.battleTag = battleTag;
 				button.name:SetText(presenceName);
+				
+				-- Show nicknames instead of info text, if nickname database active:
+				if ( ArenaLiveSpectatorWarGameMenu.activeTabIndex == 2 ) then
+					local database = ArenaLive:GetDBComponent(addonName);
+					
+					if ( battleTag and database.NicknameDatabase[battleTag] ) then
+						infoText = database.NicknameDatabase[battleTag];
+					else
+						infoText = L["No Nickname Assigned"];
+					end
+				end
+				
 				button.info:SetText(infoText);
 				button.gameIcon:SetTexture(clientTexture);
 				if ( isOnline ) then
@@ -866,7 +728,7 @@ function ArenaLiveSpectatorWarGameMenu:UpdateTeamLeaderButton(button)
 		button.background:SetTexture(1, 0, 0, 0.05);
 	else
 
-		local presenceID, presenceName, battleTag, infoText, gameAccountID, client, clientTexture, isOnline = ArenaLiveSpectatorWarGameMenu:GetPlayerDataByBattleTag(leader);
+		local presenceID, presenceName, battleTag, infoText, _, client, clientTexture, isOnline = ArenaLiveSpectatorWarGameMenu:GetPlayerDataByBattleTag(leader);
 		if ( presenceID ) then
 			button.name:SetText(presenceName);
 			button.icon:SetTexture(clientTexture);
@@ -874,11 +736,10 @@ function ArenaLiveSpectatorWarGameMenu:UpdateTeamLeaderButton(button)
 			
 			if ( client == BNET_CLIENT_WOW ) then
 				button.presenceID = presenceID;
-                button.gameAccountID = gameAccountID;
 				button.background:SetTexture(0, 1, 0, 0.05);
 				button.name:SetTextColor(0, 1, 0, 1);
 			else
-				button.gameAccountID = nil;
+				button.presenceID = nil;
 				button.background:SetTexture(1, 0, 0, 0.05);
 				button.name:SetTextColor(1, 0, 0, 1);
 				
@@ -917,24 +778,129 @@ end
 function ArenaLiveSpectatorWarGameMenuWarGamesStartButton:OnClick(button, down)
 	local database = ArenaLive:GetDBComponent(addonName);
 	local leader1, leader2, bracket, map, tournamentRules;
+	
+	-- Broadcast team data to raid, if broadcasting is enabled:
+	if ( UnitIsGroupLeader("player") and database.Broadcast ) then
+		local leftTeamName, leftTeamScore, rightTeamName, rightTeamScore = database.TeamA.Name, tostring(database.TeamA.Score), database.TeamB.Name, tostring(database.TeamB.Score);
+		local msg = leftTeamName..";"..leftTeamScore..";"..rightTeamName..";"..rightTeamScore;
+		ArenaLive:Message(L["Sending team data to raid..."], "debug");
+		SendAddonMessage("ALSPEC", msg, "RAID");
+	end
+	
 	leader1 = ArenaLiveSpectatorWarGameMenuWarGamesLeftLeaderButton.presenceID;
 	leader2 = ArenaLiveSpectatorWarGameMenuWarGamesRightLeaderButton.presenceID;
 	bracket = database.PlayMode;
 	map = database.Map;
 	tournamentRules = ValueToBoolean(database.TournamentRules);
-	
-	if ( leader1 and leader2 and bracket ) then
-		ArenaLive:Message("Calling StartSpectatorWarGame(): leader1 = %s, leader2 = %s, bracket = %d, map = %s, tournamentRules = %s", "debug", tostring(leader1), tostring(leader2), bracket, tostring(map), tostring(tournamentRules));
-		StartSpectatorWarGame(leader1, leader2, bracket, map, tournamentRules);
-			
-		-- Broadcast team data to raid, if broadcasting is enabled:
-		if ( database.Broadcast and UnitIsGroupLeader("player") ) then
-			local leftTeamName, leftTeamScore, rightTeamName, rightTeamScore = database.TeamA.Name, tostring(database.TeamA.Score), database.TeamB.Name, tostring(database.TeamB.Score);
-			local msg = "TEAM_UPDATE;"..leftTeamName..";"..leftTeamScore..";"..rightTeamName..";"..rightTeamScore..";"..bracket;
-			ArenaLive:Message("Sending team data to raid...", "debug");
-			SendAddonMessage("ALSPEC", msg, "RAID");
-		end
-	else
-		ArenaLive:Message(L["Unable to queue spectated wargame, because either team leader's or bracket number wasn't found."]);
+	StartSpectatorWarGame(leader1, leader2, bracket, map, tournamentRules);
+end
+
+
+
+--[[
+		NICKNAME DATABASE FUNCTIONS
+]]--
+function ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:OnDragStart()
+	if ( self.player ) then
+		ArenaLiveSpectatorWarGamePlayerCursorButton:SetPlayer(self.player);
+		self.player = nil;
+		self:Update();
 	end
+end
+
+function ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:OnClick(button, down)	
+	if ( CURRENT_CURSOR_SELECT ) then
+		self.player = CURRENT_CURSOR_SELECT;
+		ArenaLiveSpectatorWarGamePlayerCursorButton:Reset();
+		self:Update();
+	end
+end
+
+function ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:Initialise()
+	self.title:SetText(L["Current Player:"]);
+	self:RegisterForDrag("LeftButton");
+	self:RegisterForClicks("LeftButtonUp");
+	self:SetScript("OnClick", self.OnClick);
+	self:SetScript("OnReceiveDrag", self.OnClick);
+	self:SetScript("OnDragStart", self.OnDragStart);
+	
+	self:Update();
+end
+
+function ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:Update()
+	local database = ArenaLive:GetDBComponent(addonName);
+	local player = self.player;
+	local menu = ArenaLiveSpectatorWarGameMenu.settings;
+	if ( not player ) then
+		-- No player chosen:
+		self.name:SetText(L["Choose a Player"]);
+		self.name:SetTextColor(1, 0, 0, 1);
+		self.info:SetText(L["Drag from the player list"]);
+		self.icon:SetTexture();
+		self.background:SetTexture(1, 0, 0, 0.05);
+		
+		ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetText("");
+		menu.resetNicknameButton:Disable();
+		menu.nicknameEditBox:Hide();
+	else
+		local presenceID, presenceName, _, _, _, _, clientTexture = ArenaLiveSpectatorWarGameMenu:GetPlayerDataByBattleTag(player);
+	
+		self.name:SetTextColor(0, 1, 0, 1);
+		self.background:SetTexture(0, 1, 0, 0.05);
+		self.name:SetText(presenceName);
+		self.icon:SetTexture(clientTexture);
+		
+		if ( database.NicknameDatabase[player] ) then
+			self.info:SetText(database.NicknameDatabase[player]);
+			ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetText(database.NicknameDatabase[player]);
+			menu.resetNicknameButton:Enable();
+			
+		else
+			self.info:SetText(L["No Nickname Assigned"]);
+			ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetText("");
+			menu.resetNicknameButton:Disable();
+		end
+		
+		menu.nicknameEditBox:Show();
+	end
+	
+	ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetCursorPosition(0);
+end
+
+function ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:Initialise()
+	self.title:SetText(L["Player Nickname:"]);
+	self:SetScript("OnEditFocusLost", self.OnEditFocusLost);
+end
+
+function ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:OnEditFocusLost()
+	local player = ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton.player;
+	local nickname = self:GetText();
+
+	if ( not player ) then
+		return;
+	end
+	
+	if ( nickname == "" ) then
+		ArenaLiveSpectator.NicknameDatabase:RemoveNickname(player);
+	else
+		ArenaLiveSpectator.NicknameDatabase:UpdateNickname(player, nickname);
+	end
+	
+	ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:Update();
+	ArenaLiveSpectatorWarGameMenuPlayerScrollFrame:update();
+end
+
+function ArenaLiveSpectatorWarGameMenuSettingsResetNicknameButton.OnClick(button, down)
+	local player = ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton.player;
+	if ( player ) then
+		ArenaLiveSpectator.NicknameDatabase:RemoveNickname(player);
+		ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetText("");
+		ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetCursorPosition(0);
+		ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:Update();
+		ArenaLiveSpectatorWarGameMenuPlayerScrollFrame:update();
+	end
+end
+
+function ArenaLiveSpectatorWarGameMenuSettingsClearNicknameDBButton.OnClick(button, down)
+	StaticPopup_Show("ALSPEC_CONFIRM_CLEAR_NICKNAME_DB");
 end

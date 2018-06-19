@@ -1,27 +1,8 @@
---[[
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
+--[[ ArenaLive Spectator Functions: Nameplate Handler
+Created by: Vadrak
+Creation Date: 08.01.2015
+Last Update: 09.01.2015
+]]--
 
 -- Addon Name and localisation table:
 local addonName, L = ...;
@@ -35,12 +16,11 @@ local NamePlate = ArenaLive:ConstructHandler("NamePlate", true, true);
 local CCIndicator = ArenaLive:GetHandler("CCIndicator");
 local HealthBar = ArenaLive:GetHandler("HealthBar");
 local NameText = ArenaLive:GetHandler("NameText");
-local playerExistState = {};
+
 
 
 -- Register for needed events:
-NamePlate:RegisterEvent("AL_SPEC_PLAYER_UPDATE");
-NamePlate:RegisterEvent("AL_SPEC_PLAYER_SPECIALIZATION_UPDATE");
+NamePlate:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 NamePlate:RegisterEvent("PLAYER_ENTERING_WORLD");
 NamePlate:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED");
 NamePlate:RegisterEvent("UNIT_AURA");
@@ -58,9 +38,9 @@ NamePlate.namePlates = {};
 local NamePlateClass = {};
 
 --[[
-*****************************************
-*** PRIVATE HOOK FUNCTIONS START HERE ***
-*****************************************
+****************************************
+*** SCRIPT HOOK FUNCTIONS START HERE ***
+****************************************
 ]]--
 local function NamePlateHealthBar_OnValueChanged(healthBar)
 	local blizzPlate = healthBar:GetParent():GetParent();
@@ -102,7 +82,6 @@ function NamePlate:ConstructObject(namePlate, addonName, frameGroup)
 	
 	-- Set reference where needed:
 	namePlate.nameText = _G[prefix.."NameText"];
-	namePlate.healerIcon = _G[prefix.."HealerIcon"];
 	namePlate.border = _G[prefix.."Border"];
 	
 	
@@ -118,11 +97,10 @@ end
 
 function NamePlate:Enable()
 	self:Show();
+	NamePlate:OnEvent("COMMENTATOR_PLAYER_UPDATE");
 	for blizzPlate, namePlate in pairs(self.namePlates) do
 		namePlate:Enable();
 	end
-	self.enabled = true;
-	NamePlate:OnEvent("AL_SPEC_PLAYER_UPDATE");
 end
 
 function NamePlate:Disable()
@@ -130,8 +108,6 @@ function NamePlate:Disable()
 	for blizzPlate, namePlate in pairs(self.namePlates) do
 		namePlate:Disable();
 	end
-	
-	self.enabled = false;
 end
 
 function NamePlate:GetReactionType(r, g, b)
@@ -151,45 +127,45 @@ function NamePlate:GetReactionType(r, g, b)
 end
 
 function NamePlate:SetBlizzPlateStructure(blizzPlate)
-
---[[
-	6.2.2 UPDATED NAMEPLATE STRUCTURE:
-	The Nameplate is now structured in an easier manner:
-	NamePlate.NameContainer
-	NamePlate.ArtContainer.HealthBar
-	NamePlate.ArtContainer.CastBar
-]]
-
-	-- Get castbar and healthbar of a nameplate:
-	local healthBar = blizzPlate.ArtContainer.HealthBar;
+	local mainFrame, nameFrame = blizzPlate:GetChildren();
+	blizzPlate.mainFrame = mainFrame;
+	blizzPlate.nameFrame = nameFrame;
 	
-	local castBar = blizzPlate.ArtContainer.CastBar;
+	local mainFrameChildren = { mainFrame:GetChildren() };
+	
+	-- Get castbar and healthbar of a nameplate:
+	local healthBar = mainFrameChildren[1];
+	blizzPlate.healthBar = healthBar;
+	
+	local castBar = mainFrameChildren[2];
 	local castBarRegions = { castBar:GetRegions() };
-	castBar.shield = castBarRegions[3];
-	castBar.icon = castBarRegions[4];
-	castBar.text = castBarRegions[5];
+	blizzPlate.castBar = castBar;
+	blizzPlate.castBar.shield = castBarRegions[3];
+	blizzPlate.castBar.icon = castBarRegions[4];
+	blizzPlate.castBar.text = castBarRegions[5];
 
 	-- Get Name FontString:
-	blizzPlate.NameContainer.Name = select(1, blizzPlate.NameContainer:GetRegions());
+	nameFontString = select(1, nameFrame:GetRegions());
+	blizzPlate.nameText = nameFontString;
 	
 	-- Secure hook scripts:
-	healthBar:HookScript("OnValueChanged", NamePlateHealthBar_OnValueChanged);
-	healthBar:HookScript("OnMinMaxChanged", NamePlateHealthBar_OnValueChanged);
-	castBar:HookScript("OnValueChanged", NamePlateCastBar_OnValueChanged);
-	castBar:HookScript("OnMinMaxChanged", NamePlateCastBar_OnValueChanged);
-	castBar:HookScript("OnShow", NamePlateCastBar_OnValueChanged);
-	castBar:HookScript("OnHide", NamePlateCastBar_OnValueChanged);
+	blizzPlate.healthBar:HookScript("OnValueChanged", NamePlateHealthBar_OnValueChanged);
+	blizzPlate.healthBar:HookScript("OnMinMaxChanged", NamePlateHealthBar_OnValueChanged);
+	blizzPlate.castBar:HookScript("OnValueChanged", NamePlateCastBar_OnValueChanged);
+	blizzPlate.castBar:HookScript("OnMinMaxChanged", NamePlateCastBar_OnValueChanged);
+	blizzPlate.castBar:HookScript("OnShow", NamePlateCastBar_OnValueChanged);
+	blizzPlate.castBar:HookScript("OnHide", NamePlateCastBar_OnValueChanged);
 end
 
 function NamePlate:HideBlizzardNamePlate(blizzPlate)
 	-- Set Alpha to zero instead of actually hiding them:
-	blizzPlate.ArtContainer:SetAlpha(0);
-	blizzPlate.NameContainer:SetAlpha(0);
+	blizzPlate.mainFrame:SetAlpha(0);
+	blizzPlate.nameFrame:SetAlpha(0);
 end
 
 function NamePlate:ShowBlizzardNamePlate(blizzPlate)
-	blizzPlate.ArtContainer:SetAlpha(1);
-	blizzPlate.NameContainer:SetAlpha(1);
+	blizzPlate.mainFrame:SetAlpha(1);
+	blizzPlate.nameFrame:SetAlpha(1);
 end
 
 function NamePlate:CreateNamePlate(blizzPlate)
@@ -207,20 +183,9 @@ function NamePlate:UpdateAll()
 	end
 end
 
-function NamePlate:UpdateByUnit(unit)
-	if ( self.enabled ) then
-		for _, namePlate in pairs(NamePlate.namePlates) do
-			if ( unit == namePlate.unit ) then
-				namePlate:UpdateAppearance();
-				namePlate:Update();
-			end
-		end
-	end
-end
-
 function NamePlate:UpdateNamePlate(namePlate)
 	local blizzPlate = namePlate:GetParent();
-	local blizzPlateName = blizzPlate.NameContainer.Name:GetText();
+	local blizzPlateName = blizzPlate.nameText:GetText();
 	
 	local unit;
 	if ( NamePlate.unitNameCache[blizzPlateName] ) then
@@ -231,8 +196,11 @@ function NamePlate:UpdateNamePlate(namePlate)
 		
 		if ( isSameReaction ) then
 			local isPlayer = UnitIsPlayer(checkUnit);
-			local plateReaction = NamePlate:GetReactionType(blizzPlate.ArtContainer.HealthBar:GetStatusBarColor());
-			unit = checkUnit;
+			local plateReaction = NamePlate:GetReactionType(blizzPlate.healthBar:GetStatusBarColor());
+			
+			if ( not isPlayer or ( isPlayer and plateReaction == "Hostile-Player" ) ) then
+				unit = checkUnit;
+			end
 		end
 	end
 	
@@ -241,15 +209,11 @@ function NamePlate:UpdateNamePlate(namePlate)
 end
 
 function NamePlate:PlateReactionIsUnitReaction(blizzPlate, unit)
-	local plateReaction = NamePlate:GetReactionType(blizzPlate.ArtContainer.HealthBar:GetStatusBarColor());
+	local plateReaction = NamePlate:GetReactionType(blizzPlate.healthBar:GetStatusBarColor());
 	local unitReaction = NamePlate:GetReactionType(UnitSelectionColor(unit));
-	local isPlayer = UnitIsPlayer(unit);
-	local _, _, _, _, teamID = ArenaLiveSpectator.UnitCache:GetUnitInfo(unit);
-	local _, gameType = IsSpectator();
 	
-	if ( isPlayer and gameType == "battleground" and ( ( teamID == 1 and ( plateReaction == "Hostile-Player" or plateReaction == "Friendly" ) and unitReaction == "PvP-Friendly" ) or ( teamID == 0 and unitReaction == "Hostile" and plateReaction == "Hostile-Player" ) ) ) then
-		return true;
-	elseif ( isPlayer and gameType == "arena" and unitReaction == "Hostile" and plateReaction == "Hostile-Player" ) then
+	local isPlayer = UnitIsPlayer(unit);
+	if ( isPlayer and ( unitReaction == "Hostile" or unitReaction == "Friendly" ) and plateReaction == "Hostile-Player" ) then
 		return true;
 	elseif ( not isPlayer and ( unitReaction == "Friendly" and plateReaction == "Hostile" ) ) then
 		return true;
@@ -270,38 +234,26 @@ function NamePlate:UpdateUnitCacheEntry(unit)
 	
 	-- Apply new name data to cache:
 	local name = GetUnitName(unit);
+	self.unitCache[unit] = name;
+
 	if ( name ) then
-		--ArenaLive:Message("NamePlate:UpdateUnitCacheEntry(): Called for unit %s, name = %s", "debug", "NamePlate:UpdateUnitCacheEntry()", unit, tostring(name));
-		self.unitCache[unit] = name;
 		self.unitNameCache[name] = unit;
 	end
-end
-local function updatePlayers()
-	local numTeamA = ArenaLiveSpectator.UnitCache:GetNumPlayers(1);
-	local numTeamB = ArenaLiveSpectator.UnitCache:GetNumPlayers(2);
-	local iMax;
-	if ( numTeamA > numTeamB ) then
-		iMax = numTeamA;
-	else
-		iMax = numTeamB;
-	end
-		
-	for i = 1, iMax do
-		local unit = "spectateda"..i;
-		NamePlate:UpdateUnitCacheEntry(unit);
-			
-		unit = "spectatedb"..i;
-		NamePlate:UpdateUnitCacheEntry(unit);
-	end
-	NamePlate:UpdateAll();
 end
 
 function NamePlate:OnEvent(event, ...)
 	local unit = ...;
-	if ( event == "AL_SPEC_PLAYER_UPDATE" ) then
-		updatePlayers();
-	elseif ( event == "AL_SPEC_PLAYER_SPECIALIZATION_UPDATE" ) then
-		NamePlate:UpdateByUnit(unit);
+	if ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
+		local numTeamA = CommentatorGetNumPlayers(2);
+		local numTeamB = CommentatorGetNumPlayers(1);
+		for i = 1, 5 do
+			local unit = "spectateda"..i;
+			NamePlate:UpdateUnitCacheEntry(unit);
+			
+			unit = "spectatedb"..i;
+			NamePlate:UpdateUnitCacheEntry(unit);
+		end
+		NamePlate:UpdateAll();
 	elseif ( ( event == "UNIT_ABSORB_AMOUNT_CHANGED" or event == "UNIT_HEAL_PREDICTION" ) and NamePlate.unitCache[unit] ) then
 		for blizzPlate, namePlate in pairs(self.namePlates) do
 			if ( unit == namePlate.unit ) then
@@ -330,7 +282,7 @@ function NamePlate:OnEvent(event, ...)
 			else
 				unit = "spectatedpetb"..unitNumber;
 			end
-
+			print(unit);
 			NamePlate:UpdateUnitCacheEntry(unit);
 			NamePlate:UpdateAll();
 		end
@@ -359,8 +311,6 @@ function NamePlate:OnUpdate(elapsed)
 		end
 		self.numWorldFrameChildren = WorldFrame:GetNumChildren();
 	end
-	
-	
 end
 NamePlate:SetScript("OnUpdate", NamePlate.OnUpdate);
 
@@ -493,12 +443,6 @@ function NamePlateClass:UpdateAppearance()
 		
 		self.castBar:ClearAllPoints();
 		self.castBar:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 30, 4);
-		local role = ArenaLiveSpectator.UnitCache:GetUnitRole(self.unit);
-		if ( role == "HEALER" ) then
-			self.healerIcon:Show();
-		else
-			self.healerIcon:Hide();
-		end
 	else
 		self:SetSize(137, 22);
 		self.classIcon:Hide();
@@ -511,34 +455,21 @@ function NamePlateClass:UpdateAppearance()
 		
 		self.castBar:ClearAllPoints();
 		self.castBar:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 5, 0);
-		
-		self.healerIcon:Hide();
 	end
 	
 	-- Set border colour:
 	local red, green, blue;
-	local _, gameType = IsSpectator();
 	if ( self.unit ) then
 		local unitType = string.match(self.unit, "^([a-z]+)[0-9]+$") or self.unit;
 		if ( unitType == "spectateda" or unitType == "spectatedpeta" ) then
-			if ( gameType == "battleground" and IsAddOnLoaded("BGLive") ) then
-				local database = ArenaLive:GetDBComponent(BGLive.name);
-				red, green, blue = unpack(database.TeamA.Colour);
-			else
-				red, green, blue = unpack(database.TeamA.Colour);
-			end
+			red, green, blue = unpack(database.TeamA.Colour);
 		elseif ( unitType == "spectatedb" or unitType == "spectatedpetb" ) then
-			if ( gameType == "battleground" and IsAddOnLoaded("BGLive") ) then
-				local database = ArenaLive:GetDBComponent(BGLive.name);
-				red, green, blue = unpack(database.TeamB.Colour);
-			else
-				red, green, blue = unpack(database.TeamB.Colour);
-			end
+			red, green, blue = unpack(database.TeamB.Colour);
 		else
 			red, green, blue = UnitSelectionColor(self.unit);
 		end
 	else
-		red, green, blue = blizzPlate.ArtContainer.HealthBar:GetStatusBarColor();
+		red, green, blue = blizzPlate.healthBar:GetStatusBarColor();
 	end
 
 	self.border:SetVertexColor(red, green, blue);
@@ -546,15 +477,15 @@ end
 
 function NamePlateClass:UpdateCastBar()
 	local blizzPlate = self:GetParent();
-	if ( blizzPlate.ArtContainer.CastBar:IsShown() ) then
+	if ( blizzPlate.castBar:IsShown() ) then
 		if ( not self.castBar:IsShown() ) then
 			self.castBar:Show();
 		end
 		
-		local minValue, maxValue = blizzPlate.ArtContainer.CastBar:GetMinMaxValues();
-		local value = blizzPlate.ArtContainer.CastBar:GetValue();
-		local texture = blizzPlate.ArtContainer.CastBar.icon:GetTexture();
-		local spellName = blizzPlate.ArtContainer.CastBar.text:GetText();
+		local minValue, maxValue = blizzPlate.castBar:GetMinMaxValues();
+		local value = blizzPlate.castBar:GetValue();
+		local texture = blizzPlate.castBar.icon:GetTexture();
+		local spellName = blizzPlate.castBar.text:GetText();
 		
 		-- Prevent Division by zero:
 		if ( maxValue == 0 ) then
@@ -562,7 +493,7 @@ function NamePlateClass:UpdateCastBar()
 		end		
 		
 		local red, green, blue = 1, 0.7, 0;
-		if ( blizzPlate.ArtContainer.CastBar.shield:IsShown() ) then
+		if ( blizzPlate.castBar.shield:IsShown() ) then
 			red, green, blue = 0, 0.49, 1;
 		end
 		
@@ -590,8 +521,7 @@ function NamePlateClass:UpdateHealthBar()
 	local blizzPlate = self:GetParent();
 	
 	-- Set class color if possible:
-	local red, green, blue = blizzPlate.ArtContainer.HealthBar:GetStatusBarColor();
-	local _, gameType = IsSpectator();
+	local red, green, blue = blizzPlate.healthBar:GetStatusBarColor();
 	if ( self.unit ) then
 		HealthBar:Update(self);
 		if ( not UnitIsPlayer(self.unit) ) then
@@ -599,25 +529,15 @@ function NamePlateClass:UpdateHealthBar()
 			local database = ArenaLive:GetDBComponent(addonName);
 			local unitType = string.match(self.unit, "^([a-z]+)[0-9]+$") or self.unit;
 			if ( unitType == "spectatedpeta" ) then
-				if ( gameType == "battleground" and IsAddOnLoaded("BGLive") ) then
-					local database = ArenaLive:GetDBComponent(BGLive.name);
-					red, green, blue = unpack(database.TeamA.Colour);
-				else
-					red, green, blue = unpack(database.TeamA.Colour);
-				end
+				red, green, blue = unpack(database.TeamA.Colour);
 			elseif ( unitType == "spectatedpetb" ) then
-				if ( gameType == "battleground" and IsAddOnLoaded("BGLive") ) then
-					local database = ArenaLive:GetDBComponent(BGLive.name);
-					red, green, blue = unpack(database.TeamB.Colour);
-				else
-					red, green, blue = unpack(database.TeamB.Colour);
-				end
+				red, green, blue = unpack(database.TeamB.Colour);
 			end
 			self.HealthBar:SetStatusBarColor(red, green, blue);
 		end
 	else
-		local minValue, maxValue = blizzPlate.ArtContainer.HealthBar:GetMinMaxValues();
-		local value = blizzPlate.ArtContainer.HealthBar:GetValue();
+		local minValue, maxValue = blizzPlate.healthBar:GetMinMaxValues();
+		local value = blizzPlate.healthBar:GetValue();
 		
 		-- Prevent Division by zero:
 		if ( maxValue == 0 ) then
@@ -636,9 +556,9 @@ function NamePlateClass:UpdateNameText()
 	local blizzPlate = self:GetParent();
 	local name;
 	if ( self.unit ) then
-		name = NameText:GetNickname(self.unit) or UnitName(self.unit) or blizzPlate.NameContainer.Name:GetText();
+		name = NameText:GetNickname(self.unit) or GetUnitName(self.unit) or blizzPlate.nameText:GetText();
 	else
-		name = blizzPlate.NameContainer.Name:GetText();
+		name = blizzPlate.nameText:GetText();
 	end
 	
 	self.nameText:SetText(name);

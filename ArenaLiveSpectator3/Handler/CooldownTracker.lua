@@ -1,27 +1,8 @@
---[[
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
+--[[ ArenaLive Spectator Functions: Cooldown Tracker
+Created by: Vadrak
+Creation Date: 11.08.2014
+Last Update: 12.12.2014
+]]--
 
 -- Addon Name and localisation table:
 local addonName, L = ...;
@@ -35,37 +16,26 @@ local CooldownTracker = ArenaLive:ConstructHandler("CooldownTracker", true, true
 local Cooldown = ArenaLive:GetHandler("Cooldown");
 local NameText = ArenaLive:GetHandler("NameText");
 
--- DEBUG:
--- CooldownTracker.currentStatusID = 1;
-
 local CooldownTrackerClass = {};
 local trashTable = {};
 local trackers = {};
 local trackedUnits = {};
-local cooldownData = {};
+local inspectQueue = {};
 local activeCooldowns = {};
-
-local actionToPriority = {
-	["ADD"] = 5,
-	["REPLACE"] = 4,
-	["REMOVE"] = 3,
-	["MODIFY_COOLDOWN"] = 2,
-	["MODIFY_CHARGES"] = 1,
-};
-
+local UNIT_WAITING_FOR_INSPECT_EVENT;
 local NUM_GLPYH_SLOTS = 6;
 local MAX_TALENT_TIERS = 7;
 local NUM_TALENT_COLUMNS = 3;
 
-CooldownTracker:RegisterEvent("UPDATE_BATTLEFIELD_STATUS");
-CooldownTracker:RegisterEvent("AL_SPEC_PLAYER_UPDATE");
-CooldownTracker:RegisterEvent("AL_SPEC_PLAYER_SPECIALIZATION_UPDATE");
+CooldownTracker:RegisterEvent("PLAYER_ENTERING_WORLD");
+CooldownTracker:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
+CooldownTracker:RegisterEvent("INSPECT_READY");
 CooldownTracker:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED");
+--CooldownTracker:RegisterEvent("UNIT_NAME_UPDATE");
 CooldownTracker:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_DISPEL");
-
 function ArenaLiveSpectator:GetTrackedUnits()
-	for unit, numRegisters in pairs(trackedUnits) do
-		print(unit, numRegisters);
+	for unit, cdTable in pairs(trackedUnits) do
+		print(unit, cdTable['#']);
 	end
 end
 
@@ -81,25 +51,28 @@ local function newTable()
 	return new;
 end
 
-local function dumpTable(t)
-	if ( type(t) ~= "table" ) then
+local function dumpTable(dump)
+	if ( type(dump) ~= "table" ) then
 		return;
 	end
 	
-	table.wipe(t);
-	table.insert(trashTable, t);
+	table.wipe(dump);
+	table.insert(trashTable, dump);
 end
 
-local sortGUID;
+local sortUnit;
 local function sortFunc(a, b)
-	if ( not cooldownData[sortGUID]["cooldowns"][a].priority ) then
-		ArenaLive:Message(L["WARNING! The cooldown %s (spellID = %d) does not have a cooldown priority in the spell database. Please inform the author of the addon so he can fix that."], "normal", GetSpellInfo(a), b);
+	local aType, bType = ArenaLiveSpectator.SpellDB.CooldownTypes[a], ArenaLiveSpectator.SpellDB.CooldownTypes[b];
+	if ( not aType ) then
 		return false;
-	elseif ( not cooldownData[sortGUID]["cooldowns"][b].priority ) then
-		ArenaLive:Message(L["WARNING! The cooldown %s (spellID = %d) does not have a cooldown priority in the spell database. Please inform the author of the addon so he can fix that."], "normal", GetSpellInfo(b), b);
+	elseif ( not bType ) then
 		return true;
 	else
-		return cooldownData[sortGUID]["cooldowns"][a].priority > cooldownData[sortGUID]["cooldowns"][b].priority;
+		if ( aType == bType ) then
+			return trackedUnits[sortUnit]["cooldowns"][a]["duration"] > trackedUnits[sortUnit]["cooldowns"][b]["duration"];
+		else
+			return ArenaLiveSpectator.SpellDB.CooldownTypePriorities[aType] > ArenaLiveSpectator.SpellDB.CooldownTypePriorities[bType];
+		end
 	end
 end
 
@@ -120,10 +93,10 @@ end
 ****** HANDLER METHODS START HERE ******
 ****************************************
 ]]--
-function CooldownTracker:ConstructObject(cooldownTracker, nameText, classIcon, specIcon, addonName, frameGroup, template)
+function CooldownTracker:ConstructObject(cooldownTracker, nameText, classIcon, addonName, frameGroup, template)
 	cooldownTracker.nameText = nameText;
 	cooldownTracker.classIcon = classIcon;
-	cooldownTracker.specIcon = specIcon;
+	
 	cooldownTracker.addon = addonName;
 	cooldownTracker.group = frameGroup;
 	cooldownTracker.template = template;
@@ -174,17 +147,9 @@ function CooldownTracker:UpdateTrackersByUnit(unit)
 	end
 end
 
-function CooldownTracker:UpdateTrackersByGUID(guid)
+function CooldownTracker:UpdateTrackerShownIconsByUnit(unit)
 	for tracker in pairs(trackers) do
-		if ( guid == tracker.guid ) then
-			tracker:Update();
-		end
-	end
-end
-
-function CooldownTracker:UpdateTrackerShownIconsByGUID(guid)
-	for tracker in pairs(trackers) do
-		if ( guid == tracker.guid ) then
+		if ( unit == tracker.unit ) then
 			tracker:UpdateShownCooldowns();
 		end
 	end
@@ -192,238 +157,241 @@ end
 
 function CooldownTracker:RegisterUnit(unit)
 	if ( not trackedUnits[unit] ) then
-		trackedUnits[unit] = 1;
+		trackedUnits[unit] = newTable();
+		trackedUnits[unit]["cooldowns"] = newTable();
+		trackedUnits[unit]["TRINKET"] = newTable();
+		trackedUnits[unit]["RACIAL"] = newTable();
+		trackedUnits[unit]["DEF_CD"] = newTable();
+		trackedUnits[unit]["OFF_CD"] = newTable();
+		trackedUnits[unit]["INTERRUPT"] = newTable();
+		trackedUnits[unit]["DISPEL"] = newTable();
+		trackedUnits[unit]["CC"] = newTable();
+		trackedUnits[unit]["MISC"] = newTable();
+		trackedUnits[unit]["spellIDToIndex"] = newTable();
+		trackedUnits[unit]["#"] = 1;
+		CooldownTracker:GatherCooldownInfo(unit, false);
 	else
-		trackedUnits[unit] = trackedUnits[unit] + 1;
+		trackedUnits[unit]["#"] = trackedUnits[unit]["#"] + 1;
 	end
 end
 
 function CooldownTracker:UnregisterUnit(unit)
 	if ( trackedUnits[unit] ) then
-		trackedUnits[unit] = trackedUnits[unit] - 1;
+		trackedUnits[unit]["#"] = trackedUnits[unit]["#"] - 1;
+		
+		if ( trackedUnits[unit]["#"] < 1 ) then
+			CooldownTracker:ResetCooldownInfo(unit);
+			dumpTable(trackedUnits[unit]["cooldowns"]);
+			trackedUnits[unit]["cooldowns"] = nil;
 
-		if ( trackedUnits[unit] < 1 ) then
+			dumpTable(trackedUnits[unit]["TRINKET"]);
+			trackedUnits[unit]["TRINKET"] = nil;
+			
+			dumpTable(trackedUnits[unit]["RACIAL"]);
+			trackedUnits[unit]["RACIAL"] = nil;			
+			
+			dumpTable(trackedUnits[unit]["DEF_CD"]);
+			trackedUnits[unit]["DEF_CD"] = nil;
+			
+			dumpTable(trackedUnits[unit]["OFF_CD"]);
+			trackedUnits[unit]["OFF_CD"] = nil;
+			
+			dumpTable(trackedUnits[unit]["INTERRUPT"]);
+			trackedUnits[unit]["INTERRUPT"] = nil;
+			
+			dumpTable(trackedUnits[unit]["DISPEL"]);
+			trackedUnits[unit]["DISPEL"] = nil;
+			
+			dumpTable(trackedUnits[unit]["CC"]);
+			trackedUnits[unit]["CC"] = nil;
+			
+			dumpTable(trackedUnits[unit]["MISC"]);
+			trackedUnits[unit]["MISC"] = nil;
+			
+			dumpTable(trackedUnits[unit]["spellIDToIndex"]);
+			trackedUnits[unit]["spellIDToIndex"] = nil;
+		
+			dumpTable(trackedUnits[unit]);
 			trackedUnits[unit] = nil;
 		end
 	end
 end
 
-function CooldownTracker:GatherCooldownInfo(unit)
+function CooldownTracker:GatherCooldownInfo(unit, isInspectReady)
 
 	if ( not unit ) then
-		ArenaLive:Message(string.format(L["%s: Usage %s"], "error", "CooldownTracker:GatherCooldownInfo()", "CooldownTracker:GatherCooldownInfo(unit)"));
+		ArenaLive:Message(L["CooldownTracker:GatherCooldownInfo(): Usage CooldownTracker:GatherCooldownInfo(unit, isInspectReady)"], "error");
 	end
 	
 	local guid = UnitGUID(unit);
 	local isPlayer = UnitIsPlayer(unit);
-	if ( guid and isPlayer ) then
+	ArenaLive:Message(L["Gather Cooldown info for %s: GUID = %s, isPlayer = %s, isInspectReady = %s."], "debug", unit, tostring(guid), tostring(isPlayer), tostring(isInspectReady));
+	if ( guid and isPlayer and not isInspectReady ) then
+		inspectQueue[unit] = guid;
+		if ( not UNIT_WAITING_FOR_INSPECT_EVENT ) then
+			CooldownTracker:CallInspect();
+		end
+	elseif ( guid and isInspectReady ) then
 		
 		-- Reset old information first:
-		CooldownTracker:ResetCooldownTable(guid);
-		
-		-- Set up cooldown table structure:
-		CooldownTracker:SetUpCooldownTable(guid);
+		CooldownTracker:ResetCooldownInfo(unit);
 		
 		local _, class = UnitClass(unit);
 		local _, race = UnitRace(unit);
+		local specID = GetInspectSpecialization(unit);
+		trackedUnits[unit].specID = specID;
 		
-		cooldownData[guid].class = class;
-		cooldownData[guid].race = race;
-		cooldownData[guid].faction = UnitFactionGroup(unit);
-		cooldownData[guid].specID = ArenaLiveSpectator.UnitCache:GetUnitSpecialisation(unit);
-		cooldownData[guid].unit = unit; -- prevents cooldowns from triggering from multiple unitIDs with the same guid.
+		-- Set trinket cooldown:
+		local spellID, duration = unpack(ArenaLive.spellDB["Trinket"]);
+		CooldownTracker:AddCooldown(unit, spellID, duration);
 		
-		if ( ArenaLive.debug ) then
-			-- Add ALL talents available during debug mode to find bugs in the
-			-- spell table:
-			for talentID in pairs(ArenaLiveSpectator.SpellDB.CooldownTalentInfo[class]) do
-				cooldownData[guid].talents[talentID] = select(2, GetTalentInfoByID(talentID));
-			end
+		-- Set racial cooldown:
+		if ( ArenaLive.spellDB.Racials[race][class] ) then
+			spellID, duration = unpack(ArenaLive.spellDB.Racials[race][class]);
 		else
-			for tier = 1, MAX_TALENT_TIERS do
-				local talentID, name = ArenaLiveSpectator.UnitCache:GetUnitSelectedTalentByTier(unit, tier);
-				if ( talentID and name ) then
-					cooldownData[guid].talents[talentID] = name;
+			spellID, duration = unpack(ArenaLive.spellDB.Racials[race]);
+		end
+		CooldownTracker:AddCooldown(unit, spellID, duration);
+		
+		-- Get class/spec cooldowns:
+		for spellID, duration in pairs(ArenaLiveSpectator.SpellDB["CooldownClassSpecInfo"][class][specID]) do
+			CooldownTracker:AddCooldown(unit, spellID, duration);
+		end
+		
+		-- NOTE: Need to apply add and replace talents first,
+		-- before starting with the modify cooldown and charges
+		-- options. Otherwise it could happen that a cooldown 
+		-- reduction for a spell added via talents or glyphs isn't
+		-- applied correctly.
+		local talentQueue = {};
+		for tier = 1, MAX_TALENT_TIERS do
+			for column = 1, NUM_TALENT_COLUMNS do
+				local talentID, _, _, selected = GetTalentInfo(tier, column, nil, true, unit);
+				if ( selected ) then
+					local action, spellID, value, replaceID = ArenaLiveSpectator:GetCooldownInfo(class, "talent", talentID);
+					if ( type(action) == "table" ) then
+						for key, actionType in pairs(action) do
+							if ( action == "ADD" or action == "REPLACE" ) then
+								CooldownTracker:ExecuteCooldownInfo(unit, action[key], spellID[key], value[key], replaceID[key]);
+							else
+								talentQueue[talentID] = true;
+							end
+						end
+					elseif ( action == "ADD" or action == "REPLACE" ) then
+						CooldownTracker:ExecuteCooldownInfo(unit, action, spellID, value, replaceID);
+					else
+						talentQueue[talentID] = true;
+					end
 				end
 			end
+		end
+		
+		-- Apply modify talents:
+		for talentID in pairs(talentQueue) do
+			local action, spellID, value, replaceID = ArenaLiveSpectator:GetCooldownInfo(class, "talent", talentID);
+			CooldownTracker:ExecuteCooldownInfo(unit, action, spellID, value, replaceID);
+			talentQueue[talentID] = nil;
 		end
 		
 		-- Apply glyphs:
-		if ( ArenaLive.debug ) then
-			-- Add ALL glyphs available during debug mode to find bugs in the
-			-- spell table:
-			for glyphID in pairs(ArenaLiveSpectator.SpellDB.CooldownGlyphInfo[class]) do
-				cooldownData[guid].glyphs[glyphID] = GetSpellInfo(glyphID) or glyphID;
-			end
-		else
-			for slot = 1, NUM_GLPYH_SLOTS do
-				local glyphID = ArenaLiveSpectator.UnitCache:GetUnitSelectedGlyphBySlot(unit, slot);
-				if ( glyphID ) then
-					cooldownData[guid].glyphs[glyphID] = true;
-				end
-			end
-		end
-		
-		CooldownTracker:SetUpCooldownsForGUID(guid);
-	end
-end
-
-function CooldownTracker:SetUpCooldownTable(guid)
-
-	if ( guid and not cooldownData[guid] ) then
-		cooldownData[guid] = newTable();
-		cooldownData[guid].cooldowns = newTable();
-		cooldownData[guid].priorityList = newTable();
-		cooldownData[guid].talents = newTable();
-		cooldownData[guid].glyphs = newTable();
-	end
-end
-
-function CooldownTracker:ResetCooldownTable(guid)
-	if ( guid and cooldownData[guid] ) then
-		dumpTable(cooldownData[guid].cooldowns);
-		cooldownData[guid].cooldowns = nil;
-		dumpTable(cooldownData[guid].priorityList);
-		cooldownData[guid].priorityList = nil;
-		dumpTable(cooldownData[guid].talents);
-		cooldownData[guid].talents = nil;
-		dumpTable(cooldownData[guid].glyphs);
-		cooldownData[guid].glyphs = nil;
-		dumpTable(cooldownData[guid]);
-		cooldownData[guid] = nil;
-		CooldownTracker:UpdateTrackerShownIconsByGUID(guid);
-	end
-end
-
-local cooldownActionQueue = {};
-local function sortActionQueue(a, b)
-	return actionToPriority[a.action] > actionToPriority[b.action];
-end
-
-local function addToActionQueue(action, spellID, value, replaceID, newPriority)
-	if ( type(action) == "table" ) then
-		for index, actionType in pairs(action) do
-			if ( actionType == "REPLACE" ) then
-				addToActionQueue(actionType, spellID[index], value[index], replaceID[index]);
-			elseif ( type(newPriority) == "table" ) then
-				addToActionQueue(actionType, spellID[index], value[index], nil, newPriority[index]);
-			else
-				addToActionQueue(actionType, spellID[index], value[index], nil, newPriority);
-			end
-		end
-	elseif ( type(spellID) == "table" ) then
-		for key, realSpellID in pairs(spellID) do
-			if ( type(value) == "table" ) then
-				addToActionQueue(action, realSpellID, value[key], replaceID, newPriority);
-			else
-				addToActionQueue(action, realSpellID, value, replaceID, newPriority);
-			end
-		end
-	elseif ( action ) then
-		table.insert(cooldownActionQueue, { ["action"] = action, ["spellID"] = spellID, ["value"] = value, ["replace"] = replaceID, ["newPriority"] = newPriority});
-	end
-end
-
-function CooldownTracker:SetUpCooldownsForGUID(guid)
-	if ( guid and cooldownData[guid] ) then
-		local class = cooldownData[guid].class;
-		local race = cooldownData[guid].race;
-		local faction = cooldownData[guid].faction;
-		local specID = cooldownData[guid].specID;
-		-- Set trinket cooldown:
-		local spellID, duration = unpack(ArenaLive.spellDB.Trinket);
-		CooldownTracker:AddCooldown(guid, spellID, duration);
-		
-		-- NOTE: Some important racials are back in version 3.1.12b
-		-- Set racial cooldown:
-		if ( race == "Dwarf" or race == "Orc" or race == "Scourge" or race == "Troll" ) then
-			if ( ArenaLive.spellDB.Racials[race][class] ) then
-				spellID, duration = unpack(ArenaLive.spellDB.Racials[race][class]);
-			else
-				spellID, duration = unpack(ArenaLive.spellDB.Racials[race]);
-			end
-			CooldownTracker:AddCooldown(guid, spellID, duration);
-		end
-		
-		-- Get class/spec cooldowns:
-		if ( ArenaLive.debug ) then
-			-- Add ALL the class' cooldowns during debug mode to find bugs
-			-- in the spell table:
-			for theSpec in pairs(ArenaLiveSpectator.SpellDB.CooldownClassSpecInfo[class]) do
-				for spellID, duration in pairs(ArenaLiveSpectator.SpellDB.CooldownClassSpecInfo[class][theSpec]) do
-					local spellName = 
-					CooldownTracker:AddCooldown(guid, spellID, duration);
-				end
-			end
-		else
-			for spellID, duration in pairs(ArenaLiveSpectator.SpellDB.CooldownClassSpecInfo[class][specID]) do
-				CooldownTracker:AddCooldown(guid, spellID, duration);
-			end
-		end
-		
-		-- Now iterate through talents and glyphs:
-		for talentID, talentName in pairs(cooldownData[guid].talents) do
-			local action, spellID, value, replaceID, newPriority = ArenaLiveSpectator:GetCooldownInfo(class, "talent", talentID);
-			if ( action ) then
-				addToActionQueue(action, spellID, value, replaceID, newPriority);
-			end
-		end
-		
-		for glyphID, glyphName in pairs(cooldownData[guid].glyphs) do
-			local action, spellID, value, replaceID, newPriority = ArenaLiveSpectator:GetCooldownInfo(class, "glyph", glyphID);
+		local glyphQueue = {};
+		for slot = 1, NUM_GLPYH_SLOTS do
+			local _, _, _, glyphSpellID = GetGlyphSocketInfo(slot, nil, true, unit);
 			
-			if ( action ) then
-				addToActionQueue(action, spellID, value, replaceID, newPriority);
+			if ( glyphSpellID ) then
+				local action, spellID, value, replaceID = ArenaLiveSpectator:GetCooldownInfo(class, "glyph", glyphSpellID);
+				if ( type(action) == "table" ) then
+					for key, actionType in pairs(action) do
+						if ( action == "ADD" or action == "REPLACE" ) then
+							CooldownTracker:ExecuteCooldownInfo(unit, action[key], spellID[key], value[key], replaceID[key]);
+						else
+							glyphQueue[glyphSpellID] = true;
+						end
+					end
+				elseif ( action == "ADD" or action == "REPLACE" ) then
+						CooldownTracker:ExecuteCooldownInfo(unit, action, spellID, value, replaceID);
+				else
+						glyphQueue[glyphSpellID] = true;
+				end
+			end
+		end
+		
+		-- Apply modify glyphs:
+		for glyphID in pairs(glyphQueue) do
+			local action, spellID, value, replaceID = ArenaLiveSpectator:GetCooldownInfo(class, "glyph", glyphID);
+			CooldownTracker:ExecuteCooldownInfo(unit, action, spellID, value, replaceID);
+			glyphQueue[glyphID] = nil;
+		end		
+
+		-- Sort Cooldown type tables:
+		sortUnit = unit;
+		for cdType in pairs(ArenaLiveSpectator.SpellDB.CooldownTypePriorities) do
+			local numCDs = #trackedUnits[unit][cdType];
+			if ( numCDs > 1 ) then
+				table.sort(trackedUnits[unit][cdType], sortFunc);
+			
+				-- Update spellIDToIndexTable:
+				for i = 1, numCDs do
+					local spellID = trackedUnits[unit][cdType][i];
+					trackedUnits[unit]["spellIDToIndex"][spellID] = i;
+				end
 			end
 		end
 
-		-- NOTE: Sort action table.
-		-- Priority is: ADD > REPLACE > MODIFY_COOLDOWN = MODIFY_CHARGES
-		table.sort(cooldownActionQueue, sortActionQueue);
-		
-		for index, actionTable in ipairs(cooldownActionQueue) do
-			CooldownTracker:ExecuteCooldownModification(guid, actionTable.action, actionTable.spellID, actionTable.value, actionTable.replace, actionTable.newPriority);
-		end
-		table.wipe(cooldownActionQueue);
-		
-		-- Sort priority table according to spell priorities:
-		sortGUID = guid;
-		table.sort(cooldownData[guid].priorityList, sortFunc);
-		
-		-- Update affected unit frames:
-		CooldownTracker:UpdateTrackerShownIconsByGUID(guid);
-	end
-end
-function CooldownTracker:ExecuteCooldownModification(guid, action, spellID, value, replaceID, newPriority)
-	if ( action == "ADD" ) then
-		CooldownTracker:AddCooldown(guid, spellID, value);
-	elseif ( action == "MODIFY_CHARGES" ) then
-		CooldownTracker:ModifyCooldownCharges(guid, spellID, value);
-	elseif( action == "MODIFY_COOLDOWN" ) then
-		CooldownTracker:ModifyCooldown(guid, spellID, value);
-	elseif ( action == "REMOVE" ) then
-		CooldownTracker:RemoveCooldown(guid, spellID);
-	elseif ( action == "REPLACE" ) then
-		CooldownTracker:RemoveCooldown(guid, replaceID);
-		CooldownTracker:AddCooldown(guid, spellID, value);
-	end
-		
-	if ( newPriority ) then
-		CooldownTracker:ModifyCooldownPriority(guid, spellID, newPriority)
+		CooldownTracker:UpdateTrackerShownIconsByUnit(unit);
+	else
+		CooldownTracker:ResetCooldownInfo(unit);
 	end
 end
 
-function CooldownTracker:AddCooldown(guid, spellID, duration)	
-	local _, _, icon = GetSpellInfo(spellID);
-	local class = cooldownData[guid].class;
-	local faction = cooldownData[guid].faction;
-	local specID = cooldownData[guid].specID;
-	
-	if ( ArenaLive.debug and cooldownData[guid]["cooldowns"][spellID] ) then
-		-- Prevent duplicates during debug mode.
-		return;
+function CooldownTracker:ResetCooldownInfo(unit)
+	-- Reset Cooldowns:
+	for spellID, infoTable in pairs(trackedUnits[unit]["cooldowns"]) do
+		local cdType = ArenaLiveSpectator.SpellDB.CooldownTypes[spellID];
+		local index = trackedUnits[unit].spellIDToIndex[spellID];
+		
+		dumpTable(trackedUnits[unit].cooldowns[spellID]);
+		trackedUnits[unit].cooldowns[spellID] = nil;
+		trackedUnits[unit][cdType][index] = nil;
+		trackedUnits[unit].spellIDToIndex[spellID] = nil;
 	end
 	
+	CooldownTracker:UpdateTrackerShownIconsByUnit(unit);
+end
+
+function CooldownTracker:ExecuteCooldownInfo(unit, action, spellID, value, replaceID)
+	
+	if ( type(action) == "table" ) then
+		-- Recursion if a talent/glyph applies more actions than one:
+		-- NOTE: If this is the case, make sure that value is also a
+		-- table with the keys being the same as the action's key.
+		for key, actionType in pairs(action) do
+			CooldownTracker:ExecuteCooldownInfo(unit, actionType, spellID[key], value[key], replaceID[key]);
+		end
+	elseif ( type(spellID) == "table" ) then -- More than one spellID
+		-- Recursion if a talent/glyph changes more than one spell at a time:
+		for key, realSpellID in ipairs(spellID) do
+			CooldownTracker:ExecuteCooldownInfo(unit, action, realSpellID, value);
+		end
+	else
+		if ( action == "ADD" ) then
+			CooldownTracker:AddCooldown(unit, spellID, value);
+		elseif ( action == "MODIFY_COOLDOWN" ) then
+			CooldownTracker:ModifyCooldown(unit, spellID, value);
+		elseif( action == "MODIFY_CHARGES" ) then
+			CooldownTracker:ModifyCooldownCharges(unit, spellID, value);
+		elseif ( action == "REPLACE" ) then
+			CooldownTracker:RemoveCooldown(unit, replaceID);
+			CooldownTracker:AddCooldown(unit, spellID, value);
+		end
+	end
+	
+end
+
+function CooldownTracker:AddCooldown(unit, spellID, duration)	
+	local _, _, icon = GetSpellInfo(spellID);
+	local faction = UnitFactionGroup(unit);
+
 	-- Switch texture for pvp trinket:
 	if ( spellID == 42292 ) then
 		if ( faction == "Alliance" ) then
@@ -433,105 +401,73 @@ function CooldownTracker:AddCooldown(guid, spellID, duration)
 		end	
 	end
 	
-	local totalCharges;
+	local charges;
 	if ( type(duration) == "table" ) then
 		-- This spell has charges:
-		totalCharges = duration[2];
+		charges = duration[2];
 		duration = duration[1];
 	else
-		totalCharges = 1;
-	end
+		charges = 1;
+	end	
+	trackedUnits[unit]["cooldowns"][spellID] = newTable();
+	trackedUnits[unit]["cooldowns"][spellID].duration = duration;
+	trackedUnits[unit]["cooldowns"][spellID].totalCharges = charges;
+	trackedUnits[unit]["cooldowns"][spellID].charges = charges;
+	trackedUnits[unit]["cooldowns"][spellID].texture = icon;
 	
-	-- Check if there is an active cooldown for this spell:
-	local identifier = guid..";"..spellID;
-	local activeCooldownInfo = activeCooldowns[identifier];
-	local expires, charges;
-	if ( activeCooldownInfo ) then
-		expires, charges = string.split(";", activeCooldownInfo);
-		expires = tonumber(expires);
-		charges = tonumber(charges);
-		if ( expires > GetTime() ) then
-			charges = charges - 1;
-		end
-	end
-	
-	cooldownData[guid]["cooldowns"][spellID] = newTable();
-	cooldownData[guid]["cooldowns"][spellID].charges = charges or totalCharges;
-	cooldownData[guid]["cooldowns"][spellID].duration = duration;
-	cooldownData[guid]["cooldowns"][spellID].expires = expires;
-	cooldownData[guid]["cooldowns"][spellID].texture = icon;
-	cooldownData[guid]["cooldowns"][spellID].totalCharges = totalCharges;
-	
-	if ( ArenaLive.debug ) then
-		cooldownData[guid]["cooldowns"][spellID].priority = ArenaLiveSpectator:GetCooldownPriority(spellID, class, 0);
-	else
-		cooldownData[guid]["cooldowns"][spellID].priority = ArenaLiveSpectator:GetCooldownPriority(spellID, class, specID);
-	end
-	
-	table.insert(cooldownData[guid].priorityList, spellID);
+	-- Add to CD type table:
+	local cdType = ArenaLiveSpectator.SpellDB.CooldownTypes[spellID];
+	table.insert(trackedUnits[unit][cdType], spellID);
+	trackedUnits[unit].spellIDToIndex[spellID] = #trackedUnits[unit][cdType];
 end
 
-function CooldownTracker:ModifyCooldown(guid, spellID, value)
-
-	if ( cooldownData[guid]["cooldowns"][spellID] ) then
-		
-		local baseDuration = cooldownData[guid]["cooldowns"][spellID].duration;
-		local newVal = baseDuration;
+function CooldownTracker:ModifyCooldown(unit, spellID, value)
+	if ( trackedUnits[unit]["cooldowns"][spellID] ) then
+		local newVal;
+		local baseDuration = trackedUnits[unit]["cooldowns"][spellID]["duration"];
 		if ( type(value) == "function" ) then
 			-- Some values need a function to execute their spell changes.		
 			newVal = value(baseDuration);
-		elseif ( type(value) == "number" ) then
-			newVal = baseDuration + value;
 		else
-			ArenaLive:Message(L["WARNING! Tried to modify cooldown of spell with the spellID %d, but the modify value was not a number."], "message", spellID);
+			newVal = baseDuration + value;
 		end		
 
-		cooldownData[guid]["cooldowns"][spellID].duration = newVal;
+		trackedUnits[unit]["cooldowns"][spellID]["duration"] = newVal;
 	end
 end
 
-function CooldownTracker:ModifyCooldownCharges(guid, spellID, value)
-	if ( cooldownData[guid]["cooldowns"][spellID] ) then
-		local charges = cooldownData[guid]["cooldowns"][spellID].charges;
-		local totalCharges = cooldownData[guid]["cooldowns"][spellID].totalCharges;
-		cooldownData[guid]["cooldowns"][spellID].totalCharges = totalCharges + value;
-		cooldownData[guid]["cooldowns"][spellID].charges = charges + value;
-	end
-end
-
-function CooldownTracker:ModifyCooldownPriority(guid, spellID, newPriority)
-	if ( cooldownData[guid]["cooldowns"][spellID] ) then
-		cooldownData[guid]["cooldowns"][spellID].priority = newPriority;
-	end
-end
-
-function CooldownTracker:RemoveCooldown(guid, spellID)
-	if ( cooldownData[guid]["cooldowns"][spellID] ) then
-		--ArenaLive:Message([[Remove Cooldown: %d for guid %s, cooldownData[guid]["cooldowns"][spellID] = %s ]], "debug", spellID, guid, tostring(cooldownData[guid]["cooldowns"][spellID]));
-		
-		dumpTable(cooldownData[guid]["cooldowns"][spellID]);
-		cooldownData[guid]["cooldowns"][spellID] = nil;
-		
-		-- Remove from prio list:
-		for index, prioSpellID in ipairs(cooldownData[guid].priorityList) do
-			if ( spellID == prioSpellID ) then
-				table.remove(cooldownData[guid].priorityList, index);
-				break;
-			end
-		end
-	end
-end
-
-function CooldownTracker:StartCooldown(guid, spellID, customDuration)
-	if ( cooldownData[guid] and cooldownData[guid]["cooldowns"][spellID] ) then
-		-- Set charges - 1:
-		CooldownTracker:UpdateCooldownCharges(guid, spellID, -1, nil, customDuration);
-	end
-end
-
-function CooldownTracker:UpdateCooldownCharges(guid, spellID, value, isFullRecharge, customDuration)
+function CooldownTracker:ModifyCooldownCharges(unit, spellID, value)
 	
-	local charges, totalCharges = cooldownData[guid]["cooldowns"][spellID].charges, cooldownData[guid]["cooldowns"][spellID].totalCharges;
+	if ( trackedUnits[unit]["cooldowns"][spellID] ) then
+		local charges = trackedUnits[unit]["cooldowns"][spellID]["totalCharges"];
+		trackedUnits[unit]["cooldowns"][spellID]["totalCharges"] = charges + value;
+		trackedUnits[unit]["cooldowns"][spellID]["charges"] = charges + value;
+	end
+end
+
+function CooldownTracker:RemoveCooldown(unit, spellID)
+	if ( trackedUnits[unit]["cooldowns"][spellID] ) then
+		dumpTable(trackedUnits[unit]["cooldowns"][spellID]);
+		trackedUnits[unit]["cooldowns"][spellID] = nil;
+		
+		-- Remove from CD type table:
+		local cdType = ArenaLiveSpectator.SpellDB.CooldownTypes[spellID];
+		local index = trackedUnits[unit].spellIDToIndex[spellID];
+		trackedUnits[unit].spellIDToIndex[spellID] = nil;
+		trackedUnits[unit][cdType][index] = nil;
+	end
+end
+
+function CooldownTracker:StartCooldown(unit, spellID, customDuration)
+	-- Set charges - 1:
+	if ( trackedUnits[unit] and trackedUnits[unit]["cooldowns"][spellID] ) then
+		CooldownTracker:UpdateCooldownCharges(unit, spellID, -1, nil, customDuration);
+	end
+end
+
+function CooldownTracker:UpdateCooldownCharges(unit, spellID, value, isFullRecharge, customDuration)
+	
+	local charges, totalCharges = trackedUnits[unit]["cooldowns"][spellID]["charges"], trackedUnits[unit]["cooldowns"][spellID]["totalCharges"];
 	if ( isFullRecharge ) then
 		charges = totalCharges;
 	else
@@ -544,46 +480,62 @@ function CooldownTracker:UpdateCooldownCharges(guid, spellID, value, isFullRecha
 		charges = 0;
 	end
 	
-	cooldownData[guid]["cooldowns"][spellID].charges = charges;
+	trackedUnits[unit]["cooldowns"][spellID]["charges"] = charges;
 	
 	-- Set new cooldown if necessary:
 	if ( charges < totalCharges ) then
-		local currExpire = cooldownData[guid]["cooldowns"][spellID].expires;
+		local currExpire = trackedUnits[unit]["cooldowns"][spellID]["expires"];
 		local startTime = GetTime();
-		local duration = customDuration or cooldownData[guid]["cooldowns"][spellID].duration;
-		ArenaLive:Message("     Duration is %d seconds for cooldown %d", "debug", duration, spellID);
+		local duration = customDuration or trackedUnits[unit]["cooldowns"][spellID]["duration"];
 		local expires = startTime + duration;
-		if ( ( not currExpire or ( totalCharges == 1 and currExpire < expires ) ) ) then
-			cooldownData[guid]["cooldowns"][spellID].expires = expires;
-			activeCooldowns[guid..";"..spellID] = expires..";"..tostring(charges + 1);
-			if ( not self:IsShown() ) then
-				self:Show();
-			end
-		elseif ( totalCharges > 1 ) then
-			local expires, charges = string.split(";", activeCooldowns[guid..";"..spellID]);
-			expires = tonumber(expires);
-			charges = tonumber(charges);
-			
-			charges = charges - 1;
-			activeCooldowns[guid..";"..spellID] = expires .. ";" .. charges;
+		
+		
+		if ( not currExpire or ( totalCharges == 1 and currExpire < expires ) ) then
+			trackedUnits[unit]["cooldowns"][spellID]["expires"] = expires;
+				
+			if ( not activeCooldowns[unit] ) then
+				activeCooldowns[unit] = newTable();
+			end	
+				
+			activeCooldowns[unit][spellID] = startTime + duration;
 		end
+		
+		self:Show();
 	end
 	
 end
 
-function CooldownTracker:ResetCooldown(guid, spellID, isFullReset)
-	if ( cooldownData[guid] and cooldownData[guid]["cooldowns"][spellID] ) then
+function CooldownTracker:ResetCooldown(unit, spellID, isFullReset)
+	if ( trackedUnits[unit] and trackedUnits[unit]["cooldowns"][spellID] ) then
 		-- Reset cooldown data:
-		cooldownData[guid]["cooldowns"][spellID].expires = nil;
+		trackedUnits[unit]["cooldowns"][spellID]["expires"] = nil;
+		if ( activeCooldowns[unit] ) then
+			activeCooldowns[unit][spellID] = nil;
+		end
 		
 		-- Update charges:
-		CooldownTracker:UpdateCooldownCharges(guid, spellID, 1, isFullReset);
+		CooldownTracker:UpdateCooldownCharges(unit, spellID, 1, isFullReset);
+	end
+end
+
+function CooldownTracker:CallInspect()
+	local unit, guid = next(inspectQueue);
+	
+	if ( unit and CanInspect(unit) ) then
+		local name = GetUnitName(unit);
+		NotifyInspect(unit);
+		UNIT_WAITING_FOR_INSPECT_EVENT = unit;
+		ArenaLive:Message(L["Sending inspect query for %s (%s)..."], "debug", unit, name);
+	elseif ( unit ) then
+		-- Remove this entry from the list, as it cannot be inspected:
+		inspectQueue[unit] = nil;
+		self:Show();
 	end
 end
 
 function CooldownTracker:CallGatherForAll()
-	for unit in pairs(trackedUnits) do
-		CooldownTracker:GatherCooldownInfo(unit);
+	for unit, cdTable in pairs(trackedUnits) do
+		CooldownTracker:GatherCooldownInfo(unit, false);
 	end
 end
 
@@ -593,105 +545,130 @@ function CooldownTracker:ResetAll()
 	end
 end
 
-function CooldownTracker:GetInterruptOrDispelBySpec(specID)
-	return ArenaLiveSpectator.SpellDB.SpecIDToDispelOrInterrupt[specID];
+function CooldownTracker:ShowInterruptOrDispel(specID)
+	if ( not specID ) then
+		return nil;
+	end
+	local role = GetSpecializationRoleByID(specID);
+	if ( specID == 258 ) then
+		-- Exception for shadow priests, as they don't have an interrupt:
+		return "DISPEL";
+	elseif ( role == "DAMAGER" or role == "TANK" ) then
+		return "INTERRUPT";
+	elseif ( role == "HEALER" ) then
+		return "DISPEL";
+	else
+		return nil;
+	end
 end
 
 function CooldownTracker:OnEvent(event, ...)
 	local unit = ...;
-	unit = ArenaLive:GetPetOwnerUnit(unit);
-	
-	if ( event == "AL_SPEC_PLAYER_UPDATE" and trackedUnits[unit] ) then
-			for tracker in pairs(trackers) do
-				if ( unit == tracker.unit ) then
-					tracker:UpdateGUID();
-				end
-			end
-	elseif ( event == "AL_SPEC_PLAYER_SPECIALIZATION_UPDATE" and trackedUnits[unit] ) then
-		CooldownTracker:GatherCooldownInfo(unit);
-	elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" and self.currentStatusID ) then
+	if ( event == "COMMENTATOR_PLAYER_UPDATE" and ArenaLiveSpectator:HasMatchStarted() ) then
+		CooldownTracker:CallGatherForAll();
+	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
+		if ( IsSpectator() ) then
+			-- Update cooldown info after match has
+			-- started to make sure for talent and
+			-- glyph switches etc.
+			ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
+		else
+			self:ResetAll();
+		end
+	elseif ( event == "INSPECT_READY" and unit == inspectQueue[UNIT_WAITING_FOR_INSPECT_EVENT] ) then
+		-- unit actually has the value of a GUID in case of inspect	
+		ArenaLive:Message(L["Inspect data received for %s..."], "debug", UNIT_WAITING_FOR_INSPECT_EVENT);
+		CooldownTracker:GatherCooldownInfo(UNIT_WAITING_FOR_INSPECT_EVENT, true);
+		
+		-- Clear Inspect:
+		inspectQueue[UNIT_WAITING_FOR_INSPECT_EVENT] = nil;
+		UNIT_WAITING_FOR_INSPECT_EVENT = nil;
+		ClearInspectPlayer();
+		
+		-- Call next inspect in queue if necessary:
+		if ( next(inspectQueue) ) then
+			CooldownTracker:CallInspect();
+		end
+	elseif ( event == "UNIT_NAME_UPDATE" and trackedUnits[unit] ) then
+		-- Reset old cooldown information for this unit and add to inspect queue:
+		print(event, ...)
+		--CooldownTracker:ResetCooldownInfo(unit);
+		--CooldownTracker:GatherCooldownInfo(unit, false);
+	elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" and trackedUnits[unit] ) then
 		local spellID = select(5, ...);
-		local guid = UnitGUID(unit);
+		
 		-- Dispels need to be filtered, because they only trigger when they dispel something.
 		-- Their cooldown is, therefore, triggered by COMBAT_LOG_EVENT_UNFILTERED_SPELL_DISPEL
-		if ( guid and cooldownData[guid] and unit == cooldownData[guid].unit and not ArenaLiveSpectator.SpellDB.Dispels[spellID] ) then
+		if ( ArenaLiveSpectator.SpellDB.CooldownTypes[spellID] ~= "DISPEL" ) then
 			-- Check for cooldown resets:
 			if ( ArenaLive.spellDB.CooldownResets[spellID] ) then
 				for resetID in pairs(ArenaLive.spellDB.CooldownResets[spellID]) do
-					CooldownTracker:ResetCooldown(guid, resetID, true);
+					CooldownTracker:ResetCooldown(unit, resetID, true);
 				end
 			end
 			
 			-- Start cooldown:
-			if ( cooldownData[guid]["cooldowns"][spellID] ) then
-				CooldownTracker:StartCooldown(guid, spellID);
+			if ( trackedUnits[unit]["cooldowns"][spellID] ) then
+				CooldownTracker:StartCooldown(unit, spellID);
 			end
 			
 			-- Check if there are shared CDs:
 			if ( ArenaLiveSpectator.SpellDB.SharedCooldowns[spellID] ) then
 				for sharedID, sharedDuration in pairs(ArenaLiveSpectator.SpellDB.SharedCooldowns[spellID]) do
-					CooldownTracker:StartCooldown(guid, sharedID, sharedDuration);
+					CooldownTracker:StartCooldown(unit, sharedID, sharedDuration);
 				end
 			end
 			
 			-- Update cooldown tracker frames after all changes have been applied:
 			CooldownTracker:UpdateTrackersByUnit(unit);
 		end
-	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_DISPEL" and self.currentStatusID ) then
+	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_DISPEL" ) then
 		local spellID = select(12, ...);
-		if ( ArenaLiveSpectator.SpellDB.Dispels[spellID] ) then
+		if ( ArenaLiveSpectator.SpellDB.CooldownTypes[spellID] == "DISPEL" ) then
 			local sourceGUID = select(4, ...);
-			if ( unit and cooldownData[sourceGUID] and cooldownData[sourceGUID]["cooldowns"][spellID] ) then
-				CooldownTracker:StartCooldown(sourceGUID, spellID);
+			local unit = ArenaLiveSpectator:GetUnitByGUID(sourceGUID);
+			if ( unit and trackedUnits[unit] and trackedUnits[unit]["cooldowns"][spellID] ) then
+				CooldownTracker:StartCooldown(unit, spellID);
 			end
-		end
-	elseif ( event == "UPDATE_BATTLEFIELD_STATUS" ) then
-		local statusID = ...;
-		local status, mapName, teamSize, registeredMatch, suspendedQueue, queueType, gameType, role, unknown = GetBattlefieldStatus(statusID);
-		local isSpectator, gameType = IsSpectator();
-		if ( status == "active" and isSpectator and gameType == "arena" ) then
-			self.currentStatusID = statusID;
-			
-			-- Wipe active cooldown cache, because CDs reset when joining the arena. 
-			table.wipe(activeCooldowns);			
-		elseif ( status == "none" and statusID == self.currentStatusID ) then
-			for guid in pairs(cooldownData) do
-				CooldownTracker:ResetCooldownTable(guid);
-			end
-			self:ResetAll();
-			
-			self.currentStatusID = nil;
 		end
 	end
 end
 
+-- The function is throttled to prevent inspect call spam, which could
+-- let the server refuse our queries.
 local elapsedTillNow = 0;
 local THROTTLE = 1.0;
 function CooldownTracker:OnUpdate(elapsed)
 	elapsedTillNow = elapsedTillNow + elapsed;
 	if ( elapsedTillNow > THROTTLE ) then
 		elapsedTillNow = 0;
-		local theTime = GetTime();
+		
+		local nextKey, nextValue = next(inspectQueue);
+		if ( nextKey and not UNIT_WAITING_FOR_INSPECT_EVENT ) then
+			CooldownTracker:CallInspect();
+		end
 		
 		nextKey, nextValue = next(activeCooldowns);
 		if ( nextKey ) then
-			for identifier, expireInfo in pairs(activeCooldowns) do
-				local expires, newCharges = string.split(";", expireInfo);
-				expires = tonumber(expires);
-				newCharges = tonumber(newCharges);
-				if ( expires <= theTime ) then
-					local guid, spellID = string.split(";", identifier);
-					spellID = tonumber(spellID);
-					activeCooldowns[identifier] = nil;
-					CooldownTracker:ResetCooldown(guid, spellID);
-					CooldownTracker:UpdateTrackersByGUID(guid);
+			local theTime = GetTime();
+			for unit, cooldownTable in pairs(activeCooldowns) do
+				if ( next(cooldownTable) ) then
+					for spellID, expires in pairs(cooldownTable) do
+						if ( expires <= theTime ) then
+							CooldownTracker:ResetCooldown(unit, spellID);
+							CooldownTracker:UpdateTrackersByUnit(unit);
+						end
+					end
+				else
+					dumpTable(cooldownTable);
+					activeCooldowns[unit] = nil;
 				end
 			end
 		end
 		
 		if ( not nextKey ) then
 			-- Hide frame so OnUpdate script won't be called any longer:
-			ArenaLive:Message("Hiding CooldownTracker's handler frame...", "debug");
+			ArenaLive:Message(L["Hiding CooldownTracker's handler frame..."], "debug");
 			self:Hide();
 		end
 	end
@@ -721,8 +698,7 @@ end
 function CooldownTrackerClass:Update()
 	
 	local unit = self.unit;
-	local guid = self.guid;
-	if ( not self.enabled or not unit or not guid or not cooldownData[guid] ) then
+	if ( not self.enabled or not unit or not trackedUnits[unit] or not UnitExists(unit) ) then
 		self:Reset();
 		return;
 	end
@@ -730,26 +706,14 @@ function CooldownTrackerClass:Update()
 	self:Show();
 	
 	-- Set class icon:
-	local class = cooldownData[guid].class;
+	local _, class = UnitClass(unit);
 	if ( self.classIcon and class ) then
 		self.classIcon:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes");
 		self.classIcon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[class]));
 	end
 	
-	-- Set talent spec icon:
-	if ( self.specIcon ) then
-		local specID = cooldownData[guid].specID
-		if ( specID ) then
-			local _, _, _, texture = GetSpecializationInfoByID(specID);
-			self.specIcon:SetTexture(texture);
-			self.specIcon:Show();
-		else
-			self.specIcon:Hide();
-		end
-	end
-	
 	-- Set name:
-	local name = NameText:GetNickname(unit) or UnitName(unit);
+	local name = NameText:GetNickname(unit) or GetUnitName(unit);
 	if ( self.nameText ) then
 		self.nameText:SetText(name);
 	end	
@@ -765,97 +729,118 @@ function CooldownTrackerClass:Update()
 		end
 		
 		icon:Show();
-		
+
 		icon.spellID = spellID;
 		icon.addon = self.addon;
 		icon.group = self.group;
-
+			
 		-- Set Texture:
-		if ( cooldownData[guid]["cooldowns"][spellID] ) then
-			local texture = cooldownData[guid]["cooldowns"][spellID]["texture"] or [[Interface\Icons\INV_Misc_QuestionMark]];
-			icon.texture:SetTexture(texture);
-				
-			-- Set number of charges:
-			local charges, totalCharges = cooldownData[guid]["cooldowns"][spellID]["charges"], cooldownData[guid]["cooldowns"][spellID]["totalCharges"];
-			if ( icon.count ) then
-				if ( charges > 0 and totalCharges > 1 ) then
-					icon.count:Show();
-					icon.count:SetText(charges);
-				else
-					icon.count:Hide();
-				end
-			end
-				
-			-- Check for active cooldown:
-			local expires = cooldownData[guid]["cooldowns"][spellID]["expires"];
-			local duration = cooldownData[guid]["cooldowns"][spellID]["duration"];
-			if ( expires and expires > theTime and charges == 0 ) then
-				local startTime = expires - duration;
-				icon.cooldown:Set(startTime, duration);
+		local texture = trackedUnits[unit]["cooldowns"][spellID]["texture"] or [[Interface\Icons\INV_Misc_QuestionMark]];
+		icon.texture:SetTexture(texture);
+			
+		-- Set number of charges:
+		local charges, totalCharges = trackedUnits[unit]["cooldowns"][spellID]["charges"], trackedUnits[unit]["cooldowns"][spellID]["totalCharges"];
+		if ( icon.count ) then
+			if ( charges > 0 and totalCharges > 1 ) then
+				icon.count:Show();
+				icon.count:SetText(charges);
 			else
-				icon.cooldown:Reset();
+				icon.count:Hide();
 			end
+		end
+			
+		-- Check for active cooldown:
+		if ( trackedUnits[unit]["cooldowns"][spellID]["expires"] and trackedUnits[unit]["cooldowns"][spellID]["expires"] > theTime and charges == 0 ) then
+				
+			local expires = trackedUnits[unit]["cooldowns"][spellID]["expires"];
+			local duration = trackedUnits[unit]["cooldowns"][spellID]["duration"];
+			local startTime = expires - duration;
+			icon.cooldown:Set(startTime, duration);
 		else
-			self:ResetIcon(icon);
+			icon.cooldown:Reset();
 		end
 	end
 	
-	-- Reset empty icons:
-	for i = #self.shownCooldowns + 1, self.numIcons do
-		icon = self["icon"..i];
-		self:ResetIcon(icon);
+	-- Reset not needed icons:
+	if ( #self.shownCooldowns < self.numIcons ) then
+		for i = #self.shownCooldowns + 1, self.numIcons do
+			icon = self["icon"..i];
+			self:ResetIcon(icon);
+		end
 	end
 end
 
 function CooldownTrackerClass:UpdateShownCooldowns()
 	local database = ArenaLive:GetDBComponent(self.addon, "CooldownTracker", self.group);
 	local unit = self.unit;
-	local guid = self.guid;
+	local specID = trackedUnits[unit].specID;
 	
 	-- Reset old entries:
-	table.wipe(self.shownCooldowns);	
+	table.wipe(self.shownCooldowns);
 	
-	if ( unit and guid and cooldownData[guid] ) then
-		local specID = cooldownData[guid].specID;
-		local i = 1;
-		local spellsFound = 0;
-		local numCooldowns = #cooldownData[guid].priorityList or 0;
+	if ( trackedUnits[unit] ) then
+		-- Add trinket:
+		if ( database.ShowTrinket ) then
+			table.insert(self.shownCooldowns, trackedUnits[unit]["TRINKET"][1]);
+		end
+		
+		-- Add racial:
 		local _, race = UnitRace(unit);
-		-- NOTE: Racials were removed from cooldown list in
-		-- version 3.1.11b, to reduce ability bloat.
-		--[[if ( race == "Human" and numCooldowns > 0 ) then
-			-- BUGFIX: As I do filter Human's Racial below,
-			-- I have to reduce numCooldowns by 1, otherwise
-			-- the last cooldown in the list gets shown twice,
-			-- if a player has less than 9 cooldowns.
-			numCooldowns = numCooldowns - 1;
-		end]]
+		if ( database.ShowRacial and race ~= "Human" ) then
+			table.insert(self.shownCooldowns, trackedUnits[unit]["RACIAL"][1]);
+		end
 		
+		-- Add interrupt or dispel depending on spec:
+		local interruptOrDispel = CooldownTracker:ShowInterruptOrDispel(specID);
+		if ( interruptOrDispel ) then
+			table.insert(self.shownCooldowns, trackedUnits[unit][interruptOrDispel][1]);
+		end	
 		
-		while ( spellsFound < database.MaxShownIcons ) do
-			if ( spellsFound == database.MaxShownIcons - 1 or spellsFound == numCooldowns - 1 ) then
-				-- The last cooldown always is either interrupt or dispel,
-				-- depending on spec:
-				local spellID = CooldownTracker:GetInterruptOrDispelBySpec(specID);
-				spellsFound = spellsFound + 1;
-				if ( spellID ) then
-					self.shownCooldowns[spellsFound] = spellID;
-				else
-					self.shownCooldowns[spellsFound] = cooldownData[guid].priorityList[i];
+		local icon;
+		local numFoundDefCDs = 0;
+		local numFoundOffCDs = 0;
+		local cooldownType = "MAIN";
+		local i = 1;	
+		while #self.shownCooldowns < database.MaxShownIcons do				
+			if ( cooldownType == "MAIN" ) then
+				-- Add Defensive and Offensive Cooldowns:
+				if ( numFoundDefCDs < database.numMaxDefCDs and i <= #trackedUnits[unit]["DEF_CD"] ) then
+					numFoundDefCDs = numFoundDefCDs + 1;
+					table.insert(self.shownCooldowns, trackedUnits[unit]["DEF_CD"][i]);
+				end
+
+				if ( numFoundOffCDs < database.numMaxOffCDs and i <= #trackedUnits[unit]["OFF_CD"] ) then
+					numFoundOffCDs = numFoundOffCDs + 1;
+					table.insert(self.shownCooldowns, trackedUnits[unit]["OFF_CD"][i]);
 				end
 				
-				break; -- Break loop to make sure that this one is the last cooldown in the list.
+				if ( ( numFoundOffCDs == database.numMaxOffCDs and numFoundOffCDs == database.numMaxOffCDs ) 
+				or ( i >  #trackedUnits[unit]["DEF_CD"] and i > #trackedUnits[unit]["OFF_CD"] ) ) then
+					cooldownType = "CC";
+					i = 0;
+				end
 			else
-				spellsFound = spellsFound + 1;
-				self.shownCooldowns[spellsFound] = cooldownData[guid].priorityList[i];
+				-- Fill remaining space with crowd control and misc cooldowns:
+				if ( i <= #trackedUnits[unit][cooldownType] ) then
+					table.insert(self.shownCooldowns, trackedUnits[unit][cooldownType][i]);
+				end
+				
+				if ( cooldownType == "CC" and i >  #trackedUnits[unit][cooldownType] ) then
+					i = 0;
+					cooldownType = "MISC";
+				elseif ( cooldownType == "MISC" and i > #trackedUnits[unit][cooldownType] ) then
+					break;
+				end
 			end
 			
 			i = i + 1;
 		end
-		self:Update();
-	else
-		self:Reset();
+		
+		-- Sort cooldown table:
+		table.sort(self.shownCooldowns, sortFunc);
 	end
+
+	self:Update();
 end
 
 function CooldownTrackerClass:UpdatePositions()
@@ -918,10 +903,6 @@ function CooldownTrackerClass:Reset()
 		self.classIcon:SetTexture();
 	end
 	
-	if ( self.specIcon ) then
-		self.specIcon:SetTexture();
-	end	
-	
 	if ( self.nameText ) then
 		self.nameText:SetText("");
 	end
@@ -941,33 +922,13 @@ function CooldownTrackerClass:ResetIcon(icon)
 end
 
 function CooldownTrackerClass:UpdateUnit(unit)
+	
 	if ( unit and unit ~= self.unit ) then
-		if ( self.unit ) then
-			CooldownTracker:UnregisterUnit(self.unit);
-		end
-		
 		CooldownTracker:RegisterUnit(unit);
 	elseif ( not unit and self.unit ) then
 		CooldownTracker:UnregisterUnit(unit);
 	end
 	
 	self.unit = unit;
-	self:UpdateGUID();	
-end
-
-function CooldownTrackerClass:UpdateGUID()
-	if ( not self.unit ) then
-		self.guid = nil;
-		return;
-	end
-	
-	local guid = UnitGUID(self.unit);
-	if ( guid ~= self.guid ) then
-		self.guid = guid;
-		if ( guid ) then
-			self:UpdateShownCooldowns();
-		else
-			self:Reset();
-		end
-	end
+	self:Update();
 end

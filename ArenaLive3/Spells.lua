@@ -1,26 +1,3 @@
---[[
-    ArenaLive [Core] is an unit frame framework for World of Warcraft.
-    Copyright (C) 2014  Harald Böhm <harald@boehm.agency>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
-
 ArenaLive.spellDB = {
 			["Trinket"] = { 42292, 120 }, -- SpellID and cooldown of the PvP-Trinket
 			["Racials"] = {
@@ -39,7 +16,7 @@ ArenaLive.spellDB = {
 						["MAGE"] = { 59548, 180 },
 						["MONK"] = { 121093, 180 } -- Need to test this as soon as MoP is out.
 					},
-					["Worgen"] = { 68992, 120 },
+					["Worgen"] = { 68992, 120, 0 },
 					["Orc"] = { -- Since Orcs also have class-specific racials, we need to add all of them
 						["WARRIOR"] = { 20572, 120 },
 						["HUNTER"] = { 20572, 120 },
@@ -62,7 +39,7 @@ ArenaLive.spellDB = {
 						["MAGE"] = { 28730, 120 },
 						["WARLOCK"] = { 28730, 120 },
 						["DEATHKNIGHT"] = { 50613, 120 },
-						["MONK"] = { 129597, 120 },
+						["MONK"] = { 129597, 120 }
 					},
 					["Goblin"] = { 69070, 120 },
 					["Pandaren"] = { 107079, 120 }
@@ -112,24 +89,19 @@ ArenaLive.spellDB = {
 				[91807] = "root", 			-- Pet Leap Root
 				
 				-- Druid
-				[22812] = "defCD",			-- Barkskin
 				[33786] = "defCD",			-- Cyclone (Made that one a def CD, because the enemy is immune to everything during cyclone)
-				[102342] = "defCD",			-- Ironbark
 				[22570] = "stun",			-- Maim
 				[5211] = "stun",			-- Mighty Bash
 				[81261] = "silence",		-- Solar Beam
 				[114238] = "silence",		-- Fae Silence (Glyph of Fae Silence)
 				[99] = "crowdControl",		-- Incapacitating Roar
-				[339] = "root",				-- Entangling Roots
-				[113770] = "root",			-- Entangling Roots (Force of Nature)
-				[170855] = "root",			-- Entangling Roots (Nature's Grasp)
+				[339] = "root",				-- Entangling roots
 				[16979] = "root",			-- Wild Charge (root)
 				[102359] = "root",			-- Mass Entanglement
 
 				-- Hunter
 				[5384] = "defCD",			-- Feign Death
 				[19263] = "defCD",			-- Deterrence
-				[148467] = "defCD",			-- Deterrence (Crouching Tiger, Hidden Chimaera)
 				[117526] = "stun",			-- Binding Shot
 				[19577] = "stun",			-- Intimidation (stun)
 				[3355] = "crowdControl",	-- Freezing Trap
@@ -186,7 +158,6 @@ ArenaLive.spellDB = {
 				[145067] = "crowdControl",	-- Turn Evil
 				[105421] = "crowdControl",	-- Blinding Light
 				[20066] = "crowdControl",	-- Repentance
-				[6940] = "usefulBuffs",		-- Hand of Sacrifice
 				
 				-- Priest
 				[33206] = "defCD",			-- Pain Suppression
@@ -208,7 +179,6 @@ ArenaLive.spellDB = {
 				-- Rogue	
 				[5277] = "defCD",			-- Evasion
 				[31224] = "defCD",			-- Cloak of Shadows
-				[74002] = "defCD",			-- Combat Insight (Combat Readiness Stacks)
 				[88611] = "defCD",			-- Smokebomb
 				[13750] = "offCD",			-- Adrenaline Rush
 				[51690] = "offCD",			-- Killing Spree
@@ -233,7 +203,6 @@ ArenaLive.spellDB = {
 				[51514] = "crowdControl",	-- Hex
 				[63685] = "root",			-- Frost Shock (including Frozen Power)
 				[64695] = "root",			-- Earthgrab Totem
-				[8178] = "usefulBuffs",		-- Grounding Totem
 				
 				-- Warlock
 				[710] = "defCD",			-- Banish (It is marked as def CD for the same reason as Cyclone)
@@ -250,7 +219,6 @@ ArenaLive.spellDB = {
 				[118699] = "crowdControl",	-- Fear
 				[115268] = "crowdControl",	-- Mesmerize (Pet-Charm)
 				[6358] = "crowdControl",	-- Seduce (Pet-Charm)
-				[170996] = "root",			-- Debilitate (Terrorguard)
 				[30108] = "usefulDebuffs",	-- Unstable Affliction		
 				
 				-- Warrior
@@ -296,47 +264,6 @@ ArenaLive.spellDB = {
 					[166646] = "Wind Walking",
 					[126137] = "Lightspring Trigger",
 					[178293] = "Arena Inbounds Marker",
-					[132951] = "Flare",
-			},
-			["DefensiveCooldowns"] = {
-				["DEATHKNIGHT"] = {
-					[48707] = 45,		-- Anti-Magic Shell
-				},
-				["DRUID"] = {
-					[22812] = 60,		-- Barkskin
-					[61336] = 180,		-- Survival Instincts	
-				},
-				["HUNTER"] = {
-					[19263] = 180		-- Deterrence
-				},
-				["MAGE"] = {
-					[45438] = 300,		-- Ice Block
-				},
-				["MONK"] = {
-					[115203] = 180,		-- Fortifying Brew
-				},
-				["PALADIN"] = {
-					[642] = 300,		-- Divine Shield
-				},
-				["PRIEST"] = {
-					[33206] = 120,			-- Pain Suppression (with Setbonus)
-					[47788] = 120,			-- Guardian Spirit
-					[47585] = 120,			-- Dispersion (Unglyphed)
-				},
-				["ROGUE"] = {
-					[5277] = 120,			-- Evasion
-				},
-				["SHAMAN"] = {
-					[30823] = 60,			-- Shamanistic Rage
-					[108280] = 180,			-- Healing Tide Totem
-				},
-				["WARRIOR"] = {
-					[118038] = 120,			-- Die by the Sword
-					[871] = 180,			-- Shield Wall
-				},
-				["WARLOCK"] = {
-					[104773] = 180,			-- Unending Resolve
-				},
 			},
 			["ShownBuffs"] = { -- I've decided to just show certain Buffs on the Buff-frame. Here is the List.
 			-- Order is [SpellID] = "Castname",
@@ -426,7 +353,6 @@ ArenaLive.spellDB = {
 				[159916] = "Amplify Magic",
 				[57761] = "Brain Freeze",
 				[87023] = "Cauterize",
-				[61316] = "Dalaran Brilliance",
 				[12051] = "Evocation",
 				[7302] = "Frost Armor",
 				[113862] = "Greater Invisibility",
@@ -614,7 +540,6 @@ ArenaLive.spellDB = {
 			["DRUID"] = { 106839, 15 }, 		-- Skull Bash
 			["HUNTER"] = { 147362, 24 },		-- Counter Shot
 			["MAGE"] = { 2139, 24 },			-- Counter Spell
-			["MONK"] = { 116705, 15 }, 			-- Spear Hand Strike
 			["PALADIN"] = { 96231, 15 }, 		-- Rebuke
 			["ROGUE"] = { 1766, 15 }, 			-- Kick
 			["SHAMAN"] = { 57994, 12 },			-- Wind Shear
@@ -625,15 +550,11 @@ ArenaLive.spellDB = {
 				[42292] = { -- PvP-Insignia
 					[59752] = 120,			-- Human Racial
 					[7744] = 30,			-- Will of the Forsaken
-					[20594] = 30,			-- Stoneform
 				},
 				[59752] = { -- Human Racial
 					[42292] = 120,			-- PvP-Insignia
 				},
 				[7744] = { -- Will of the Forsaken
-					[42292] = 30,			-- PvP-Insignia
-				},
-				[20594] = { -- Stoneform
 					[42292] = 30,			-- PvP-Insignia
 				},
 				[119911] = { -- Optical Blast
@@ -647,66 +568,11 @@ ArenaLive.spellDB = {
 				},
 			},
 		["DiminishingReturns"] =
-			{
-				-- Disorients:
-				[33786] = "disorient",			-- Cyclone
-				
-				[31661] = "disorient", 			-- Dragon's Breath
-				
-				[105421] = "disorient", 		-- Blinding Light
-				[10326] = "disorient", 			-- Turn Evil
-				
-				[8122] = "disorient", 			-- Psychic Scream
-				
-				[2094] = "disorient", 			-- Blind
-
-				[118699] = "disorient", 		-- Fear
-				[5484] = "disorient", 			-- Howl of Terror
-				[115268] = "disorient", 		-- Mesmerize
-				[6358] = "disorient", 			-- Seduction
-
-				[5246] = "disorient",			-- Intimidating Shout
-				[95199] = "disorient", 			-- Intimidating Shout
-				
-				
-				-- Incapacitates:
-				[99] = "incapacitate", 			-- Incapacitating Roar
-				
-				[3355] = "incapacitate", 		-- Freezing Trap
-				[19386] = "incapacitate", 		-- Wyvern Sting
-				
-				[118] = "incapacitate", 		-- Polymorph
-				[113724] = "incapacitate", 		-- Ring of Frost
-				
-				[123407] = "incapacitate",		-- Glyph of Breath of Fire
-				[115078] = "incapacitate", 		-- Paralysis
-				[137460] = "incapacitate",		-- Ring of Peace
-				
-				[20066] = "incapacitate", 		-- Repentance
-				
-				[605] = "incapacitate",			-- Dominate Mind
-				[88625] = "incapacitate", 		-- Holy Word: Chastise
-				[64044] = "incapacitate", 		-- Psychic Horror
-				[9484] = "incapacitate", 		-- Shackle Undead (?)				
-				
-				[1776] = "incapacitate", 		-- Gouge
-				[6770] = "incapacitate", 		-- Sap
-				
-				[51514] = "incapacitate", 		-- Hex
-				
-				[710] = "incapacitate",			-- Banish
-				[137143] = "incapacitate", 		-- Blood Horror
-				[6789] = "incapacitate", 		-- Mortal Coil
-				
-				[107079] = "incapacitate", 		-- Quaking Palm (Racial)
-				
-				
+			{						
 				-- Roots:
 				[96294] = "root", 				-- Chains of Ice
 				
 				[339] = "root", 				-- Entangling Roots
-				[113770] = "root",				-- Entangling Roots (Force of Nature)
-				[170855] = "root",				-- Entangling Roots (Nature's Grasp)
 				[102359] = "root",				-- Mass Entanglement
 				
 				[53148] = "root",				-- Charge (Tenacity Pet)
@@ -714,7 +580,6 @@ ArenaLive.spellDB = {
 				[136634] = "root", 				-- Narrow Escape 
 				
 				[33395] =  "root",  			-- Freeze
-				[102051] = {"root", "silence"}, -- Frostjaw
 				[122] = "root",  				-- Frost Nova
 				[111340] = "root",				-- Ice Ward Root
 				
@@ -726,30 +591,7 @@ ArenaLive.spellDB = {
 				[64695] = "root",				-- Earthgrab (Earthgrab Totem)
 				[63685] = "root", 				-- Frost Shock (Frozen Power Talent)
 
-				[170996] = "root",				-- Debilitate (Terrorguard)
 				
-				-- Silences:
-				[47476] = "silence", 			-- Strangulate
-				
-				[114238] = "silence",			-- Fae Silence (Glyph of Fae Silence)
-				[81261] = "silence", 			-- Solar Beam
-				
-				[31935] = "silence", 			-- Avenger's Shield
-				
-				[15487] = "silence", 			-- Silence
-				
-				[1330] = "silence", 			-- Garrote - Silence
-				
-				[129597] = "silence", 			-- Arcane Torrent (Blood Elf Racial)				
-				[69179] = "silence",
-				[28730] = "silence",
-				[80483] = "silence",
-				[25046] = "silence",
-				[28730] = "silence",
-				[28730] = "silence",
-				[28730] = "silence",
-				[50613] = "silence",
-		
 				-- Stuns:
 				[108194] = "stun", 				-- Asphyxiate
 				[91800] = "stun", 				-- Gnaw (Ghoul)
@@ -761,7 +603,7 @@ ArenaLive.spellDB = {
 				[163505] = "stun", 				-- Rake	
 				
 				[117526] = "stun",				-- Binding Shot
-				[19577] = "stun",				-- Intimidation
+				[19577] = "stun",				-- Intimidation (stun)			
 
 				[44572] = "stun", 				-- Deep Freeze
 				
@@ -777,17 +619,86 @@ ArenaLive.spellDB = {
 				[408] = "stun", 				-- Kidney Shot
 				
 				[118345] = "stun",				-- Pulverize (Primal Earth Elemental)
-				[118905] = "stun", 				-- Static Charge (Capacitor Totem)
+				[118905] = "stun", 				-- Static Charge
 				
-				[89766] = "stun",				-- Axe Toss (Felguard)
+				[103131] = "stun",				-- Axe Toss (Felguard)
 				[22703] = "stun",				-- Infernal Awakening
 				[30283] = "stun", 				-- Shadowfury
 				
 				[132168] = "stun", 				-- Shockwave
-				[132169] = "stun",				-- Storm Bolt
+				[107570] = "stun",				-- Storm Bolt
 				
-				[20549] = "stun", 				-- War Stomp (Tauren Racial)
+				[20549] = "stun", 				-- War Stomp
+				
+				
+				-- Incapacitates:
+				[99] = "incapacitate", 			-- Incapacitating Roar
+				
+				[3355] = "incapacitate", 		-- Freezing Trap
+				[19386] = "incapacitate", 		-- Wyvern Sting
+				
+				[31661] = "incapacitate", 		-- Dragon's Breath
+				[118] = "incapacitate", 		-- Polymorph
+				[113724] = "incapacitate", 		-- Ring of Frost
+				
+				[123407] = "incapacitate",		-- Glyph of Breath of Fire
+				[115078] = "incapacitate", 		-- Paralysis
+				[137460] = "incapacitate",		-- Ring of Peace
+				
+				[20066] = "incapacitate", 		-- Repentance
+				
+				[605] = "incapacitate",			-- Dominate Mind
+				[88625] = "incapacitate", 		-- Holy Word: Chastise
+				[64044] = "incapacitate", 		-- Psychic Horror
+				[9484] = "incapacitate", 		-- Shackle Undead (?)
+				
+				
+				[1776] = "incapacitate", 		-- Gouge
+				[6770] = "incapacitate", 		-- Sap
+				
+				[51514] = "incapacitate", 		-- Hex
+				
+				[710] = "incapacitate",			-- Banish
+				[137143] = "incapacitate", 		-- Blood Horror
+				[6789] = "incapacitate", 		-- Mortal Coil
+				
+				[107079] = "incapacitate", 		-- Quaking Palm (Racial)
+				
+				-- Disorients:
+				[33786] = "disorient",			-- Cyclone
+				
+				[10326] = "disorient", 			-- Turn Evil
+				[105421] = "disorient", 		-- Blinding Light (?)
+				
+				[8122] = "disorient", 			-- Psychic Scream
+				
+				[2094] = "disorient", 			-- Blind
 
+				[118699] = "disorient", 		-- Fear
+				[5484] = "disorient", 			-- Howl of Terror
+				[115268] = "disorient", 		-- Mesmerize
+				[6358] = "disorient", 			-- Seduction
+
+				[5246] = "disorient",			-- Intimidating Shout
+				[95199] = "disorient", 			-- Intimidating Shout
+
+				
+				-- Silences:
+				[47476] = "silence", 			-- Strangulate
+				
+				[114238] = "silence",			-- Fae Silence (Glyph of Fae Silence)
+				[81261] = "silence", 			-- Solar Beam
+				
+				[102051] = "silence", 			-- Frostjaw
+				
+				[31935] = "silence", 			-- Avenger's Shield
+				
+				[15487] = "silence", 			-- Silence
+				
+				[1330] = "silence", 			-- Garrote - Silence
+				
+				[129597] = "silence", 			-- Arcane Torrent
+				
 				
 				-- Knockbacks:
 				-- Gorefiend's Grasp

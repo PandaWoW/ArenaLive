@@ -1,25 +1,9 @@
---[[
-    ArenaLive [Core] is an unit frame framework for World of Warcraft.
-    Copyright (C) 2014  Harald Böhm <harald@boehm.agency>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
+--[[ ArenaLive Core Functions: HealthBar Handler
+Created by: Vadrak
+Creation Date: 04.04.2014
+Last Update: 17.05.2014
+These functions are used to set up every health bar.
+]]--
 
 -- ArenaLive addon Name and localisation table:
 local addonName, L = ...;
@@ -50,21 +34,11 @@ local frequentUpdates =
 		["spectateda3"] = 0,
 		["spectateda4"] = 0,
 		["spectateda5"] = 0,
-		["spectateda6"] = 0,
-		["spectateda7"] = 0,
-		["spectateda8"] = 0,
-		["spectateda9"] = 0,
-		["spectateda10"] = 0,
 		["spectatedb1"] = 0,
 		["spectatedb2"] = 0,
 		["spectatedb3"] = 0,
 		["spectatedb4"] = 0,
 		["spectatedb5"] = 0,
-		["spectatedb6"] = 0,
-		["spectatedb7"] = 0,
-		["spectatedb8"] = 0,
-		["spectatedb9"] = 0,
-		["spectatedb10"] = 0,
 	};
 
 
@@ -423,20 +397,10 @@ function HealthBar:SetColour (unitFrame)
 		end
 
 		blue = 0;
-	elseif ( colourMode == "team" ) then
-		local addonDB = ArenaLive:GetDBComponent(unitFrame.addon);
-		local factionGroup = UnitFactionGroup(unit);
-		if ( addonDB.TeamA and addonDB.TeamB ) then
-			local unitType = string.match(unit, "^([a-z]+)[0-9]+$") or unit;
-			if ( unitType == "spectateda" or unitType == "spectatedpeta" or factionGroup == "Alliance" ) then
-				red, green, blue = unpack(addonDB.TeamA.Colour);
-			elseif ( unitType == "spectatedb" or unitType == "spectatedpetb" or factionGroup == "Horde" ) then
-				red, green, blue = unpack(addonDB.TeamB.Colour);
-			end
-		end
 	end
 	
-	healthBar:SetStatusBarColor(red, green, blue);
+	healthBar:SetStatusBarColor(red, green, blue);	
+
 end
 
 --[[ Method: OnUpdate

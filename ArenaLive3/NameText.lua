@@ -1,25 +1,12 @@
---[[
-    ArenaLive [Core] is an unit frame framework for World of Warcraft.
-    Copyright (C) 2014  Harald Böhm <harald@boehm.agency>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
+--[[ ArenaLive Core Functions: Name Text Handler
+Created by: Vadrak
+Creation Date: 09.04.2014
+Last Update: 17.01.2015
+This file contains all relevant functions for name font strings and nicknames.
+Basically nicknames are names for players that are displayed instead of their charactername.
+They are mainly used in ArenaLive [Spectator] in order to show the known names of tournament players instead
+of their char names, which are often different from their nicknames in the community.
+]]--
 
 -- ArenaLive addon Name and localisation table:
 local addonName, L = ...;
@@ -49,12 +36,9 @@ local displayedNames = {};
 		nameText (FontString): The FontString object that is going to be set up as a name text.
 		unitFrame (Button): The name text's parent that contains addon name, frame group etc.
 ]]--
-function NameText:ConstructObject(nameText, unitFrame, hideAFKAndDND, hideRealm)
+function NameText:ConstructObject(nameText, unitFrame)
 
 	ArenaLive:CheckArgs(nameText, "FontString", unitFrame, "Button");
-	
-	nameText.hideAFKAndDND = hideAFKAndDND;
-	nameText.hideRealm = hideRealm;	
 	
 	-- Set initial text object:
 	NameText:SetTextObject(unitFrame);
@@ -75,22 +59,16 @@ function NameText:Update (unitFrame)
 	if ( unitFrame.test ) then
 		name = ArenaLive.testModeValues[unitFrame.test]["name"];
 	else
-		if ( nameText.hideRealm ) then
-			name = UnitName(unit);
-		else
-			name = GetUnitName(unit);
-		end
+		name = GetUnitName(unit);
 	end
 
 	name = NameText:GetNickname(unit) or name;
 	
-	-- Check if unit is AFK or DND (Cool suggestion by Nick lel).
-	if ( not nameText.hideAFKAndDND ) then
-		if ( UnitIsAFK(unit) ) then
-			tag = L["<AFK>"];
-		elseif ( UnitIsDND(unit) ) then
-			tag = L["<DND>"];
-		end
+	-- Check if unit is AFK or DND (Cool suggestion by Nick lul).
+	if ( UnitIsAFK(unit) ) then
+		tag = L["<AFK>"];
+	elseif ( UnitIsDND(unit) ) then
+		tag = L["<DND>"];
 	end
 	
 	NameText:SetColour(unitFrame);
@@ -168,7 +146,7 @@ function NameText:AddNickname(keyName, nickname)
 	
 	displayedNames[keyName] = nickname;
 	
-	ArenaLive:Message("Added nickname %s for player %s", "debug", nickname, keyName);
+	ArenaLive:Message(L["Added nickname %s for player %s"], "debug", nickname, keyName);
 	
 	-- Update all unit frames
 	for id, unitFrame in ArenaLive:GetAllUnitFrames() do
@@ -191,9 +169,9 @@ function NameText:RemoveNickname(keyName)
 			end
 		end
 		
-		ArenaLive:Message("Removed nickname for player %s", "debug", keyName);
+		ArenaLive:Message(L["Removed nickname for player %s"], "debug", keyName);
 	else
-		ArenaLive:Message("Couldn't remove nickname for player %s, because there is no nickname registered for this player!", "debug", keyName);
+		ArenaLive:Message(L["Couldn't remove nickname for player %s, because there is no nickname registered for this player!"], "debug", keyName);
 	end
 
 end

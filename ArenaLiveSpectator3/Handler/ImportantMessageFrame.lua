@@ -1,27 +1,9 @@
---[[
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
+--[[ ArenaLive Spectator Functions: Important Message Frame
+Created by: Vadrak
+Creation Date: 16.12.2014
+Last Update: "
+This Handler is used to show important combat messages, such as low health or connection loss of a player.
+]]--
 
 -- Addon Name and localisation table:
 local addonName, L = ...;
@@ -34,9 +16,8 @@ local addonName, L = ...;
 -- Create new Handler and register for all important events:
 local ImportantMessageFrame = ArenaLive:ConstructHandler("ImportantMessageFrame", true, true);
 local NameText = ArenaLive:GetHandler("NameText");
-ImportantMessageFrame:RegisterEvent("AL_SPEC_PLAYER_UPDATE");
+ImportantMessageFrame:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 ImportantMessageFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
-ImportantMessageFrame:RegisterEvent("UNIT_AURA");
 ImportantMessageFrame:RegisterEvent("UNIT_CONNECTION");
 ImportantMessageFrame:RegisterEvent("UNIT_SPELLCAST_START");
 --ImportantMessageFrame:RegisterEvent("UNIT_HEALTH"); Deactivated until UNIT_HEALTH actually fires for spectated unitIDs
@@ -46,8 +27,6 @@ local unitCache = {};
 local unitHealthCache = {};
 local unitLowHealthCache = {}; -- This table will store, if a unit was below 25% health, to prevent message spam.
 local MessageFrameClass = {};
-local feignDeathName;
-local unitFeignDeathCache = {};
 
 local function MessageFrameAnimation_OnFinished(animation)
 	local singleFrame = animation:GetParent();
@@ -122,12 +101,8 @@ end
 function ImportantMessageFrame:CreateMessage(event, ...)
 	
 	local unit = ...;
-	local name = NameText:GetNickname(unit) or UnitName(unit);
+	local name = NameText:GetNickname(unit) or GetUnitName(unit);
 	local _, class = UnitClass(unit);
-	if ( not name or not class ) then
-		return;
-	end
-	
 	local unitType = string.match(unit, "^([a-z]+)[0-9]+$");
 	local classColour = RAID_CLASS_COLORS[class].colorStr;
 
@@ -150,14 +125,14 @@ function ImportantMessageFrame:CreateMessage(event, ...)
 			msg = string.format(L["|c%s%s|r disconnected."], classColour, name);
 		end
 	elseif ( event == "UNIT_HEALTH" ) then
-		msg = string.format(L["|c%s%s|r has low health."], classColour, name);
+		msg = string.format(L["|c%s%s|r is at low health."], classColour, name);
 		texture = "Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes";
 		texCoords = CLASS_ICON_TCOORDS[class];
 	elseif ( event == "UNIT_SPELLCAST_START" ) then
 		local spellID = select(5, ...);
 		local spellName, _, icon = GetSpellInfo(spellID)
 		if ( ArenaLiveSpectator.SpellDB["Resurrects"][spellID] ) then
-			local resName = NameText:GetNickname(unit.."target") or UnitName(unit.."target");
+			local resName = NameText:GetNickname(unit.."target") or GetUnitName(unit.."target");
 			local _, resClass = UnitClass(unit.."target");
 			if ( resName and resClass ) then
 				local resClassColour = RAID_CLASS_COLORS[resClass].colorStr;
@@ -181,29 +156,27 @@ function ImportantMessageFrame:UpdatePlayerCache()
 	table.wipe(unitHealthCache);
 	
 	-- Check how many players are on both sides:
-	local teamA = ArenaLiveSpectator.UnitCache:GetNumPlayers(1);
-	local teamB = ArenaLiveSpectator.UnitCache:GetNumPlayers(2);
-	local iMax;
-	if ( teamA > teamB ) then
-		iMax = teamA;
-	else
-		iMax = teamB;
-	end
+	local teamA = CommentatorGetNumPlayers(2);
+	local teamB = CommentatorGetNumPlayers(1);
 	
 	-- Update cache tables:
 	if ( teamA > 0 or teamB > 0 ) then
 		local unit;
-		for i = 1, iMax do			
+		for i = 1, 5 do
+			if ( i > teamA and i > teamB ) then
+				break;
+			end
+			
 			unit = "spectateda"..i;
 			if ( i <= teamA ) then
 				unitCache[unit] = true;
-				unitHealthCache[unit] = 0;
+				unitHealthCache[unit] = 100;
 			end
 			
 			unit = "spectatedb"..i;
 			if ( i <= teamB ) then
 				unitCache[unit] = true;
-				unitHealthCache[unit] = 0;
+				unitHealthCache[unit] = 100;
 			end
 		end
 	end
@@ -211,11 +184,10 @@ end
 
 function ImportantMessageFrame:OnEvent(event, ...)
 	local unit = ...;
-	if ( event == "AL_SPEC_PLAYER_UPDATE" ) then
+	if ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
 		ImportantMessageFrame:UpdatePlayerCache();
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		if ( IsSpectator() ) then
-			feignDeathName = GetSpellInfo(5384);
 			ImportantMessageFrame:UpdatePlayerCache();
 			self:Show();
 		else
@@ -224,32 +196,21 @@ function ImportantMessageFrame:OnEvent(event, ...)
 				frame:Reset();
 			end
 		end
-	elseif ( event == "UNIT_AURA" and unitCache[unit] ) then
-		-- BUGFIX: Prevent low health warning
-		-- from triggering, if player used
-		-- Feign Death.
-		local name = UnitBuff(unit, feignDeathName);
-		if ( name ) then
-			unitFeignDeathCache[unit] = true;
-		elseif ( not name and type(unitFeignDeathCache[unit]) == "boolean" ) then
-			unitFeignDeathCache[unit] = GetTime() + 1;
-		end
 	elseif ( event == "UNIT_CONNECTION" and unitCache[unit] ) then
 		ImportantMessageFrame:CreateMessage(event, ...);
 	elseif ( event == "UNIT_HEALTH" and unitCache[unit] ) then
 		-- Use health cache instead of UnitHealth and UnitHealthMax functions: 
 		local healthPercent = unitHealthCache[unit];
-		local theTime = GetTime();
-		if ( healthPercent <= 0.25 and not unitLowHealthCache[unit] and ( not unitFeignDeathCache[unit] or ( type(unitFeignDeathCache[unit]) == "number" and unitFeignDeathCache[unit] <= theTime ) ) ) then
+		if ( healthPercent <= 0.25 and not unitLowHealthCache[unit] ) then
 			ImportantMessageFrame:CreateMessage(event, unit);
-			unitLowHealthCache[unit] = theTime + 5;
-		elseif ( healthPercent > 0.25 and unitLowHealthCache[unit] and unitLowHealthCache[unit] <= theTime  ) then
+			unitLowHealthCache[unit] = true;
+		elseif ( healthPercent > 0.25 and unitLowHealthCache[unit] ) then
 			-- Reset entry, because unit is abvoe 25% health again
 			unitLowHealthCache[unit] = nil;
 		end
 	elseif ( event == "UNIT_SPELLCAST_START" and unitCache[unit] ) then
 		local spellID = select(5, ...);
-		if ( ArenaLiveSpectator.SpellDB.Resurrects[spellID] ) then
+		if ( ArenaLiveSpectator.SpellDB["Resurrects"][spellID] ) then
 			ImportantMessageFrame:CreateMessage(event, ...);
 		end
 	end

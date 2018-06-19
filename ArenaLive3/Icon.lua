@@ -1,25 +1,10 @@
---[[
-    ArenaLive [Core] is an unit frame framework for World of Warcraft.
-    Copyright (C) 2014  Harald Böhm <harald@boehm.agency>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
+--[[ ArenaLive Core Functions: Icon Handler
+Created by: Vadrak
+Creation Date: 05.04.2014
+Last Update: 10.09.2014
+This file stores the function for ArenaLive's dynamic icons. These are used to show trinket CD, class, race etc.
+NOTE: Improve fall back option
+]]--
 
 -- ArenaLive addon Name and localisation table:
 local addonName, L = ...;
@@ -128,6 +113,7 @@ local RACE_GENDER_ICON_TCOORDS =
 local cooldownCache = {};
 
 
+
 --[[
 ****************************************
 ****** HANDLER METHODS START HERE ******
@@ -191,8 +177,6 @@ function Icon:UseFallBackType(frame, iconID)
 	elseif ( iconType == "interrupt" and class and ArenaLive.spellDB.Interrupts[class] ) then
 		return false;
 	elseif ( iconType == "dispel" and class and ArenaLive.spellDB.Dispels[class] ) then
-		return false;
-	elseif ( iconType == "defensiveCD" and class ) then
 		return false;
 	else
 		return true;
@@ -280,18 +264,6 @@ function Icon:GetSpellInfo(unitFrame, iconType)
 				return unpack(ArenaLive.spellDB.Interrupts[class]);
 		elseif ( iconType == "dispel" and ArenaLive.spellDB.Dispels[class] ) then
 			return unpack(ArenaLive.spellDB.Dispels[class]);
-		elseif ( iconType == "defensiveCD" and class ) then
-			local guid = UnitGUID(unit);
-			if ( class == "DRUID" or class == "PRIEST" or class == "SHAMAN" or class == "WARRIOR" ) then
-				-- These classes do not have a useful cross spec defensive cooldown.
-				for spellID, duration in pairs(ArenaLive.spellDB.DefensiveCooldowns[class]) do
-					if ( cooldownCache[guid] and cooldownCache[guid][spellID] ) then
-						return spellID, duration;
-					end
-				end
-			else
-				return next(ArenaLive.spellDB.DefensiveCooldowns[class]);
-			end
 		end
 	end	
 	
@@ -436,22 +408,12 @@ function Icon:SetTexture(frame, icon, iconType)
 			texture = "Interface\\ICONS\\INV_Jewelry_TrinketPVP_01";
 		else
 			texture = "Interface\\ICONS\\INV_Jewelry_TrinketPVP_02";
-		end
-	elseif ( icon.spellID and ( iconType == "racial" or iconType == "interrupt" or iconType == "dispel" or iconType == "defensiveCD" ) ) then
+		end	
+	elseif ( icon.spellID and ( iconType == "racial" or iconType == "interrupt" or iconType == "dispel" ) ) then
 		local spellIcon = select(3, GetSpellInfo(icon.spellID));
 		if ( spellIcon ) then
 			texture = spellIcon;
 		end	
-	elseif ( iconType == "defensiveCD" ) then
-		if ( class == "DRUID" ) then
-			texture = "Interface\\AddOns\\ArenaLive3\\Textures\\DruidDefCooldowns";
-		elseif ( class == "PRIEST" ) then
-			texture = "Interface\\AddOns\\ArenaLive3\\Textures\\PriestDefCooldowns";
-		elseif ( class == "SHAMAN" ) then
-			texture = "Interface\\AddOns\\ArenaLive3\\Textures\\ShamanDefCooldowns";
-		elseif ( class == "WARRIOR" ) then
-			texture = "Interface\\AddOns\\ArenaLive3\\Textures\\WarriorDefCooldowns";
-		end
 	end
 	
 	icon.texture:SetTexture(texture);
@@ -548,10 +510,8 @@ function Icon:UpdateCooldownCache (event, spellID, unit, guid)
 			wasCacheUpdated = Icon:AddCooldown(guid, spellID, interruptCD);
 		elseif ( spellID == racialID ) then
 			wasCacheUpdated = Icon:AddCooldown(guid, spellID, racialCD);
-		elseif ( class and ArenaLive.spellDB.DefensiveCooldowns[class][spellID] ) then
-			wasCacheUpdated = Icon:AddCooldown(guid, spellID, ArenaLive.spellDB.DefensiveCooldowns[class][spellID]);
 		end
-		
+
 		-- Check if the spell is a cooldown resetter:
 		if ( ArenaLive.spellDB.CooldownResets[spellID] ) then
 			for resetID in pairs(ArenaLive.spellDB.CooldownResets[spellID]) do
@@ -659,8 +619,9 @@ function Icon:OnEvent(event, ...)
 		local _, instanceType = IsInInstance();
 		
 		if ( instanceType == "arena" ) then
-			ArenaLive:Message("Entering arena, wiping Icon cooldown cache table...", "debug");
+			ArenaLive:Message(L["Entering arena, wiping Icon cooldown cache table..."], "debug");
 			table.wipe(cooldownCache);
+			
 			for id, frame in ArenaLive:GetAllUnitFrames() do
 				Icon:Update(frame);
 			end
@@ -676,34 +637,30 @@ local iconTypes = {
 		["text"] = L["Class Icon"],
 	},
 	[2] = {
-		["value"] = "defensiveCD",
-		["text"] = L["Defensive Cooldown"],
-	},
-	[3] = {
 		["value"] = "dispel",
 		["text"] = L["Dispel Cooldown"],
 	},
-	[4] = {
+	[3] = {
 		["value"] = "interrupt",
 		["text"] = L["Interrupt Cooldown"],
 	},
-	[5] = {
+	[4] = {
 		["value"] = "race",
 		["text"] = L["Race Icon"],
 	},
-	[6] = {
+	[5] = {
 		["value"] = "racial",
 		["text"] = L["Racial Ability Cooldown"],
 	},
-	[7] = {
+	[6] = {
 		["value"] = "reaction",
 		["text"] = L["Reaction Colour"],
 	},
-	[8] = {
+	[7] = {
 		["value"] = "specialisation",
 		["text"] = L["Talent Specialisation Icon"],
 	},
-	[9] = {
+	[8] = {
 		["value"] = "trinket",
 		["text"] = L["PvP Insignia"],
 	},

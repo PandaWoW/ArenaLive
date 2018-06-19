@@ -1,22 +1,9 @@
---[[
-    ArenaLive [Spectator] 3 is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-]]
+--[[ ArenaLive Spectator Functions: Main Target Indicator
+Created by: Vadrak
+Creation Date: 25.10.2014
+Last Update: 16.12.2014
+This Handler tries to find out which player of the team is the current main target of the opposing team.
+]]--
 
 -- Addon Name and localisation table:
 local addonName, L = ...;
@@ -28,7 +15,7 @@ local addonName, L = ...;
 ]]--
 -- Create new Handler and register for all important events:
 local MainTargetIndicator = ArenaLive:ConstructHandler("MainTargetIndicator", true, true);
-MainTargetIndicator:RegisterEvent("AL_SPEC_PLAYER_UPDATE");
+MainTargetIndicator:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 MainTargetIndicator:RegisterEvent("PLAYER_ENTERING_WORLD");
 
 local MAIN_TARGET_LEFT, MAIN_TARGET_RIGHT;
@@ -74,17 +61,12 @@ function MainTargetIndicator:Reset(unitFrame)
 end
 
 function MainTargetIndicator:UpdateNumPlayers()
-	NUM_PLAYERS_LEFT = ArenaLiveSpectator.UnitCache:GetNumPlayers(1);
-	NUM_PLAYERS_RIGHT = ArenaLiveSpectator.UnitCache:GetNumPlayers(2);
+	-- For some reason 2 is team A and 1 is team B...
+	NUM_PLAYERS_LEFT = CommentatorGetNumPlayers(2);
+	NUM_PLAYERS_RIGHT = CommentatorGetNumPlayers(1);
 	
-	local iMax;
-	if ( NUM_PLAYERS_LEFT > NUM_PLAYERS_RIGHT ) then
-		iMax = NUM_PLAYERS_LEFT;
-	else
-		iMax = NUM_PLAYERS_RIGHT;
-	end
 	local unit;
-	for i = 1, iMax do
+	for i = 1, 5 do
 		unit = "spectateda"..i;
 		if ( i <= NUM_PLAYERS_LEFT ) then
 			playerTargets[unit] = false;
@@ -121,7 +103,7 @@ function MainTargetIndicator:UpdateMainTarget(team)
 		numPlayers = NUM_PLAYERS_RIGHT;
 		numTargets = NUM_PLAYERS_LEFT;
 	else
-		ArenaLive:Message(L["%s: Usage %s"], "error", "MainTargetIndicator:UpdateMainTarget()", "MainTargetIndicator:UpdateMainTarget(team)");
+		ArenaLive:Message(L["MainTargetIndicator:UpdateMainTarget(): Usage MainTargetIndicator:UpdateMainTarget(team)"], "error");
 	end
 	
 	-- There is no main target, if number of players or numer of targets is zero.
@@ -216,7 +198,7 @@ function MainTargetIndicator:CallUpdateForUnitType(unitType)
 end
 
 function MainTargetIndicator:OnEvent(event, ...)
-	if ( event == "AL_SPEC_PLAYER_UPDATE" ) then
+	if ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
 		self:UpdateNumPlayers();
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		self:UpdateNumPlayers();

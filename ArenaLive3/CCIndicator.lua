@@ -1,25 +1,9 @@
---[[
-    ArenaLive [Core] is an unit frame framework for World of Warcraft.
-    Copyright (C) 2014  Harald Böhm <harald@boehm.agency>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
+--[[ ArenaLive Core Functions: Crowd Control Indicator Handler
+Created by: Vadrak
+Creation Date: 11.04.2014
+Last Update: 27.04.2014
+Used to create a indicator that shows current CC or important auras on the unit.
+]]--
 
 -- ArenaLive addon Name and localisation table:
 local addonName, L = ...;
@@ -86,23 +70,20 @@ function CCIndicator:Update (unitFrame)
 		return;
 	end
 
+	local priority, highestID, highestPriority, highestExpires;
 	local database = ArenaLive:GetDBComponent(unitFrame.addon, self.name);
 	-- Update according to cache entries:
 	if ( unitCCCache[unit] ) then
-		local priority, expires, highestID, highestPriority, highestExpires;
-		
 		-- Iterate through all cached CCs in order to find the most important one:
 		for spellID, infoTable in pairs(unitCCCache[unit]) do
 			priority = database.Priorities[infoTable["priorityType"]];
-			expires = unitCCCache[unit][spellID]["expires"];
-
 			if ( priority > 0 ) then
-				if ( expires > 0 and GetTime() > expires  ) then
+				if ( GetTime() > unitCCCache[unit][spellID]["expires"] ) then
 					-- Important spell has run out already. Remove entry from cache:
 					table.wipe(unitCCCache[unit][spellID]);
 					unitCCCache[unit][spellID] = nil;
-				elseif ( not highestPriority or priority > highestPriority or ( priority == highestPriority and ( ( highestExpires > 0 and expires > highestExpires ) or expires == 0 ) ) ) then
-					highestExpires = expires;
+				elseif ( not highestPriority or priority > highestPriority or ( priority == highestPriority and unitCCCache[unit][spellID]["expires"] > highestExpires ) ) then
+					highestExpires = unitCCCache[unit][spellID]["expires"];
 					highestID = spellID;
 					highestPriority = priority;
 				end
@@ -110,17 +91,9 @@ function CCIndicator:Update (unitFrame)
 		end
 		
 		if ( highestID ) then
+			local startTime = unitCCCache[unit][highestID]["expires"] - unitCCCache[unit][highestID]["duration"];
 			indicator.texture:SetTexture(unitCCCache[unit][highestID]["texture"]);
-			
-			if ( highestExpires > 0 ) then
-				local duration = unitCCCache[unit][highestID]["duration"];
-				local startTime = highestExpires - duration;
-				indicator.cooldown:Set(startTime, duration);
-			else
-				-- These are buffs/debuffs without a duration, e.g. Solar Beam, Smoke Bomb and Grounding Totem
-				indicator.cooldown:Reset();
-			end
-			
+			indicator.cooldown:Set(startTime, unitCCCache[unit][highestID]["duration"]);
 			indicator:Show();
 		else
 			CCIndicator:Reset(unitFrame);
@@ -156,13 +129,9 @@ function CCIndicator:UpdateCache (event, unit)
 	-- Check Buffs:
 	for i = 1, MAX_BUFFS, 1 do
 		name, _, texture, _, _, duration, expires, _, _, _, spellID = UnitBuff(unit, i);
-		if ( not expires ) then -- spellID == 8178
-			-- Grounding Totem:
-			expires = 0;
-		end
-		
 		if ( spellID ) then
 			priorityType = ArenaLive.spellDB.CCIndicator[spellID];
+			
 			-- Found an important buff, store it in the cache:
 			if ( priorityType ) then
 			
@@ -177,7 +146,7 @@ function CCIndicator:UpdateCache (event, unit)
 					if ( not unitCCCache[spellID] ) then
 						unitCCCache[unit][spellID] = {};
 					end
-
+				
 					unitCCCache[unit][spellID]["texture"] = texture;
 					unitCCCache[unit][spellID]["duration"] = duration;
 					unitCCCache[unit][spellID]["expires"] = expires;
@@ -192,9 +161,9 @@ function CCIndicator:UpdateCache (event, unit)
 	-- Check Debuffs:
 	for i = 1, MAX_DEBUFFS, 1 do
 		name, _, texture, _, _, duration, expires, _, _, _, spellID = UnitDebuff(unit, i);
-		if ( not expires ) then -- spellID == 81261 or spellID == 88611
+		if ( spellID == 81261 or spellID == 88611 ) then
 			-- Solar Beam and Smoke Bomb:
-			expires = 0;
+			expires = GetTime() + 5;
 		end
 		
 		if ( spellID ) then

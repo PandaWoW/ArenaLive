@@ -1,32 +1,6 @@
---[[
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
-
-local addonName, L = ...;
 local SpiritHealerFrame = ArenaLive:ConstructHandler("SpiritHealerFrame", true, true);
 SpiritHealerFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
-SpiritHealerFrame:RegisterEvent("AL_SPEC_PLAYER_UPDATE");
+SpiritHealerFrame:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 
 local playerStates = {};
 
@@ -41,16 +15,10 @@ function SpiritHealerFrame:ConstructObject(spiritHealerFrame)
 end
 
 function SpiritHealerFrame:UpdateNumPlayers()
-	local numTeamA = ArenaLiveSpectator.UnitCache:GetNumPlayers(1);
-	local numTeamB = ArenaLiveSpectator.UnitCache:GetNumPlayers(2);
-	local iMax
-	if ( numTeamA > numTeamB ) then
-		iMax = numTeamA;
-	else
-		iMax = numTeamB;
-	end
+	local numTeamA = CommentatorGetNumPlayers(2);
+	local numTeamB = CommentatorGetNumPlayers(1);
 	
-	for i = 1, iMax do
+	for i = 1, 5 do
 		local unit = "spectateda"..i;
 		if ( i <= numTeamA ) then
 			playerStates[unit] = ValueToBoolean(UnitIsDeadOrGhost(unit));

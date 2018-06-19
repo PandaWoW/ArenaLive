@@ -1,34 +1,9 @@
---[[
-    ArenaLive [Spectator] is an user interface for spectated arena 
-	wargames in World of Warcraft.
-    Copyright (C) 2015  Harald Böhm <harald@boehm.agency>
-	Further contributors: Jochen Taeschner and Romina Schmidt.
-	
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	ADDITIONAL PERMISSION UNDER GNU GPL VERSION 3 SECTION 7:
-	As a special exception, the copyright holder of this add-on gives you
-	permission to link this add-on with independent proprietary software,
-	regardless of the license terms of the independent proprietary software.
-]]
-
 local addonName, L = ...;
 
 local function OnUpdate(self, elapsed)
 	local guid = UnitGUID("targettarget");
-	if ( guid ~= self.guid ) then
-		local unit = select(2, ArenaLiveSpectator.UnitCache:GetUnitInfoByGUID(guid)) or "targettarget";
+	if ( self.guid and guid ~= self.guid ) then
+		local unit = ArenaLiveSpectator:GetUnitByGUID(guid) or "targettarget";
 		self:UpdateUnit(unit);
 	end
 	
@@ -47,7 +22,7 @@ function ArenaLiveSpectator:InitialiseTargetFrames ()
 	frame:RegisterHandler(_G[prefix.."PowerBar"], "PowerBar", nil, addonName, "TargetFrame");
 	frame:RegisterHandler(_G[prefix.."Portrait"], "Portrait", nil, _G[prefix.."PortraitBackground"], _G[prefix.."PortraitTexture"],  _G[prefix.."PortraitThreeD"], frame);
 	frame:RegisterHandler(_G[prefix.."PortraitCCIndicator"], "CCIndicator", nil, _G[prefix.."PortraitCCIndicatorTexture"], _G[prefix.."PortraitCCIndicatorCooldown"], addonName);
-	frame:RegisterHandler(_G[prefix.."Name"], "NameText", nil, frame, true, true);
+	frame:RegisterHandler(_G[prefix.."Name"], "NameText", nil, frame);
 	frame:RegisterHandler(_G[prefix.."HealthBarText"], "HealthBarText", nil, frame);
 	frame:RegisterHandler(_G[prefix.."PowerBarText"], "PowerBarText", nil, frame);
 	frame:RegisterHandler(_G[prefix.."CastBar"], "CastBar", nil, _G[prefix.."CastBarIcon"], _G[prefix.."CastBarText"], _G[prefix.."CastBarShield"], _G[prefix.."CastBarAnimation"], _G[prefix.."CastBarAnimationFadeOut"], true, addonName, "TargetFrame");
