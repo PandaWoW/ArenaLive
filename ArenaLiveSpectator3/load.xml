@@ -38,7 +38,6 @@
     <Script File="Handler\CommandHandler.lua" />
 	<Script File="Handler\CooldownTracker.lua" />
 	<Script File="Handler\GUIDTracker.lua" />
-	<Include File="Handler\ImportantMessageFrame.xml" />
 	<Script File="Handler\MainTargetIndicator.lua" />
 	<Include File="Handler\NamePlate.xml" />
 	<Include File ="Handler\SpiritHealer.xml" />

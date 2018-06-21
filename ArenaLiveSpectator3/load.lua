@@ -25,9 +25,6 @@ ArenaLiveSpectator.defaults = {
 	["PlayMode"] = 3,
 	["ShowScoreBoard"] = true,
 	["Version"] = "3.0.0b",
-	["ImportantMessageFrame"] = {
-		["NumMaxMessages"] = 2,
-	},
 	["TeamA"] = {
 		["Name"] = "Gold Team",
 		["Leader"] = "",
@@ -438,7 +435,6 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		ArenaLiveSpectatorScoreBoard:Initialise();
 		ArenaLiveSpectatorMatchStatistic:Initialise();
 		ArenaLiveSpectatorWarGameMenu:Initialise();
-		ArenaLive:ConstructHandlerObject(ArenaLiveSpectatorMessageFrame, "ImportantMessageFrame", addonName, nil);
 		
 		-- Set up hide normal UI button, it shows up if UIParent is somehow shown during a match:
 		ArenaLiveSpectatorHideUIButtonText:SetText(L["Hide normal UI"]);
