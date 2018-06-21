@@ -62,8 +62,8 @@ end
 
 function MainTargetIndicator:UpdateNumPlayers()
 	-- For some reason 2 is team A and 1 is team B...
-	NUM_PLAYERS_LEFT = CommentatorGetNumPlayers(2);
-	NUM_PLAYERS_RIGHT = CommentatorGetNumPlayers(1);
+	NUM_PLAYERS_LEFT = ArenaLiveSpectator:GetNumPlayersInTeam(GoldTeam);
+	NUM_PLAYERS_RIGHT = ArenaLiveSpectator:GetNumPlayersInTeam(GreenTeam);
 	
 	local unit;
 	for i = 1, 5 do
@@ -122,7 +122,7 @@ function MainTargetIndicator:UpdateMainTarget(team)
 	for i = 1, numTargets do
 		-- Gather target data:
 		unit = targetUnitMod..i;
-		guid = UnitGUID(unit);
+		guid = ArenaLiveSpectator:GetPlayerGUID(unit);
 		if ( guid ) then
 			if ( not tempTargetInfo[guid] ) then
 				health = UnitHealth(unit);

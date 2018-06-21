@@ -113,18 +113,19 @@ function ImportantMessageFrame:CreateMessage(event, ...)
 		team = "B";
 	end
 	
-	if ( event == "UNIT_CONNECTION" ) then --and unitCache[unit]
-		local isConnected = select(2, ...);
-		if ( isConnected ) then
-			texture = BNet_GetClientTexture();
-			texCoords = {0, 1, 0, 1}
-			msg = string.format(L["|c%s%s|r reconnected."], classColour, name);
-		else
-			texture = "Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\Battlenet-Offlineicon";
-			texCoords = {0, 1, 0, 1}
-			msg = string.format(L["|c%s%s|r disconnected."], classColour, name);
-		end
-	elseif ( event == "UNIT_HEALTH" ) then
+	-- if ( event == "UNIT_CONNECTION" ) then --and unitCache[unit]
+		-- local isConnected = select(2, ...);
+		-- if ( isConnected ) then
+			-- texture = BNet_GetClientTexture();
+			-- texCoords = {0, 1, 0, 1}
+			-- msg = string.format(L["|c%s%s|r reconnected."], classColour, name);
+		-- else
+			-- texture = "Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\Battlenet-Offlineicon";
+			-- texCoords = {0, 1, 0, 1}
+			-- msg = string.format(L["|c%s%s|r disconnected."], classColour, name);
+		-- end
+	-- else
+    if ( event == "UNIT_HEALTH" ) then
 		msg = string.format(L["|c%s%s|r is at low health."], classColour, name);
 		texture = "Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes";
 		texCoords = CLASS_ICON_TCOORDS[class];
@@ -156,9 +157,12 @@ function ImportantMessageFrame:UpdatePlayerCache()
 	table.wipe(unitHealthCache);
 	
 	-- Check how many players are on both sides:
-	local teamA = CommentatorGetNumPlayers(2);
-	local teamB = CommentatorGetNumPlayers(1);
-	
+	-- local teamA = CommentatorGetNumPlayers(2);
+	-- local teamB = CommentatorGetNumPlayers(1);
+    
+    local teamA = 2;
+	local teamB = 2;
+
 	-- Update cache tables:
 	if ( teamA > 0 or teamB > 0 ) then
 		local unit;
@@ -196,23 +200,23 @@ function ImportantMessageFrame:OnEvent(event, ...)
 				frame:Reset();
 			end
 		end
-	elseif ( event == "UNIT_CONNECTION" and unitCache[unit] ) then
-		ImportantMessageFrame:CreateMessage(event, ...);
-	elseif ( event == "UNIT_HEALTH" and unitCache[unit] ) then
-		-- Use health cache instead of UnitHealth and UnitHealthMax functions: 
-		local healthPercent = unitHealthCache[unit];
-		if ( healthPercent <= 0.25 and not unitLowHealthCache[unit] ) then
-			ImportantMessageFrame:CreateMessage(event, unit);
-			unitLowHealthCache[unit] = true;
-		elseif ( healthPercent > 0.25 and unitLowHealthCache[unit] ) then
-			-- Reset entry, because unit is abvoe 25% health again
-			unitLowHealthCache[unit] = nil;
-		end
-	elseif ( event == "UNIT_SPELLCAST_START" and unitCache[unit] ) then
-		local spellID = select(5, ...);
-		if ( ArenaLiveSpectator.SpellDB["Resurrects"][spellID] ) then
-			ImportantMessageFrame:CreateMessage(event, ...);
-		end
+	-- elseif ( event == "UNIT_CONNECTION" and unitCache[unit] ) then
+		-- ImportantMessageFrame:CreateMessage(event, ...);
+	-- elseif ( event == "UNIT_HEALTH" and unitCache[unit] ) then
+		-- -- Use health cache instead of UnitHealth and UnitHealthMax functions: 
+		-- local healthPercent = unitHealthCache[unit];
+		-- if ( healthPercent <= 0.25 and not unitLowHealthCache[unit] ) then
+			-- ImportantMessageFrame:CreateMessage(event, unit);
+			-- unitLowHealthCache[unit] = true;
+		-- elseif ( healthPercent > 0.25 and unitLowHealthCache[unit] ) then
+			-- -- Reset entry, because unit is abvoe 25% health again
+			-- unitLowHealthCache[unit] = nil;
+		-- end
+	-- elseif ( event == "UNIT_SPELLCAST_START" and unitCache[unit] ) then
+		-- local spellID = select(5, ...);
+		-- if ( ArenaLiveSpectator.SpellDB["Resurrects"][spellID] ) then
+			-- ImportantMessageFrame:CreateMessage(event, ...);
+		-- end
 	end
 end
 

@@ -186,7 +186,7 @@ end
 function NamePlate:UpdateNamePlate(namePlate)
 	local blizzPlate = namePlate:GetParent();
 	local blizzPlateName = blizzPlate.nameText:GetText();
-	
+
 	local unit;
 	if ( NamePlate.unitNameCache[blizzPlateName] ) then
 		
@@ -195,7 +195,7 @@ function NamePlate:UpdateNamePlate(namePlate)
 		local isSameReaction = NamePlate:PlateReactionIsUnitReaction(blizzPlate, checkUnit);
 		
 		if ( isSameReaction ) then
-			local isPlayer = UnitIsPlayer(checkUnit);
+			local isPlayer = PlayerHandler:IsPlayer(checkUnit);
 			local plateReaction = NamePlate:GetReactionType(blizzPlate.healthBar:GetStatusBarColor());
 			
 			if ( not isPlayer or ( isPlayer and plateReaction == "Hostile-Player" ) ) then
@@ -212,7 +212,7 @@ function NamePlate:PlateReactionIsUnitReaction(blizzPlate, unit)
 	local plateReaction = NamePlate:GetReactionType(blizzPlate.healthBar:GetStatusBarColor());
 	local unitReaction = NamePlate:GetReactionType(UnitSelectionColor(unit));
 	
-	local isPlayer = UnitIsPlayer(unit);
+	local isPlayer = PlayerHandler:IsPlayer(unit);
 	if ( isPlayer and ( unitReaction == "Hostile" or unitReaction == "Friendly" ) and plateReaction == "Hostile-Player" ) then
 		return true;
 	elseif ( not isPlayer and ( unitReaction == "Friendly" and plateReaction == "Hostile" ) ) then
@@ -430,7 +430,7 @@ function NamePlateClass:UpdateAppearance()
 	local blizzPlate = self:GetParent();
 	local database = ArenaLive:GetDBComponent(addonName);
 	
-	if ( self.unit and UnitIsPlayer(self.unit) ) then
+	if ( self.unit and PlayerHandler:IsPlayer(self.unit) ) then
 		self:SetSize(163, 33);
 		
 		self.classIcon:Show();
@@ -508,8 +508,8 @@ function NamePlateClass:UpdateCastBar()
 end
 
 function NamePlateClass:UpdateClassIcon()
-	if ( self.unit and UnitIsPlayer(self.unit) ) then
-		local _, class = UnitClass(self.unit);
+	if ( self.unit and PlayerHandler:IsPlayer(self.unit) ) then
+		local class = PlayerHandler:GetClass(self.unit);
 		self.classIcon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[class]));
 		self.classIcon:Show();
 	else
@@ -524,7 +524,7 @@ function NamePlateClass:UpdateHealthBar()
 	local red, green, blue = blizzPlate.healthBar:GetStatusBarColor();
 	if ( self.unit ) then
 		HealthBar:Update(self);
-		if ( not UnitIsPlayer(self.unit) ) then
+		if ( not PlayerHandler:IsPlayer(self.unit) ) then
 			-- A player's pet, use team colour instead:
 			local database = ArenaLive:GetDBComponent(addonName);
 			local unitType = string.match(self.unit, "^([a-z]+)[0-9]+$") or self.unit;
@@ -587,7 +587,7 @@ end
 
 function NamePlateClass:UpdateGUID()
 	if ( self.unit ) then
-		local guid = UnitGUID(self.unit);
+		local guid = ArenaLiveSpectator:GetPlayerGUID(self.unit);
 		if ( not self.guid or guid ~= self.guid ) then
 			self.guid = guid;
 			if ( guid ) then

@@ -223,8 +223,8 @@ function CooldownTracker:GatherCooldownInfo(unit, isInspectReady)
 		ArenaLive:Message(L["CooldownTracker:GatherCooldownInfo(): Usage CooldownTracker:GatherCooldownInfo(unit, isInspectReady)"], "error");
 	end
 	
-	local guid = UnitGUID(unit);
-	local isPlayer = UnitIsPlayer(unit);
+	local guid = ArenaLiveSpectator:GetPlayerGUID(unit);
+	local isPlayer = PlayerHandler:IsPlayer(unit);
 	ArenaLive:Message(L["Gather Cooldown info for %s: GUID = %s, isPlayer = %s, isInspectReady = %s."], "debug", unit, tostring(guid), tostring(isPlayer), tostring(isInspectReady));
 	if ( guid and isPlayer and not isInspectReady ) then
 		inspectQueue[unit] = guid;
@@ -388,6 +388,7 @@ function CooldownTracker:ExecuteCooldownInfo(unit, action, spellID, value, repla
 	
 end
 
+-- DeadMouse, check this function
 function CooldownTracker:AddCooldown(unit, spellID, duration)	
 	local _, _, icon = GetSpellInfo(spellID);
 	local faction = UnitFactionGroup(unit);
@@ -626,7 +627,7 @@ function CooldownTracker:OnEvent(event, ...)
 		local spellID = select(12, ...);
 		if ( ArenaLiveSpectator.SpellDB.CooldownTypes[spellID] == "DISPEL" ) then
 			local sourceGUID = select(4, ...);
-			local unit = ArenaLiveSpectator:GetUnitByGUID(sourceGUID);
+			local unit = ArenaLiveSpectator:GetPlayerByGUID(sourceGUID);
 			if ( unit and trackedUnits[unit] and trackedUnits[unit]["cooldowns"][spellID] ) then
 				CooldownTracker:StartCooldown(unit, spellID);
 			end

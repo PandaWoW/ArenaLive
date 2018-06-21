@@ -1,4 +1,10 @@
 local addonName, L = ...;
+
+Players = {};
+
+GreenTeam = 67;
+GoldTeam = 469;
+
 --[[
 	 Most important information for Spectated War Games:
 		UnitIDs: 
@@ -357,7 +363,8 @@ end
 	 return 3 for you)."
 ]]--
 function IsSpectator()
-	return ( CommentatorGetMode() == 3 );
+    local inInstance, instanceType = IsInInstance();
+    return instanceType and instanceType== "arena";
 end
 
 function ArenaLiveSpectator:Enable()
@@ -366,13 +373,14 @@ function ArenaLiveSpectator:Enable()
 	self:Show();
 	
 	local database = ArenaLive:GetDBComponent(addonName);
-	ArenaLiveSpectator:SetNumPlayers(database.PlayMode);
+	--:SetNumPlayers(database.PlayMode);
 	ArenaLiveSpectatorHideUIButton:Show();
 	ArenaLiveSpectatorMatchStatistic:SetParent("ArenaLiveSpectator");
 	ArenaLiveSpectator:CallOnMatchStart(function() ArenaLiveSpectatorMatchStatistic:Start(); end);
 	ArenaLiveSpectatorMatchStatistic.leaveButton:Enable();
-	ArenaLiveSpectator:RefreshGUIDs();
+	--ArenaLiveSpectator:RefreshGUIDs();
 	self.enabled = true;
+    self.hasStarted = true;
 end
 
 function ArenaLiveSpectator:Disable()
@@ -417,11 +425,11 @@ function ArenaLiveSpectator:Disable()
 end
 
 function ArenaLiveSpectator:OnEvent(event, ...)
-	local filter = ...;
+	local filter, arg2, arg3 = ...;
 
 	if ( event == "ADDON_LOADED" and filter == addonName ) then
 		-- Initialise Nickname Database:
-		self.NicknameDatabase:Initialise()
+		--self.NicknameDatabase:Initialise()
 		
 		-- Initialise frames:
 		self:InitialiseSideFrames();
@@ -452,56 +460,56 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 			callbackFunc();
 			onMatchStartCallbackList[callbackFunc] = nil;
 		end
-	elseif ( event == "BN_FRIEND_TOON_ONLINE" or event == "BN_TOON_NAME_UPDATED" or event == "BN_FRIEND_TOON_OFFLINE" or event == "BN_FRIEND_LIST_SIZE_CHANGED" ) then
-		-- BN_TOON_NAME_UPDATED: Args seem to be: toonID, toonName, unknown(boolean)
-		self.NicknameDatabase:OnToonNameUpdate(filter);
-		ArenaLiveSpectatorWarGameMenu:BNFriendEvent();
-	elseif ( event == "CHAT_MSG_ADDON" and filter == "ALSPEC" ) then
-		local prefix, message, channel, sender = ...;
-		local playerName = GetUnitName("player", true);
-		if ( sender == playerName) then
-			return;
-		end
-		local leftTeamName, leftTeamScore, rightTeamName, rightTeamScore = string.split(";", message);
-		ArenaLive:Message(L["Received team data from group leader (%s). Updating team entries..."], "message", sender);
+	-- elseif ( event == "BN_FRIEND_TOON_ONLINE" or event == "BN_TOON_NAME_UPDATED" or event == "BN_FRIEND_TOON_OFFLINE" or event == "BN_FRIEND_LIST_SIZE_CHANGED" ) then
+		-- -- BN_TOON_NAME_UPDATED: Args seem to be: toonID, toonName, unknown(boolean)
+		-- self.NicknameDatabase:OnToonNameUpdate(filter);
+		-- ArenaLiveSpectatorWarGameMenu:BNFriendEvent();
+	-- elseif ( event == "CHAT_MSG_ADDON" and filter == "ALSPEC" ) then
+		-- local prefix, message, channel, sender = ...;
+		-- local playerName = GetUnitName("player", true);
+		-- if ( sender == playerName) then
+			-- return;
+		-- end
+		-- local leftTeamName, leftTeamScore, rightTeamName, rightTeamScore = string.split(";", message);
+		-- ArenaLive:Message(L["Received team data from group leader (%s). Updating team entries..."], "message", sender);
 		
-		local database = ArenaLive:GetDBComponent(addonName);
-		database.TeamA.Name = leftTeamName;
-		database.TeamA.Score = tonumber(leftTeamScore);
-		database.TeamB.Name = rightTeamName;
-		database.TeamB.Score = tonumber(rightTeamScore);
+		-- local database = ArenaLive:GetDBComponent(addonName);
+		-- database.TeamA.Name = leftTeamName;
+		-- database.TeamA.Score = tonumber(leftTeamScore);
+		-- database.TeamB.Name = rightTeamName;
+		-- database.TeamB.Score = tonumber(rightTeamScore);
 		
-		-- Update option frames:
-		ArenaLiveSpectatorWarGameMenuWarGamesLeftTeamName:UpdateShownValue();
-		ArenaLiveSpectatorWarGameMenuWarGamesLeftTeamScore:UpdateShownValue();
-		ArenaLiveSpectatorWarGameMenuWarGamesRightTeamName:UpdateShownValue();
-		ArenaLiveSpectatorWarGameMenuWarGamesRightTeamScore:UpdateShownValue();
+		-- -- Update option frames:
+		-- ArenaLiveSpectatorWarGameMenuWarGamesLeftTeamName:UpdateShownValue();
+		-- ArenaLiveSpectatorWarGameMenuWarGamesLeftTeamScore:UpdateShownValue();
+		-- ArenaLiveSpectatorWarGameMenuWarGamesRightTeamName:UpdateShownValue();
+		-- ArenaLiveSpectatorWarGameMenuWarGamesRightTeamScore:UpdateShownValue();
 		
-		-- Update scoreboard display:
-		ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamA");
-		ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
-		ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamB");
-		ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
+		-- -- Update scoreboard display:
+		-- ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamA");
+		-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
+		-- ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamB");
+		-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED" and self.enabled ) then
 		ArenaLiveSpectatorMatchStatistic:OnEvent(event, ...)
-	elseif ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
+	--elseif ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
 		-- "COMMENTATOR_PLAYER_UPDATE" fires a bit too early,
 		-- I use the new C_Timer to wait 2 seconds, before
 		-- updating the side frames and cooldown trackers 
 		-- after the event fires. This way all player 
 		-- information should available.
-		C_Timer.After(2, ArenaLiveSpectator.PlayerUpdate);
+		-- C_Timer.After(2, ArenaLiveSpectator.PlayerUpdate);
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		ArenaLiveSpectator:Toggle();
-		if ( self.waitForNicknameInit and BNFeaturesEnabled() and BNConnected() ) then
-			self.waitForNicknameInit = nil;
-			self.NicknameDatabase:InitialiseNicknames();
-		end
+		-- if ( self.waitForNicknameInit and BNFeaturesEnabled() and BNConnected() ) then
+			-- self.waitForNicknameInit = nil;
+			-- self.NicknameDatabase:InitialiseNicknames();
+		-- end
 	elseif ( event == "PLAYER_TARGET_CHANGED" and self.enabled ) then
 		if ( self.enabled ) then
 			local database = ArenaLive:GetDBComponent(addonName);
 			if ( database.FollowTarget ) then
-				CommentatorFollowUnit("target");
+				--CommentatorFollowUnit("target"); DeadMouse
 			end
 			if ( database.HideTargetFrames or database.PlayMode > 3 ) then
 				for i = 1, database.PlayMode do
@@ -512,7 +520,18 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 				end
 			end
 		end
-	elseif ( event == "START_TIMER" and filter == 1 and self.enabled ) then
+    
+    elseif ((event == "CHAT_MSG_ADDON") and (filter == "ARENASPEC") and (arg3 == "WHISPER") and arg2) then
+        if not self.enabled then
+            CommandHandler:ForceUpdate();
+            ArenaLive:TriggerEvent("AL_SPEC_MATCH_START");
+        end
+        self.hasStarted = true;
+        
+        CommandHandler:ParseCommands(arg2);
+        
+        ArenaLiveSpectator:PlayerUpdate();
+    elseif ( event == "START_TIMER" and filter == 1 and self.enabled ) then
 		local _, timeSeconds, totalTime = ...;
 		ArenaLiveSpectatorCountDown:SetTimer(timeSeconds, totalTime);
 	elseif ( event == "UI_SCALE_CHANGED" or event == "DISPLAY_SIZE_CHANGED" ) then
@@ -521,31 +540,31 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		ArenaLiveSpectatorTooltip:SetScale(scale);
 	elseif ( event == "UNIT_PET" or event == "UNIT_AURA" ) then
 		ArenaLiveSpectatorMatchStatistic:OnEvent(event, ...);
-	elseif ( event == "UPDATE_BATTLEFIELD_STATUS" and self.enabled ) then
+	-- elseif ( event == "UPDATE_BATTLEFIELD_STATUS" and self.enabled ) then
 		
-		local status, mapName, teamSize, registeredMatch, suspendedQueue, queueType, gameType, role = GetBattlefieldStatus(filter);
-		local winner = GetBattlefieldWinner();
-		if ( status == "active" and winner ) then
-			-- Update team scores according to winner:
-			local database = ArenaLive:GetDBComponent(addonName);
-			if ( winner == 0 ) then
-				database.TeamB.Score = database.TeamB.Score + 1;
-			elseif ( winner == 1 ) then
-				database.TeamB.Score = database.TeamA.Score + 1;
-			elseif ( winner == 255 ) then
-				database.TeamA.Score = database.TeamA.Score + 1;
-				database.TeamB.Score = database.TeamB.Score + 1;
-			end
+		-- local status, mapName, teamSize, registeredMatch, suspendedQueue, queueType, gameType, role = GetBattlefieldStatus(filter);
+		-- local winner = GetBattlefieldWinner();
+		-- if ( status == "active" and winner ) then
+			-- -- Update team scores according to winner:
+			-- local database = ArenaLive:GetDBComponent(addonName);
+			-- if ( winner == 0 ) then
+				-- database.TeamB.Score = database.TeamB.Score + 1;
+			-- elseif ( winner == 1 ) then
+				-- database.TeamB.Score = database.TeamA.Score + 1;
+			-- elseif ( winner == 255 ) then
+				-- database.TeamA.Score = database.TeamA.Score + 1;
+				-- database.TeamB.Score = database.TeamB.Score + 1;
+			-- end
 			
-			ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
-			ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
-			ArenaLiveSpectatorWarGameMenuWarGamesLeftTeamScore:UpdateShownValue();
-			ArenaLiveSpectatorWarGameMenuWarGamesRightTeamScore:UpdateShownValue();
+			-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
+			-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
+			-- ArenaLiveSpectatorWarGameMenuWarGamesLeftTeamScore:UpdateShownValue();
+			-- ArenaLiveSpectatorWarGameMenuWarGamesRightTeamScore:UpdateShownValue();
 			
-			-- Stop Recording Match Statistic and Show it:
-			ArenaLiveSpectatorMatchStatistic:Stop();
-			ArenaLiveSpectatorMatchStatistic:Open(true);
-		end
+			-- -- Stop Recording Match Statistic and Show it:
+			-- ArenaLiveSpectatorMatchStatistic:Stop();
+			-- ArenaLiveSpectatorMatchStatistic:Open(true);
+		-- end
 	elseif ( event == "WORLD_STATE_UI_TIMER_UPDATE" and self.enabled ) then
 		if ( ArenaLiveSpectatorScoreBoard.enabled ) then
 			if ( not self.worldStateTimerIndex ) then

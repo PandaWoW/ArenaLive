@@ -3,7 +3,7 @@ local addonName, L = ...;
 local function OnUpdate(self, elapsed)
 	local guid = UnitGUID("targettarget");
 	if ( self.guid and guid ~= self.guid ) then
-		local unit = ArenaLiveSpectator:GetUnitByGUID(guid) or "targettarget";
+		local unit = ArenaLiveSpectator:GetPlayerByGUID(guid) or "targettarget";
 		self:UpdateUnit(unit);
 	end
 	

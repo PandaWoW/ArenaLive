@@ -96,24 +96,24 @@ function NameText:SetColour(unitFrame)
 
 	local nameText = unitFrame[self.name];
 	local database = ArenaLive:GetDBComponent(unitFrame.addon, self.name, unitFrame.group);
-	local colourMode = database.ColourMode;	
+	local colourMode = database.ColourMode;
 	
-	local isPlayer = UnitIsPlayer(unit);
+	local isPlayer = PlayerHandler:IsPlayer(unit);
 	local red, green, blue = 1, 1, 1;
+
 	if ( colourMode == "class" and ( isPlayer or unitFrame.test ) ) then
-		local _, class;
+		local class;
 		if ( unitFrame.test ) then
 			class = ArenaLive.testModeValues[unitFrame.test]["class"];
 		else
-			_, class = UnitClass(unit);
+			class = PlayerHandler:GetClass(unit);
 		end
 		
 		if ( class ) then
 			red, green, blue = RAID_CLASS_COLORS[class]["r"], RAID_CLASS_COLORS[class]["g"], RAID_CLASS_COLORS[class]["b"];
-		end	
+		end
 	
 	elseif ( colourMode == "reaction" or not isPlayer ) then
-	
 		red, green, blue = UnitSelectionColor(unit);
 		
 		-- If the unit is a NPC that was tapped by another person, I reflect that in the name colour by colouring it grey.

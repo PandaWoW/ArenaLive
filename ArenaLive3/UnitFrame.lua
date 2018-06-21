@@ -268,9 +268,9 @@ end
 	 This function is used to update the frames GUID key after a unit change occured or after the same
 	 unitID displays a different player/npc.
 ]]--
-function UnitFrameClass:UpdateGUID ()
+function UnitFrameClass:UpdateGUID()
 	if ( self.unit ) then
-		local guid = UnitGUID(self.unit);
+		local guid = ArenaLiveSpectator:GetPlayerGUID(self.unit);
 		
 		if ( not self.guid or guid ~= self.guid ) then
 			-- Reset old guid if necessary:
