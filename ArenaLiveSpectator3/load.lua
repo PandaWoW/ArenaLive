@@ -375,7 +375,6 @@ function ArenaLiveSpectator:Enable()
 	ArenaLiveSpectatorMatchStatistic:SetParent("ArenaLiveSpectator");
 	ArenaLiveSpectator:CallOnMatchStart(function() ArenaLiveSpectatorMatchStatistic:Start(); end);
 	ArenaLiveSpectatorMatchStatistic.leaveButton:Enable();
-	--ArenaLiveSpectator:RefreshGUIDs();
 	self.enabled = true;
     self.hasStarted = true;
 end
@@ -615,7 +614,6 @@ function ArenaLiveSpectator:Toggle()
 end
 
 function ArenaLiveSpectator:PlayerUpdate()
-	ArenaLiveSpectator:RefreshGUIDs();
 	ArenaLiveSpectator:UpdateSideFrames();
 	ArenaLiveSpectator:UpdateCooldownTrackers();
 end

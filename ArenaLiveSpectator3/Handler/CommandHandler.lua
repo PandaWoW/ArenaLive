@@ -43,7 +43,7 @@ function CommandHandler:ParseCommands(data)
     target = strsub(data, 1, stop - 1)
     pos = stop + 1
     
-    target = tostring(ArenaLiveSpectator:ConvertGUID(tonumber(target))); -- wow UnitGUID format
+    target = tostring(CommandHandler:ConvertGUID(tonumber(target))); -- wow UnitGUID format
     
     if target == nil or target == "" then
         return;
@@ -61,4 +61,16 @@ function CommandHandler:ParseCommands(data)
             CommandHandler:Execute(target, prefix, value)
         end
     until stop == nil
+end
+
+function CommandHandler:ConvertGUID(guidLow)
+    local B, K, GUID, I, D = 16, "0123456789ABCDEF", "", 0;
+    
+    while guidLow > 0 do
+        I = I + 1;
+        guidLow, D = math.floor(guidLow / B), mod(guidLow, B) + 1;
+        GUID = string.sub(K, D, D)..GUID;
+    end
+    
+    return "0x0180000000"..GUID;
 end
