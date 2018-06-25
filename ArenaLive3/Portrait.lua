@@ -72,7 +72,7 @@ function Portrait:Update(unitFrame)
 		
 		local unitType = string.match(unit, "^([a-z]+)[0-9]+$") or unit;
 		local unitNumber = tonumber(string.match(unit, "^[a-z]+([0-9]+)$"));
-		local isPlayer = PlayerHandler:IsPlayer(unit);
+		local isPlayer = UnitIsPlayer(unit);
 
 		if ( class and ( isPlayer or unitFrame.test ) ) then
 		

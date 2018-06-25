@@ -98,7 +98,7 @@ function NameText:SetColour(unitFrame)
 	local database = ArenaLive:GetDBComponent(unitFrame.addon, self.name, unitFrame.group);
 	local colourMode = database.ColourMode;
 	
-	local isPlayer = PlayerHandler:IsPlayer(unit);
+	local isPlayer = UnitIsPlayer(unit);
 	local red, green, blue = 1, 1, 1;
 
 	if ( colourMode == "class" and ( isPlayer or unitFrame.test ) ) then
@@ -106,7 +106,7 @@ function NameText:SetColour(unitFrame)
 		if ( unitFrame.test ) then
 			class = ArenaLive.testModeValues[unitFrame.test]["class"];
 		else
-			class = PlayerHandler:GetClass(unit);
+			_, class = UnitClass(unit);
 		end
 		
 		if ( class ) then

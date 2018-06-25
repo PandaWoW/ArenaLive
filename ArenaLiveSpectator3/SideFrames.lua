@@ -35,33 +35,20 @@ function ArenaLiveSpectator:InitialiseSideFrames()
 end
 
 function ArenaLiveSpectator:SetUpSideFrames(numPlayers)
+	
 	-- Enable and disable frames:
-	local frame, unit;
+	local frame;
 	for i = 1, 5 do
 		if ( i <= numPlayers ) then
 			frame = _G["ALSPEC_LeftSideFramesFrame"..i];
-            
-            unit = ArenaLiveSpectator:GetPlayerByTeamSlot(GoldTeam, i);
-			
-            if unit then
-                self:UpdateSideFrameConstituents(frame);
-                frame:Enable();
-                frame:UpdateUnit(unit);
-            else
-                frame:Disable();
-            end
+			self:UpdateSideFrameConstituents(frame);
+			frame:Enable();
+			frame:UpdateUnit("raid"..i);--
 
 			frame = _G["ALSPEC_RightSideFramesFrame"..i];
-            
-            unit = ArenaLiveSpectator:GetPlayerByTeamSlot(GreenTeam, i);
-            
-            if unit then
-                self:UpdateSideFrameConstituents(frame);
-                frame:Enable();
-                frame:UpdateUnit(unit);
-            else
-                frame:Disable();
-            end
+			self:UpdateSideFrameConstituents(frame)
+			frame:Enable();
+			frame:UpdateUnit("arena"..i);--
 		else
 			frame = _G["ALSPEC_LeftSideFramesFrame"..i];
 			frame:Disable();

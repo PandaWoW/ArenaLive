@@ -765,7 +765,7 @@ function ArenaLiveSpectatorWarGameMenuWarGamesStartButton:Toggle()
 	leader2 = ArenaLiveSpectatorWarGameMenuWarGamesRightLeaderButton.presenceID;
 	bracket = database.PlayMode;
 	map = database.Map;
-	tournamentRules = ValueToBoolean(database.TournamentRules);
+	tournamentRules = false;--ValueToBoolean(database.TournamentRules);
 	
 	if ( not leader1 or not leader2 or leader1 == leader2 ) then
 		self:Disable();

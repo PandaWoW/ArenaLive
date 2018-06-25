@@ -360,8 +360,7 @@ end
 	 return 3 for you)."
 ]]--
 function IsSpectator()
-    local inInstance, instanceType = IsInInstance();
-    return instanceType and instanceType== "arena";
+    return CommentatorGetMode() == 2;
 end
 
 function ArenaLiveSpectator:Enable()
@@ -370,13 +369,14 @@ function ArenaLiveSpectator:Enable()
 	self:Show();
 	
 	local database = ArenaLive:GetDBComponent(addonName);
-	--:SetNumPlayers(database.PlayMode);
 	ArenaLiveSpectatorHideUIButton:Show();
 	ArenaLiveSpectatorMatchStatistic:SetParent("ArenaLiveSpectator");
 	ArenaLiveSpectator:CallOnMatchStart(function() ArenaLiveSpectatorMatchStatistic:Start(); end);
 	ArenaLiveSpectatorMatchStatistic.leaveButton:Enable();
+    ArenaLiveSpectator:PlayerUpdate();
 	self.enabled = true;
     self.hasStarted = true;
+    ArenaLiveSpectator:SetNumPlayers(3);
 end
 
 function ArenaLiveSpectator:Disable()
@@ -455,10 +455,6 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 			callbackFunc();
 			onMatchStartCallbackList[callbackFunc] = nil;
 		end
-	-- elseif ( event == "BN_FRIEND_TOON_ONLINE" or event == "BN_TOON_NAME_UPDATED" or event == "BN_FRIEND_TOON_OFFLINE" or event == "BN_FRIEND_LIST_SIZE_CHANGED" ) then
-		-- -- BN_TOON_NAME_UPDATED: Args seem to be: toonID, toonName, unknown(boolean)
-		-- self.NicknameDatabase:OnToonNameUpdate(filter);
-		-- ArenaLiveSpectatorWarGameMenu:BNFriendEvent();
 	-- elseif ( event == "CHAT_MSG_ADDON" and filter == "ALSPEC" ) then
 		-- local prefix, message, channel, sender = ...;
 		-- local playerName = GetUnitName("player", true);
@@ -487,13 +483,13 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED" and self.enabled ) then
 		ArenaLiveSpectatorMatchStatistic:OnEvent(event, ...)
-	--elseif ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
+	elseif ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
 		-- "COMMENTATOR_PLAYER_UPDATE" fires a bit too early,
 		-- I use the new C_Timer to wait 2 seconds, before
 		-- updating the side frames and cooldown trackers 
 		-- after the event fires. This way all player 
 		-- information should available.
-		-- C_Timer.After(2, ArenaLiveSpectator.PlayerUpdate);
+		--DelayEvent(2, ArenaLiveSpectator.PlayerUpdate);
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		ArenaLiveSpectator:Toggle();
 		-- if ( self.waitForNicknameInit and BNFeaturesEnabled() and BNConnected() ) then
@@ -515,17 +511,6 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 				end
 			end
 		end
-    
-    elseif ((event == "CHAT_MSG_ADDON") and (filter == "ARENASPEC") and (arg3 == "WHISPER") and arg2) then
-        if not self.enabled then
-            CommandHandler:ForceUpdate();
-            ArenaLive:TriggerEvent("AL_SPEC_MATCH_START");
-        end
-        self.hasStarted = true;
-        
-        CommandHandler:ParseCommands(arg2);
-        
-        ArenaLiveSpectator:PlayerUpdate();
     elseif ( event == "START_TIMER" and filter == 1 and self.enabled ) then
 		local _, timeSeconds, totalTime = ...;
 		ArenaLiveSpectatorCountDown:SetTimer(timeSeconds, totalTime);
@@ -614,8 +599,13 @@ function ArenaLiveSpectator:Toggle()
 end
 
 function ArenaLiveSpectator:PlayerUpdate()
+    ArenaLiveSpectator:RefreshGUIDs();
 	ArenaLiveSpectator:UpdateSideFrames();
 	ArenaLiveSpectator:UpdateCooldownTrackers();
+    
+    -- TODO: Call MainTargetIndicator:UpdateNumPlayers();
+    
+    DelayEvent(2, ArenaLiveSpectator.PlayerUpdate); -- every 2 seconds
 end
 
 function ArenaLiveSpectator:SetNumPlayers(numPlayers)
@@ -666,9 +656,7 @@ ArenaLive:ConstructAddon(ArenaLiveSpectator, addonName, true, ArenaLiveSpectator
 ArenaLiveSpectator:RegisterEvent("AL_SPEC_MATCH_START"); -- Custom Event triggered by ArenaLiveSpectator:OnEvent() WORLD_STATE_UI_TIMER_UPDATE
 ArenaLiveSpectator:RegisterEvent("ADDON_LOADED");
 ArenaLiveSpectator:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED");
-ArenaLiveSpectator:RegisterEvent("BN_FRIEND_TOON_ONLINE");
 ArenaLiveSpectator:RegisterEvent("BN_TOON_NAME_UPDATED");
-ArenaLiveSpectator:RegisterEvent("BN_FRIEND_TOON_OFFLINE");
 ArenaLiveSpectator:RegisterEvent("CHAT_MSG_ADDON");
 ArenaLiveSpectator:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
 ArenaLiveSpectator:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");

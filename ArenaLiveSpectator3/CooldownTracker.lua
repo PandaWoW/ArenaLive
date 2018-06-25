@@ -94,28 +94,15 @@ function ArenaLiveSpectator:SetUpCooldownTracker(numPlayers)
 	local database = ArenaLive:GetDBComponent(addonName);
 	
 	-- Enable and disable trackers:
-	local tracker, unit;
+	local tracker;
 	for i = 1, 5 do
 		if ( i <= numPlayers ) then
-            unit = ArenaLiveSpectator:GetPlayerByTeamSlot(GoldTeam, i);
 			tracker = _G["ALSPEC_CDTrackersLeftTracker"..i];
-			
-            if unit then
-                tracker:Enable();
-                tracker:UpdateUnit(unit);
-            else
-                tracker:Disable();
-            end
-            
-            unit = ArenaLiveSpectator:GetPlayerByTeamSlot(GreenTeam, i);
+			tracker:Enable();
+			tracker:UpdateUnit("raid"..i);
 			tracker = _G["ALSPEC_CDTrackersRightTracker"..i];
-            
-            if unit then
-                tracker:Enable();
-                tracker:UpdateUnit(unit);
-            else
-                tracker:Disable();
-            end
+			tracker:Enable();
+			tracker:UpdateUnit("arena"..i);
 		else
 			tracker = _G["ALSPEC_CDTrackersLeftTracker"..i];
 			tracker:Disable();

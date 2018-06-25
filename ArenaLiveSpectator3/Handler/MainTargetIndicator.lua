@@ -62,19 +62,19 @@ end
 
 function MainTargetIndicator:UpdateNumPlayers()
 	-- For some reason 2 is team A and 1 is team B...
-	NUM_PLAYERS_LEFT = ArenaLiveSpectator:GetNumPlayersInTeam(GoldTeam);
-	NUM_PLAYERS_RIGHT = ArenaLiveSpectator:GetNumPlayersInTeam(GreenTeam);
+	NUM_PLAYERS_LEFT = ArenaLiveSpectator:GetNumPlayersInTeam("raid");
+	NUM_PLAYERS_RIGHT = ArenaLiveSpectator:GetNumPlayersInTeam("arena");
 	
 	local unit;
 	for i = 1, 5 do
-		unit = "spectateda"..i;
+		unit = "raid"..i;
 		if ( i <= NUM_PLAYERS_LEFT ) then
 			playerTargets[unit] = false;
 		else
 			playerTargets[unit] = nil;
 		end
 		
-		unit = "spectatedb"..i;
+		unit = "arena"..i;
 		if ( i <= NUM_PLAYERS_RIGHT ) then
 			playerTargets[unit] = false;
 		else
@@ -93,13 +93,13 @@ local tempTargetInfo = {};
 function MainTargetIndicator:UpdateMainTarget(team)
 	local numPlayers, numTargets, playerUnitMod, targetUnitMod;
 	if ( team == 1 ) then
-		playerUnitMod = "spectateda";
-		targetUnitMod = "spectatedb";
+		playerUnitMod = "raid";
+		targetUnitMod = "arena";
 		numPlayers = NUM_PLAYERS_LEFT;
 		numTargets = NUM_PLAYERS_RIGHT;
 	elseif ( team == 2 ) then
-		playerUnitMod = "spectatedb";
-		targetUnitMod = "spectateda";
+		playerUnitMod = "arena";
+		targetUnitMod = "raid";
 		numPlayers = NUM_PLAYERS_RIGHT;
 		numTargets = NUM_PLAYERS_LEFT;
 	else
@@ -122,7 +122,7 @@ function MainTargetIndicator:UpdateMainTarget(team)
 	for i = 1, numTargets do
 		-- Gather target data:
 		unit = targetUnitMod..i;
-		guid = ArenaLiveSpectator:GetPlayerGUID(unit);
+		guid = UnitGUID(unit);
 		if ( guid ) then
 			if ( not tempTargetInfo[guid] ) then
 				health = UnitHealth(unit);

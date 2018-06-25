@@ -1,4 +1,4 @@
-## Interface: 60003
+## Interface: 50408
 ## Title: ArenaLive3 [Spectator]
 ## Notes: Spectator Mode UI for WoW Arenas.
 ## Author: Vadrak

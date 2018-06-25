@@ -19,7 +19,7 @@ UnitFrame:RegisterEvent("PLAYER_REGEN_ENABLED");
 UnitFrame:RegisterEvent("PLAYER_TARGET_CHANGED");
 UnitFrame:RegisterEvent("PLAYER_FOCUS_CHANGED");
 UnitFrame:RegisterEvent("UNIT_PET");
-UnitFrame:RegisterEvent("UNIT_CONNECTION");
+--UnitFrame:RegisterEvent("UNIT_CONNECTION");
 UnitFrame:RegisterEvent("UNIT_NAME_UPDATE");
 UnitFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
 
@@ -194,7 +194,7 @@ local UnitFrameClass = {};
 --[[ Method: Enable
 	 Enables the unit frame and all its constituents.
 ]]--
-function UnitFrameClass:Enable ()
+function UnitFrameClass:Enable()
 	-- Set general attributes according to saved variables:
 	local database = ArenaLive:GetDBComponent(self.addon, "FrameMover");
 	local frameLock = database.FrameLock;
@@ -226,7 +226,7 @@ end
 --[[ Method: Disable
 	 Disables the unit frame and all its constituents.
 ]]--
-function UnitFrameClass:Disable ()		
+function UnitFrameClass:Disable()
 	if ( not self.hasHeader ) then
 		-- Unwrap secure onAttribute snippet:
 		self:UnwrapScript(self, "OnAttributeChanged");
@@ -270,7 +270,7 @@ end
 ]]--
 function UnitFrameClass:UpdateGUID()
 	if ( self.unit ) then
-		local guid = ArenaLiveSpectator:GetPlayerGUID(self.unit);
+		local guid = UnitGUID(self.unit);
 		
 		if ( not self.guid or guid ~= self.guid ) then
 			-- Reset old guid if necessary:

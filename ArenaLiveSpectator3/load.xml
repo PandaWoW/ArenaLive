@@ -34,14 +34,13 @@
 	<Script File="Spells.lua" />
 	<Script File="load.lua" />
 	<Script File="NicknameDatabase.lua" />
+    <Script File="Timer.lua" />
 	
-    <Script File="Handler\CommandHandler.lua" />
 	<Script File="Handler\CooldownTracker.lua" />
 	<Script File="Handler\GUIDTracker.lua" />
 	<Script File="Handler\MainTargetIndicator.lua" />
 	<Include File="Handler\NamePlate.xml" />
 	<Include File ="Handler\SpiritHealer.xml" />
-    <Script File="Handler\PlayerHandler.lua" />
 	
 	<Include File ="WarGameMenu.xml" />
 	

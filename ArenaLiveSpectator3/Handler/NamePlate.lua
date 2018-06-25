@@ -195,7 +195,7 @@ function NamePlate:UpdateNamePlate(namePlate)
 		local isSameReaction = NamePlate:PlateReactionIsUnitReaction(blizzPlate, checkUnit);
 		
 		if ( isSameReaction ) then
-			local isPlayer = PlayerHandler:IsPlayer(checkUnit);
+			local isPlayer = UnitIsPlayer(checkUnit);
 			local plateReaction = NamePlate:GetReactionType(blizzPlate.healthBar:GetStatusBarColor());
 			
 			if ( not isPlayer or ( isPlayer and plateReaction == "Hostile-Player" ) ) then
@@ -212,7 +212,7 @@ function NamePlate:PlateReactionIsUnitReaction(blizzPlate, unit)
 	local plateReaction = NamePlate:GetReactionType(blizzPlate.healthBar:GetStatusBarColor());
 	local unitReaction = NamePlate:GetReactionType(UnitSelectionColor(unit));
 	
-	local isPlayer = PlayerHandler:IsPlayer(unit);
+	local isPlayer = UnitIsPlayer(unit);
 	if ( isPlayer and ( unitReaction == "Hostile" or unitReaction == "Friendly" ) and plateReaction == "Hostile-Player" ) then
 		return true;
 	elseif ( not isPlayer and ( unitReaction == "Friendly" and plateReaction == "Hostile" ) ) then
@@ -244,48 +244,49 @@ end
 function NamePlate:OnEvent(event, ...)
 	local unit = ...;
 	if ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
-		local numTeamA = CommentatorGetNumPlayers(2);
-		local numTeamB = CommentatorGetNumPlayers(1);
-		for i = 1, 5 do
-			local unit = "spectateda"..i;
-			NamePlate:UpdateUnitCacheEntry(unit);
+		-- local numTeamA = CommentatorGetNumPlayers(2);
+		-- local numTeamB = CommentatorGetNumPlayers(1);
+
+        -- for i = 1, 5 do
+			-- local unit = "spectateda"..i;
+			-- NamePlate:UpdateUnitCacheEntry(unit);
 			
-			unit = "spectatedb"..i;
-			NamePlate:UpdateUnitCacheEntry(unit);
-		end
+			-- unit = "spectatedb"..i;
+			-- NamePlate:UpdateUnitCacheEntry(unit);
+		-- end
 		NamePlate:UpdateAll();
-	elseif ( ( event == "UNIT_ABSORB_AMOUNT_CHANGED" or event == "UNIT_HEAL_PREDICTION" ) and NamePlate.unitCache[unit] ) then
+	elseif ( ( event == "UNIT_ABSORB_AMOUNT_CHANGED" or event == "UNIT_HEAL_PREDICTION" )) then --and NamePlate.unitCache[unit] ) then
 		for blizzPlate, namePlate in pairs(self.namePlates) do
 			if ( unit == namePlate.unit ) then
 				HealthBar:Update(namePlate);
 			end
 		end
-	elseif ( event == "UNIT_AURA" and NamePlate.unitCache[unit] ) then
+	elseif ( event == "UNIT_AURA" ) then --and NamePlate.unitCache[unit] ) then
 		for blizzPlate, namePlate in pairs(self.namePlates) do
 			if ( unit == namePlate.unit ) then
 				CCIndicator:Update(namePlate);
 			end
 		end
-	elseif ( event == "UNIT_NAME_UPDATE" and NamePlate.unitCache[unit] ) then
-		NamePlate:UpdateUnitCacheEntry(unit);
+	elseif ( event == "UNIT_NAME_UPDATE" ) then-- and NamePlate.unitCache[unit] ) then
+		--NamePlate:UpdateUnitCacheEntry(unit);
 		NamePlate:UpdateAll();
-	elseif ( event == "UNIT_PET" and NamePlate.unitCache[unit] ) then
+	elseif ( event == "UNIT_PET" ) then --and NamePlate.unitCache[unit] ) then
 		local unitType = string.match(unit, "^([a-z]+)[0-9]+$") or unit;
 		local unitNumber = string.match(unit, "^[a-z]+([0-9]+)$");
 		if ( not unitNumber ) then
 			return;
 		end
 		
-		if ( unitType == "spectateda" or unitType == "spectatedb" ) then
-			if ( unitType == "spectateda" ) then
-				unit = "spectatedpeta"..unitNumber;
-			else
-				unit = "spectatedpetb"..unitNumber;
-			end
-			print(unit);
-			NamePlate:UpdateUnitCacheEntry(unit);
+		-- if ( unitType == "spectateda" or unitType == "spectatedb" ) then
+			-- if ( unitType == "spectateda" ) then
+				-- unit = "spectatedpeta"..unitNumber;
+			-- else
+				-- unit = "spectatedpetb"..unitNumber;
+			-- end
+			-- print(unit);
+			-- NamePlate:UpdateUnitCacheEntry(unit);
 			NamePlate:UpdateAll();
-		end
+		--end
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		if ( IsSpectator() ) then
 			NamePlate:Enable();
@@ -314,11 +315,11 @@ function NamePlate:OnUpdate(elapsed)
 end
 NamePlate:SetScript("OnUpdate", NamePlate.OnUpdate);
 
-function ArenaLiveSpectator:PrintUnitCache()
-	for unit, name in pairs(NamePlate.unitCache) do
-		print(unit.." = "..name);
-	end
-end
+-- function ArenaLiveSpectator:PrintUnitCache()
+	-- for unit, name in pairs(NamePlate.unitCache) do
+		-- print(unit.." = "..name);
+	-- end
+-- end
 
 local children;
 function ArenaLiveSpectator:CrawlNamePlateData(nameplate)
@@ -430,7 +431,7 @@ function NamePlateClass:UpdateAppearance()
 	local blizzPlate = self:GetParent();
 	local database = ArenaLive:GetDBComponent(addonName);
 	
-	if ( self.unit and PlayerHandler:IsPlayer(self.unit) ) then
+	if ( self.unit and UnitIsPlayer(self.unit) ) then
 		self:SetSize(163, 33);
 		
 		self.classIcon:Show();
@@ -508,8 +509,8 @@ function NamePlateClass:UpdateCastBar()
 end
 
 function NamePlateClass:UpdateClassIcon()
-	if ( self.unit and PlayerHandler:IsPlayer(self.unit) ) then
-		local class = PlayerHandler:GetClass(self.unit);
+    if ( self.unit and UnitIsPlayer(self.unit) ) then
+		local _, class = UnitClass(self.unit);
 		self.classIcon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[class]));
 		self.classIcon:Show();
 	else
@@ -524,7 +525,7 @@ function NamePlateClass:UpdateHealthBar()
 	local red, green, blue = blizzPlate.healthBar:GetStatusBarColor();
 	if ( self.unit ) then
 		HealthBar:Update(self);
-		if ( not PlayerHandler:IsPlayer(self.unit) ) then
+		if ( not UnitIsPlayer(self.unit) ) then
 			-- A player's pet, use team colour instead:
 			local database = ArenaLive:GetDBComponent(addonName);
 			local unitType = string.match(self.unit, "^([a-z]+)[0-9]+$") or self.unit;
@@ -587,7 +588,7 @@ end
 
 function NamePlateClass:UpdateGUID()
 	if ( self.unit ) then
-		local guid = ArenaLiveSpectator:GetPlayerGUID(self.unit);
+		local guid = UnitGUID(self.unit);
 		if ( not self.guid or guid ~= self.guid ) then
 			self.guid = guid;
 			if ( guid ) then
