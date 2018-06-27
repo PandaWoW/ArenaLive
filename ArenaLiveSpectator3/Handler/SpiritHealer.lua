@@ -19,14 +19,14 @@ function SpiritHealerFrame:UpdateNumPlayers()
 	local numTeamB = CommentatorGetNumPlayers(1);
 	
 	for i = 1, 5 do
-		local unit = "spectateda"..i;
+		local unit = "raid"..i;
 		if ( i <= numTeamA ) then
 			playerStates[unit] = ValueToBoolean(UnitIsDeadOrGhost(unit));
 		else
 			playerStates[unit] = nil;
 		end
 		
-		unit = "spectatedb"..i;
+		unit = "arena"..i;
 		if ( i <= numTeamB ) then
 			playerStates[unit] = ValueToBoolean(UnitIsDeadOrGhost(unit));
 		else

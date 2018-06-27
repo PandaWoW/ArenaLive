@@ -41,9 +41,9 @@ function MainTargetIndicator:Update(unitFrame)
 	
 	-- Get correct main target according to unit type: 
 	local mainTarget;
-	if ( unitType == "spectateda" ) then
+	if ( unitType == "raid" ) then
 		mainTarget = MAIN_TARGET_RIGHT;
-	elseif ( unitType == "spectatedb" ) then
+	elseif ( unitType == "arena" ) then
 		mainTarget = MAIN_TARGET_LEFT;
 	end
 	
@@ -205,9 +205,9 @@ function MainTargetIndicator:OnEvent(event, ...)
 	elseif ( event == "UNIT_TARGET" ) then
 		local unit = ...;
 		local unitType = string.match(unit, "^([a-z]+)[0-9]+$") or unit;
-		if ( unitType == "spectateda" ) then
+		if ( unitType == "raid" ) then
 			MainTargetIndicator:UpdateMainTarget(1);
-		elseif ( unitType == "spectatedb" ) then
+		elseif ( unitType == "arena" ) then
 			MainTargetIndicator:UpdateMainTarget(2);
 		end
 	end

@@ -26,21 +26,20 @@ HealthBar:RegisterEvent("UNIT_HEAL_PREDICTION");
 
 -- Legit units for frequent updates with their current HP.
 local frequentUpdates = 
-	{
-		["player"] = 0,
-		["target"] = 0,
-		["spectateda1"] = 0,
-		["spectateda2"] = 0,
-		["spectateda3"] = 0,
-		["spectateda4"] = 0,
-		["spectateda5"] = 0,
-		["spectatedb1"] = 0,
-		["spectatedb2"] = 0,
-		["spectatedb3"] = 0,
-		["spectatedb4"] = 0,
-		["spectatedb5"] = 0,
-	};
-
+{
+    ["player"] = 0,
+    ["target"] = 0,
+    ["raid1"]  = 0,
+    ["raid2"]  = 0,
+    ["raid3"]  = 0,
+    ["raid4"]  = 0,
+    ["raid5"]  = 0,
+    ["arena1"] = 0,
+    ["arena2"] = 0,
+    ["arena3"] = 0,
+    ["arena4"] = 0,
+    ["arena5"] = 0,
+};
 
 --[[
 ****************************************

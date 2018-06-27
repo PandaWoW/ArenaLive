@@ -464,9 +464,9 @@ function NamePlateClass:UpdateAppearance()
 	local red, green, blue;
 	if ( self.unit ) then
 		local unitType = string.match(self.unit, "^([a-z]+)[0-9]+$") or self.unit;
-		if ( unitType == "spectateda" or unitType == "spectatedpeta" ) then
+		if ( unitType == "raid" or unitType == "raidpet" ) then
 			red, green, blue = unpack(database.TeamA.Colour);
-		elseif ( unitType == "spectatedb" or unitType == "spectatedpetb" ) then
+		elseif ( unitType == "arena" or unitType == "arenapet" ) then
 			red, green, blue = unpack(database.TeamB.Colour);
 		else
 			red, green, blue = UnitSelectionColor(self.unit);
@@ -531,9 +531,9 @@ function NamePlateClass:UpdateHealthBar()
 			-- A player's pet, use team colour instead:
 			local database = ArenaLive:GetDBComponent(addonName);
 			local unitType = string.match(self.unit, "^([a-z]+)[0-9]+$") or self.unit;
-			if ( unitType == "spectatedpeta" ) then
+			if ( unitType == "raidpet" ) then
 				red, green, blue = unpack(database.TeamA.Colour);
-			elseif ( unitType == "spectatedpetb" ) then
+			elseif ( unitType == "arenapet" ) then
 				red, green, blue = unpack(database.TeamB.Colour);
 			end
 			self.HealthBar:SetStatusBarColor(red, green, blue);

@@ -5,18 +5,6 @@ Players = {};
 GreenTeam = 67;
 GoldTeam = 469;
 
---[[
-	 Most important information for Spectated War Games:
-		UnitIDs: 
-			spectatedaX
-			spectatedbX
-		TeamIDs: (e.g. CommentatorGetNumPlayers(teamID))
-			1 = TeamB (spectatedbX)
-			2 = TeamA (spectatedaX)
-		factionIDs: (e.g. for GetBattlefieldWinner())
-			 0 = TeamB (Green Team)
-			 1 = TeamA (Gold Team)
-]]
 ArenaLiveSpectator.defaults = {
 	["Broadcast"] = true,
 	["FirstLogin"] = true,
