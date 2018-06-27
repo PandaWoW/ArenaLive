@@ -247,46 +247,48 @@ function NamePlate:OnEvent(event, ...)
 		-- local numTeamA = CommentatorGetNumPlayers(2);
 		-- local numTeamB = CommentatorGetNumPlayers(1);
 
-        -- for i = 1, 5 do
-			-- local unit = "spectateda"..i;
-			-- NamePlate:UpdateUnitCacheEntry(unit);
+        for i = 1, 5 do
+			local unit = "raid"..i;
+			NamePlate:UpdateUnitCacheEntry(unit);
 			
-			-- unit = "spectatedb"..i;
-			-- NamePlate:UpdateUnitCacheEntry(unit);
-		-- end
+			unit = "arena"..i;
+			NamePlate:UpdateUnitCacheEntry(unit);
+		end
 		NamePlate:UpdateAll();
-	elseif ( ( event == "UNIT_ABSORB_AMOUNT_CHANGED" or event == "UNIT_HEAL_PREDICTION" )) then --and NamePlate.unitCache[unit] ) then
+        
+        ArenaLiveSpectator:PrintUnitCache();
+	elseif ( ( event == "UNIT_ABSORB_AMOUNT_CHANGED" or event == "UNIT_HEAL_PREDICTION" ) and NamePlate.unitCache[unit] ) then
 		for blizzPlate, namePlate in pairs(self.namePlates) do
 			if ( unit == namePlate.unit ) then
 				HealthBar:Update(namePlate);
 			end
 		end
-	elseif ( event == "UNIT_AURA" ) then --and NamePlate.unitCache[unit] ) then
+	elseif ( event == "UNIT_AURA" and NamePlate.unitCache[unit] ) then
 		for blizzPlate, namePlate in pairs(self.namePlates) do
 			if ( unit == namePlate.unit ) then
 				CCIndicator:Update(namePlate);
 			end
 		end
-	elseif ( event == "UNIT_NAME_UPDATE" ) then-- and NamePlate.unitCache[unit] ) then
-		--NamePlate:UpdateUnitCacheEntry(unit);
+	elseif ( event == "UNIT_NAME_UPDATE" and NamePlate.unitCache[unit] ) then
+		NamePlate:UpdateUnitCacheEntry(unit);
 		NamePlate:UpdateAll();
-	elseif ( event == "UNIT_PET" ) then --and NamePlate.unitCache[unit] ) then
+	elseif ( event == "UNIT_PET" and NamePlate.unitCache[unit] ) then
 		local unitType = string.match(unit, "^([a-z]+)[0-9]+$") or unit;
 		local unitNumber = string.match(unit, "^[a-z]+([0-9]+)$");
 		if ( not unitNumber ) then
 			return;
 		end
 		
-		-- if ( unitType == "spectateda" or unitType == "spectatedb" ) then
-			-- if ( unitType == "spectateda" ) then
-				-- unit = "spectatedpeta"..unitNumber;
-			-- else
-				-- unit = "spectatedpetb"..unitNumber;
-			-- end
-			-- print(unit);
-			-- NamePlate:UpdateUnitCacheEntry(unit);
+		if ( unitType == "raid" or unitType == "arena" ) then
+			if ( unitType == "raid" ) then
+				unit = "raidpet"..unitNumber;
+			else
+				unit = "arenapet"..unitNumber;
+			end
+
+			NamePlate:UpdateUnitCacheEntry(unit);
 			NamePlate:UpdateAll();
-		--end
+		end
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		if ( IsSpectator() ) then
 			NamePlate:Enable();
@@ -315,11 +317,11 @@ function NamePlate:OnUpdate(elapsed)
 end
 NamePlate:SetScript("OnUpdate", NamePlate.OnUpdate);
 
--- function ArenaLiveSpectator:PrintUnitCache()
-	-- for unit, name in pairs(NamePlate.unitCache) do
-		-- print(unit.." = "..name);
-	-- end
--- end
+function ArenaLiveSpectator:PrintUnitCache()
+	for unit, name in pairs(NamePlate.unitCache) do
+		print(unit.." = "..name);
+	end
+end
 
 local children;
 function ArenaLiveSpectator:CrawlNamePlateData(nameplate)
