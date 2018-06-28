@@ -31,25 +31,6 @@ L["Sending team data to raid..."] = "Sending team data to raid...";
 L["Received team data from group leader (%s). Updating team entries..."] = "Received team data from group leader (%s). Updating team entries...";
 L["WARNING! Couldn't register addon message prefix for ArenaLive [Spectator]. You won't be able to receive broadcast data during this session."] = "WARNING! Couldn't register addon message prefix for ArenaLive [Spectator]. You won't be able to receive broadcast data during this session.";
 
--- Important Message Frame Handler:
-L["|c%s%s|r disconnected."] = "|c%s%s|r disconnected.";
-L["|c%s%s|r reconnected."] = "|c%s%s|r reconnected.";
-L["|c%s%s|r is at low health."] = "|c%s%s|r is at low health.";
-L["|c%s%s|r tries to resurrect |c%s%s|r."] = "|c%s%s|r tries to resurrect |c%s%s|r.";
-
--- Match Statistic:
-L["%d. %s vs %s (%d:%d)"] = "%d. %s vs %s (%d:%d)";
-L["Choose a Match"] = "Choose a Match";
-L["Match:"] = "Match:";
-L["ArenaLive [Spectator] Match Statistic"] = "ArenaLive [Spectator] Match Statistic";
-L["Saved Match %s to SavedVariables..."] = "Saved Match %s to SavedVariables...";
-L["ArenaLiveSpectatorMatchStatistic:SetMatch(id): id too high."] = "ArenaLiveSpectatorMatchStatistic:SetMatch(id): id too high.";
-L["Damage Dealt:"] = "Damage Dealt:";
-L["Healing Done:"] = "Healing Done:";
-L["Time in CC:"] = "Time in CC:";
-L["Leave Arena"] = "Leave Arena";
-L["%d:%s"] = "%d:%s";
-L["Delete Match"] = "Delete Match";
 -- Settings Tab:
 L["Settings"] = "Settings";
 

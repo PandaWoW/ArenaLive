@@ -45,7 +45,6 @@
 	<Include File ="WarGameMenu.xml" />
 	
 	<Include File ="CountDown.xml" />
-	<Include File ="MatchStatistic.xml" />
 	<Include File ="ScoreBoard.xml" />
 	<Include File ="CooldownTracker.xml" />
 	<Include File ="CastBarTemplates.xml" />

@@ -329,8 +329,6 @@ SLASH_ARENALIVESPECTATOR1, SLASH_ARENALIVESPECTATOR2 = "/alspec", "/arenalivespe
 function SlashCmdList.ARENALIVESPECTATOR (msg, editBox )
 	if ( not msg or msg == "" or msg == "menu" ) then
 		ArenaLiveSpectatorWarGameMenu:Show();
-	elseif ( msg == "stats" ) then
-		ArenaLiveSpectatorMatchStatistic:Open();
 	elseif ( msg == "help" ) then
 		ArenaLive:Message(L["Available Slash Commands for ArenaLive [Spectator] are:"], "message");
 		for cmd, description in pairs(slashCMDs) do
@@ -360,9 +358,6 @@ function ArenaLiveSpectator:Enable()
 	
 	local database = ArenaLive:GetDBComponent(addonName);
 	ArenaLiveSpectatorHideUIButton:Show();
-	ArenaLiveSpectatorMatchStatistic:SetParent("ArenaLiveSpectator");
-	ArenaLiveSpectator:CallOnMatchStart(function() ArenaLiveSpectatorMatchStatistic:Start(); end);
-	ArenaLiveSpectatorMatchStatistic.leaveButton:Enable();
     ArenaLiveSpectator:PlayerUpdate();
 	self.enabled = true;
     self.hasStarted = true;
@@ -375,11 +370,6 @@ function ArenaLiveSpectator:Disable()
 	UIParent:Show();
 	
 	ArenaLiveSpectatorScoreBoard:Reset();
-	ArenaLiveSpectatorMatchStatistic.leaveButton:Disable();
-	ArenaLiveSpectatorMatchStatistic:SetParent("UIParent");
-	if ( ArenaLiveSpectatorMatchStatistic:IsRecording() ) then
-		ArenaLiveSpectatorMatchStatistic:Stop();
-	end
 	
 	-- Disable Side frames:
 	local frame;
@@ -422,7 +412,6 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		self:InitialiseTargetFrames();
 		self:InitialiseCooldownTracker();
 		ArenaLiveSpectatorScoreBoard:Initialise();
-		ArenaLiveSpectatorMatchStatistic:Initialise();
 		ArenaLiveSpectatorWarGameMenu:Initialise();
 		
 		-- Set up hide normal UI button, it shows up if UIParent is somehow shown during a match:
@@ -471,8 +460,6 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
 		-- ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamB");
 		-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
-	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED" and self.enabled ) then
-		ArenaLiveSpectatorMatchStatistic:OnEvent(event, ...)
 	elseif ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
 		-- "COMMENTATOR_PLAYER_UPDATE" fires a bit too early,
 		-- I use the new C_Timer to wait 2 seconds, before
@@ -508,33 +495,6 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		local screenHeight = math.ceil(GetScreenHeight());
 		local scale = 786 / screenHeight;
 		ArenaLiveSpectatorTooltip:SetScale(scale);
-	elseif ( event == "UNIT_PET" or event == "UNIT_AURA" ) then
-		ArenaLiveSpectatorMatchStatistic:OnEvent(event, ...);
-	-- elseif ( event == "UPDATE_BATTLEFIELD_STATUS" and self.enabled ) then
-		
-		-- local status, mapName, teamSize, registeredMatch, suspendedQueue, queueType, gameType, role = GetBattlefieldStatus(filter);
-		-- local winner = GetBattlefieldWinner();
-		-- if ( status == "active" and winner ) then
-			-- -- Update team scores according to winner:
-			-- local database = ArenaLive:GetDBComponent(addonName);
-			-- if ( winner == 0 ) then
-				-- database.TeamB.Score = database.TeamB.Score + 1;
-			-- elseif ( winner == 1 ) then
-				-- database.TeamB.Score = database.TeamA.Score + 1;
-			-- elseif ( winner == 255 ) then
-				-- database.TeamA.Score = database.TeamA.Score + 1;
-				-- database.TeamB.Score = database.TeamB.Score + 1;
-			-- end
-			
-			-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
-			-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
-			-- ArenaLiveSpectatorWarGameMenuWarGamesLeftTeamScore:UpdateShownValue();
-			-- ArenaLiveSpectatorWarGameMenuWarGamesRightTeamScore:UpdateShownValue();
-			
-			-- -- Stop Recording Match Statistic and Show it:
-			-- ArenaLiveSpectatorMatchStatistic:Stop();
-			-- ArenaLiveSpectatorMatchStatistic:Open(true);
-		-- end
 	elseif ( event == "WORLD_STATE_UI_TIMER_UPDATE" and self.enabled ) then
 		if ( ArenaLiveSpectatorScoreBoard.enabled ) then
 			if ( not self.worldStateTimerIndex ) then
@@ -590,7 +550,7 @@ end
 
 function ArenaLiveSpectator:PlayerUpdate()
     ArenaLiveSpectator:RefreshGUIDs();
-	ArenaLiveSpectator:UpdateSideFrames();
+	--ArenaLiveSpectator:UpdateSideFrames();
 	ArenaLiveSpectator:UpdateCooldownTrackers();
     
     ArenaLive:TriggerEvent("COMMENTATOR_PLAYER_UPDATE");

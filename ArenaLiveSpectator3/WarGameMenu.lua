@@ -418,10 +418,6 @@ end
 function ArenaLiveSpectatorWarGameMenu:OnShow()
 
 	-- Close Match Statistic:
-	if ( ArenaLiveSpectatorMatchStatistic:IsShown() ) then
-		ArenaLiveSpectatorMatchStatistic:Hide();
-	end
-
 	PlaySound("igCharacterInfoOpen");
 	self:BNFriendEvent();
 	self:ShowTab();
