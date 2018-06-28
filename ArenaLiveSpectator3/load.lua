@@ -27,8 +27,6 @@ ArenaLiveSpectator.defaults = {
 	},
 	["MatchStatistic"] = {
 	},
-	["NicknameDatabase"] = {
-	},
 	["FrameMover"] = {
 		["FrameLock"] = true,
 	},
@@ -404,9 +402,6 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 	local filter, arg2, arg3 = ...;
 
 	if ( event == "ADDON_LOADED" and filter == addonName ) then
-		-- Initialise Nickname Database:
-		--self.NicknameDatabase:Initialise()
-		
 		-- Initialise frames:
 		self:InitialiseSideFrames();
 		self:InitialiseTargetFrames();
@@ -469,10 +464,6 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		--DelayEvent(2, ArenaLiveSpectator.PlayerUpdate);
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		ArenaLiveSpectator:Toggle();
-		-- if ( self.waitForNicknameInit and BNFeaturesEnabled() and BNConnected() ) then
-			-- self.waitForNicknameInit = nil;
-			-- self.NicknameDatabase:InitialiseNicknames();
-		-- end
 	elseif ( event == "PLAYER_TARGET_CHANGED" and self.enabled ) then
 		if ( self.enabled ) then
 			local database = ArenaLive:GetDBComponent(addonName);

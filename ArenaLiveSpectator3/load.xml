@@ -33,7 +33,6 @@
 	
 	<Script File="Spells.lua" />
 	<Script File="load.lua" />
-	<Script File="NicknameDatabase.lua" />
     <Script File="Timer.lua" />
 	
 	<Script File="Handler\CooldownTracker.lua" />

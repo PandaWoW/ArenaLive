@@ -590,12 +590,7 @@ function ArenaLiveSpectatorWarGamePlayerCursorButton:SetPlayer(battleTag)
 		-- Show nicknames instead of info text, if nickname database active:
 		if ( ArenaLiveSpectatorWarGameMenu.activeTabIndex == 2 ) then
 			local database = ArenaLive:GetDBComponent(addonName);
-					
-			if ( battleTag and database.NicknameDatabase[battleTag] ) then
-				infoText = database.NicknameDatabase[battleTag];
-			else
-				infoText = L["No Nickname Assigned"];
-			end
+            infoText = L["No Nickname Assigned"];
 		elseif ( client ~= BNET_CLIENT_WOW and isOnline ) then
 			self.info:SetText(L["Not logged into WoW"]);
 		end
@@ -652,11 +647,7 @@ function ArenaLiveSpectatorWarGameMenuPlayerScrollFrame:update()
 				if ( ArenaLiveSpectatorWarGameMenu.activeTabIndex == 2 ) then
 					local database = ArenaLive:GetDBComponent(addonName);
 					
-					if ( battleTag and database.NicknameDatabase[battleTag] ) then
-						infoText = database.NicknameDatabase[battleTag];
-					else
-						infoText = L["No Nickname Assigned"];
-					end
+                    infoText = L["No Nickname Assigned"];
 				end
 				
 				button.info:SetText(infoText);
@@ -846,16 +837,10 @@ function ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:Update()
 		self.name:SetText(presenceName);
 		self.icon:SetTexture(clientTexture);
 		
-		if ( database.NicknameDatabase[player] ) then
-			self.info:SetText(database.NicknameDatabase[player]);
-			ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetText(database.NicknameDatabase[player]);
-			menu.resetNicknameButton:Enable();
-			
-		else
-			self.info:SetText(L["No Nickname Assigned"]);
-			ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetText("");
-			menu.resetNicknameButton:Disable();
-		end
+
+        self.info:SetText(L["No Nickname Assigned"]);
+        ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetText("");
+        menu.resetNicknameButton:Disable();
 		
 		menu.nicknameEditBox:Show();
 	end
@@ -876,12 +861,6 @@ function ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:OnEditFocusLost()
 		return;
 	end
 	
-	if ( nickname == "" ) then
-		ArenaLiveSpectator.NicknameDatabase:RemoveNickname(player);
-	else
-		ArenaLiveSpectator.NicknameDatabase:UpdateNickname(player, nickname);
-	end
-	
 	ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:Update();
 	ArenaLiveSpectatorWarGameMenuPlayerScrollFrame:update();
 end
@@ -889,7 +868,6 @@ end
 function ArenaLiveSpectatorWarGameMenuSettingsResetNicknameButton.OnClick(button, down)
 	local player = ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton.player;
 	if ( player ) then
-		ArenaLiveSpectator.NicknameDatabase:RemoveNickname(player);
 		ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetText("");
 		ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:SetCursorPosition(0);
 		ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:Update();
