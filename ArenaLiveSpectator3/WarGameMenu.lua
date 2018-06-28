@@ -791,7 +791,7 @@ function ArenaLiveSpectatorWarGameMenuWarGamesStartButton:OnClick(button, down)
 	leader2 = ArenaLiveSpectatorWarGameMenuWarGamesRightLeaderButton.presenceID;
 	bracket = database.PlayMode;
 	map = database.Map;
-	tournamentRules = ValueToBoolean(database.TournamentRules);
+	tournamentRules = false;--ValueToBoolean(database.TournamentRules);
 	StartSpectatorWarGame(leader1, leader2, bracket, map, tournamentRules);
 end
 

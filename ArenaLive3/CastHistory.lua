@@ -69,7 +69,7 @@ end
 	 Creates a new icon for the cast history.
 		castHistory (Frame): The frame that is going to be set up as a cast history.
 ]]--
-function CastHistory:CreateIcon (unitFrame, castHistory)
+function CastHistory:CreateIcon(unitFrame, castHistory)
 	
 	local icon = CreateFrame("Frame", nil, castHistory, "ArenaLive_CastHistoryIconTemplate");
 	
@@ -247,10 +247,12 @@ function CastHistory:ResetIcon (icon)
 end
 
 -- CAST HISTORY SPECIFIC FUNCTIONS:
-function CastHistory:OnEnable (unitFrame)
+function CastHistory:OnEnable(unitFrame)
 	local castHistory = unitFrame[self.name];
 	castHistory:Show();
-	CastHistory:Update(unitFrame);
+	--CastHistory:Update(unitFrame);
+    
+    CastHistory:Reset(unitFrame);
 end
 
 function CastHistory:OnDisable (unitFrame)
@@ -259,8 +261,8 @@ function CastHistory:OnDisable (unitFrame)
 	castHistory:Hide();
 end
 
-function CastHistory:Update (unitFrame)
-	 CastHistory:Reset(unitFrame);
+function CastHistory:Update(unitFrame)
+	 --CastHistory:Reset(unitFrame);
 end
 
 function CastHistory:Reset (unitFrame)

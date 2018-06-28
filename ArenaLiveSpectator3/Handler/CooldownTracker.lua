@@ -392,6 +392,8 @@ end
 function CooldownTracker:AddCooldown(unit, spellID, duration)	
 	local _, _, icon = GetSpellInfo(spellID);
 	local faction = UnitFactionGroup(unit);
+    
+    if not icon then print("Нет иконки "..spellID); end
 
 	-- Switch texture for pvp trinket:
 	if ( spellID == 42292 ) then
@@ -735,6 +737,10 @@ function CooldownTrackerClass:Update()
 		icon.spellID = spellID;
 		icon.addon = self.addon;
 		icon.group = self.group;
+        
+        if trackedUnits[unit]["cooldowns"][spellID] == nil then
+            print(spellID.." нулл!");
+        end
 			
 		-- Set Texture:
 		local texture = trackedUnits[unit]["cooldowns"][spellID]["texture"] or [[Interface\Icons\INV_Misc_QuestionMark]];
@@ -759,7 +765,7 @@ function CooldownTrackerClass:Update()
 			local startTime = expires - duration;
 			icon.cooldown:Set(startTime, duration);
 		else
-			icon.cooldown:Reset();
+			--icon.cooldown:Reset();
 		end
 	end
 	
@@ -919,7 +925,7 @@ end
 
 function CooldownTrackerClass:ResetIcon(icon)
 	icon.texture:SetTexture([[Interface\Icons\INV_Misc_QuestionMark]]);
-	icon.cooldown:Reset();
+	--icon.cooldown:Reset();
 	icon:Hide();
 end
 

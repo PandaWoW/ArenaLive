@@ -348,7 +348,9 @@ end
 	 return 3 for you)."
 ]]--
 function IsSpectator()
-    return CommentatorGetMode() == 2;
+    -- return CommentatorGetMode() == 2;
+    local inInstance, instanceType = IsInInstance();
+	return instanceType == "arena";
 end
 
 function ArenaLiveSpectator:Enable()
@@ -591,9 +593,8 @@ function ArenaLiveSpectator:PlayerUpdate()
 	ArenaLiveSpectator:UpdateSideFrames();
 	ArenaLiveSpectator:UpdateCooldownTrackers();
     
-    -- TODO: Call MainTargetIndicator:UpdateNumPlayers();
-    
-    DelayEvent(2, ArenaLiveSpectator.PlayerUpdate); -- every 2 seconds
+    ArenaLive:TriggerEvent("COMMENTATOR_PLAYER_UPDATE");
+    DelayEvent(1, ArenaLiveSpectator.PlayerUpdate); -- every 1 seconds
 end
 
 function ArenaLiveSpectator:SetNumPlayers(numPlayers)
@@ -638,6 +639,14 @@ function ArenaLiveSpectator:UpdateDB()
 	
 	if ( database.Version == "3.0.0b" ) then
 	end
+end
+
+function ArenaLiveSpectator:ValueToBoolean(value)
+    if value then
+        return true;
+    else
+        return nil;
+    end
 end
 
 ArenaLive:ConstructAddon(ArenaLiveSpectator, addonName, true, ArenaLiveSpectator.defaults, false, "ALSPEC_Database");

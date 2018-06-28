@@ -255,8 +255,6 @@ function NamePlate:OnEvent(event, ...)
 			NamePlate:UpdateUnitCacheEntry(unit);
 		end
 		NamePlate:UpdateAll();
-        
-        ArenaLiveSpectator:PrintUnitCache();
 	elseif ( ( event == "UNIT_ABSORB_AMOUNT_CHANGED" or event == "UNIT_HEAL_PREDICTION" ) and NamePlate.unitCache[unit] ) then
 		for blizzPlate, namePlate in pairs(self.namePlates) do
 			if ( unit == namePlate.unit ) then

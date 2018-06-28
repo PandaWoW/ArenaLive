@@ -7,7 +7,7 @@ function DelayEvent(delay, func, ...)
     end
     
     if (waitFrame == nil) then
-        waitFrame = CreateFrame("Frame","WaitFrame", UIParent);
+        waitFrame = CreateFrame("Frame","WaitFrame");
         waitFrame:SetScript("onUpdate",function (self,elapse)
         
         local count = #waitTable;
