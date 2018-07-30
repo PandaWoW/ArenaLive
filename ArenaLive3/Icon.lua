@@ -599,21 +599,24 @@ function Icon:OnEvent(event, ...)
 		
 
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_INTERRUPT" ) then
-		--[[ Bugfix for Ticket 41: Mages get their Counter Spell cooldown reduced by 4 sec. whenever they successfully interrupt someone,
-			 if they have the 2 piece set bonus of the PvP-Set. So always reduce the cooldown on a successful counter spell by 4 sec to make
-			 sure that always the lowest possible cooldown is shown. 
-			 UPDATE: This set bonus was removed in WoD.
+		-- Bugfix for Ticket 41: Mages get their Counter Spell cooldown reduced by 4 sec. whenever they successfully interrupt someone,
+		--	 if they have the 2 piece set bonus of the PvP-Set. So always reduce the cooldown on a successful counter spell by 4 sec to make
+		--	 sure that always the lowest possible cooldown is shown. 
+		--	 UPDATE: This set bonus was removed in WoD.
 			local guid = select(4, ...);
 			local spellID = select(12, ...);
-			if ( guid and spellID and spellID == ArenaLive.spellDB.Interrupts.MAGE[1] and cooldownCache[guid] and cooldownCache[guid][spellID] ) then
+			if ( guid and spellID and spellID == ArenaLive.spellDB.Interrupts.MAGE[1] or spellID == ArenaLive.spellDB.Interrupts.ROGUE[1] and cooldownCache[guid] and cooldownCache[guid][spellID] ) then
+				if spellID == 1766 then cooldownCache[guid][spellID] = cooldownCache[guid][spellID] - 6
+				else
 				cooldownCache[guid][spellID] = cooldownCache[guid][spellID] - 4;
+				end
 				if ( ArenaLive:IsGUIDInUnitFrameCache(guid) ) then
 					for id, isRegistered in ArenaLive:GetAffectedUnitFramesByGUID(guid) do
 						local frame = ArenaLive:GetUnitFrameByID(id);
 						Icon:Update(frame);
 					end
 				end
-			end]]
+			end
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		-- Wipe the cooldown cache when entering the arena, because all cooldowns will be resetted.
 		local _, instanceType = IsInInstance();

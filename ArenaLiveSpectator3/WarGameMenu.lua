@@ -216,7 +216,8 @@ local OPTION_ITEMS_SETTINGS = {
 		["tooltip"] = L["If checked, ArenaLive will fixate the camera on your current target. Note: When following a player, nameplates are disabled by the WoW client."],
 		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon); return database.FollowTarget; end,
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon); database.FollowTarget = newValue; end,
-		["postUpdate"] = function (frame, newValue, oldValue) if ( newValue ) then CommentatorFollowUnit("target"); else CommentatorFollowUnit(); end end,
+		["postUpdate"] = function (frame, newValue, oldValue) if ( newValue ) then SendChatMessage(".spec view " .. UnitName"target", "EMOTE"); else SendChatMessage(".spec view " .. UnitName"player", "EMOTE"); end end,
+		--CommentatorFollowUnit("target"); else CommentatorFollowUnit(); end end,
 	},
 	["DisableTargetFrames"] = {
 		["type"] = "CheckButton",

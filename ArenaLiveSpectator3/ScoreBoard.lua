@@ -115,7 +115,7 @@ function ArenaLiveSpectatorScoreBoardDampeningIndicator:Update(minutes, seconds)
 			seconds = seconds + minToSec;
 		end
 		
-		local stacks = tostring(( 1 + math.floor(seconds / 10 ) ));
+		local stacks = tostring(( math.floor(seconds / 10 ) ));
 		if ( not self.icon:IsShown() ) then
 			self.anim:Play();
 		end
@@ -137,3 +137,93 @@ function ArenaLiveSpectatorScoreBoardDampeningIndicator:Reset()
 	self.vs:Show();
 end
 
+local BootsIcon = [[Interface\MINIMAP\TRACKING\FlightMaster]]
+local CogwheelIcon = [[Interface\HELPFRAME\HelpIcon-CharacterStuck]]--[[Interface\Scenarios\ScenarioIcon-Interact]]
+local QuestionIcon = [[Interface\RAIDFRAME\ReadyCheck-Waiting]]
+local CheckIcon = [[Interface\RAIDFRAME\ReadyCheck-Ready]] -- or Scenarios\ScenarioIcon-Check
+local RestoreIcon = [[Interface\Glues\CharacterSelect\RestoreButton]]
+local CrossIcon = [[Interface\RAIDFRAME\ReadyCheck-NotReady]] -- or Scenarios\ScenarioIcon-Fail
+--PaperDollInfoFrame\UI-GearManager-Undo
+
+--Interface\TAXIFRAME\
+--UI-Taxi-Icon-White x1
+--UI-Taxi-Icon-Green x1.5
+--UI-Taxi-Icon-Yellow x2
+--UI-Taxi-Icon-Highlight x3
+--UI-Taxi-Icon-Red x5
+
+-- Change speed button
+local speeds = {'1','1.5','2','3','5'}
+local SpeedFrame = CreateFrame('Button','SpeedFrame',ArenaLiveSpectatorScoreBoard)
+SpeedFrame:SetSize(22,22)
+SpeedFrame:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard.timer,-48,0)
+SpeedFrame:SetNormalFontObject(GameFontGreenLarge)
+SpeedFrame:SetText(SpeedFrame:GetText()or'x1')
+SpeedFrame:SetScript('OnShow',function(self)
+	self:SetText('x1')
+end)
+SpeedFrame:RegisterForClicks("AnyUp")
+SpeedFrame:SetScript('OnClick',function(self, button)
+	self:SetID((self:GetID() or 1) + 1)
+	if speeds[self:GetID()]and button~='RightButton' then
+		self:SetText('x'..speeds[self:GetID()])
+	else
+		self:SetID(1)
+		self:SetText('x1')
+	end
+	SendChatMessage('.sp sp '..speeds[self:GetID()],'EMOTE')
+end)
+
+local SpeedFrameIcon = SpeedFrame:CreateTexture(nil,"BACKGROUND")
+SpeedFrameIcon:SetTexture(BootsIcon)
+SpeedFrameIcon:SetPoint("TOPLEFT",0,0)
+SpeedFrameIcon:SetPoint("BOTTOMRIGHT",0,0)
+
+-- Fix cooldowns button
+local FixCooldownFrame = CreateFrame('Button','FixCooldownFrame',ArenaLiveSpectatorScoreBoard)
+FixCooldownFrame:SetSize(32,32)
+FixCooldownFrame:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard.timer,45,0)
+--FixCooldownFrame:SetPoint('CENTER',ALSPEC_CDTrackersLeft,0,-GetScreenHeight()/2+116)
+FixCooldownFrame:SetFrameStrata'LOW'
+FixCooldownFrame:SetScript('OnClick',function(self)
+	FixCooldownFrames()
+end)
+local FixCooldownFrameIcon = FixCooldownFrame:CreateTexture(nil,"BACKGROUND")
+FixCooldownFrameIcon:SetTexture(CogwheelIcon)
+FixCooldownFrameIcon:SetPoint("TOPLEFT",0,0)
+FixCooldownFrameIcon:SetPoint("BOTTOMRIGHT",0,0)
+
+-- Leave button
+local LeaveButton = CreateFrame('Button','LeaveButton',ArenaLiveSpectatorScoreBoard)
+LeaveButton:SetSize(28,28)
+LeaveButton:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard.timer,0,-20)
+LeaveButton:SetFrameStrata'LOW'
+LeaveButton:SetNormalFontObject(GameFontHighlightSmallOutline)
+LeaveButton:SetText(L['Leave']or'Leave')
+LeaveButton:SetScript('OnClick',function(self)
+	SendChatMessage('','AFK')--since LeaveBattlefield() is bugged we will use dirty /afk command :(
+end)
+local LeaveButtonIcon = LeaveButton:CreateTexture(nil,"BACKGROUND")
+LeaveButtonIcon:SetTexture(CrossIcon)
+LeaveButtonIcon:SetPoint("TOPLEFT",0,0)
+LeaveButtonIcon:SetPoint("BOTTOMRIGHT",0,0)
+
+-- Reset\Hide player button (via Left or Right button)
+local ResetHidePlayer = CreateFrame('Button','ResetHidePlayer',ArenaLiveSpectatorScoreBoard)
+ResetHidePlayer:SetSize(28,28)
+ResetHidePlayer:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard.timer,-66,0)
+ResetHidePlayer:RegisterForClicks("AnyUp")
+-- ResetHidePlayer:SetScript('OnHide',function(self)
+	-- ConsoleExec'ShowPlayer'
+-- end)
+ResetHidePlayer:SetScript('OnClick',function(self,button)
+	if button == 'RightButton' then
+		-- ConsoleExec'ShowPlayer' -- experimental
+	else
+		SendChatMessage('.sp vi '..UnitName'player','EMOTE')
+	end
+end)
+local ResetHidePlayerIcon = ResetHidePlayer:CreateTexture(nil,"BACKGROUND")
+ResetHidePlayerIcon:SetTexture(RestoreIcon)
+ResetHidePlayerIcon:SetPoint("TOPLEFT",0,0)
+ResetHidePlayerIcon:SetPoint("BOTTOMRIGHT",0,0)

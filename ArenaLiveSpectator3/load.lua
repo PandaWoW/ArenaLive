@@ -344,26 +344,45 @@ end
 	 return 3 for you)."
 ]]--
 function IsSpectator()
-    -- return CommentatorGetMode() == 2;
-    local inInstance, instanceType = IsInInstance();
-	return instanceType == "arena";
+    return CommentatorGetMode() == 2;
 end
+
+-- таймер арены. временное и конечно не самое элегантное решение
+local frame = CreateFrame"Frame"
+local TimeSinceLastUpdate = 0
+frame:SetScript("OnUpdate",function(self,elapsed)
+	TimeSinceLastUpdate = TimeSinceLastUpdate + elapsed
+	if TimeSinceLastUpdate >= 1 then
+		TimeSinceLastUpdate = 0
+		local mm,ss = 19-math.floor(GetBattlefieldInstanceRunTime()/1000/60),59-math.floor(GetBattlefieldInstanceRunTime()/1000%60)
+		ArenaLiveSpectatorScoreBoard:UpdateTimer(mm,strlen(ss)==1 and'0'..ss or ss)
+	end
+end)
+
+frame:SetScript("OnShow", function(self)
+	TimeSinceLastUpdate = 0
+end)
+frame:Hide()
 
 function ArenaLiveSpectator:Enable()
 	ArenaLiveSpectatorWarGameMenu:Hide();
 	UIParent:Hide();
 	self:Show();
+	frame:Show();
 	
 	local database = ArenaLive:GetDBComponent(addonName);
 	ArenaLiveSpectatorHideUIButton:Show();
     ArenaLiveSpectator:PlayerUpdate();
 	self.enabled = true;
     self.hasStarted = true;
-    ArenaLiveSpectator:SetNumPlayers(3);
+	ArenaLiveSpectator:SetNumPlayers(max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents()));
+    --ArenaLiveSpectator:SetNumPlayers(3);
 end
 
 function ArenaLiveSpectator:Disable()
 	self:Hide();
+	frame:Hide();
+	
 	ArenaLiveSpectatorHideUIButton:Hide();
 	UIParent:Show();
 	
@@ -423,12 +442,12 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		end
 		
 		ArenaLive:Message(L["Spectator addon has been loaded successfully! Type /alspec to open the spectator war game menu or /alspec help for a list of available commands."], "message");
-	elseif ( event == "AL_SPEC_MATCH_START" ) then
-		-- Iterate through all callback functions that have registered for match start:
-		for callbackFunc in pairs(onMatchStartCallbackList) do
-			callbackFunc();
-			onMatchStartCallbackList[callbackFunc] = nil;
-		end
+	-- elseif ( event == "AL_SPEC_MATCH_START" ) then
+		-- -- Iterate through all callback functions that have registered for match start:
+		-- for callbackFunc in pairs(onMatchStartCallbackList) do
+			-- callbackFunc();
+			-- onMatchStartCallbackList[callbackFunc] = nil;
+		-- end
 	-- elseif ( event == "CHAT_MSG_ADDON" and filter == "ALSPEC" ) then
 		-- local prefix, message, channel, sender = ...;
 		-- local playerName = GetUnitName("player", true);
@@ -455,7 +474,7 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
 		-- ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamB");
 		-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
-	elseif ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
+	--elseif ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
 		-- "COMMENTATOR_PLAYER_UPDATE" fires a bit too early,
 		-- I use the new C_Timer to wait 2 seconds, before
 		-- updating the side frames and cooldown trackers 
@@ -463,11 +482,12 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		-- information should available.
 		--DelayEvent(2, ArenaLiveSpectator.PlayerUpdate);
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
-		ArenaLiveSpectator:Toggle();
+		ArenaLiveSpectator:Toggle()
 	elseif ( event == "PLAYER_TARGET_CHANGED" and self.enabled ) then
 		if ( self.enabled ) then
 			local database = ArenaLive:GetDBComponent(addonName);
-			if ( database.FollowTarget ) then
+			if ( database.FollowTarget ) and UnitIsPlayer"target" then
+				SendChatMessage(".spec view " .. UnitName"target", "EMOTE")
 				--CommentatorFollowUnit("target"); DeadMouse
 			end
 			if ( database.HideTargetFrames or database.PlayMode > 3 ) then
@@ -486,12 +506,13 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		local screenHeight = math.ceil(GetScreenHeight());
 		local scale = 786 / screenHeight;
 		ArenaLiveSpectatorTooltip:SetScale(scale);
+	--[=[	
 	elseif ( event == "WORLD_STATE_UI_TIMER_UPDATE" and self.enabled ) then
 		if ( ArenaLiveSpectatorScoreBoard.enabled ) then
 			if ( not self.worldStateTimerIndex ) then
 				for index = 1, GetNumWorldStateUI() do
 					local uiType = GetWorldStateUIInfo(index);
-					if ( uiType == 3 ) then -- 3 seems to be the identifier for timers.
+					if ( uiType == 1 ) then -- Its pwow baby! --( uiType == 3 ) then -- 3 seems to be the identifier for timers.
 						self.worldStateTimerIndex = index;
 						break;
 					end
@@ -514,7 +535,7 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 					ArenaLiveSpectatorScoreBoard:UpdateTimer("00", "00")
 				end
 			end
-		end
+		end]=]
 	end
 end
 
@@ -533,7 +554,10 @@ end
 function ArenaLiveSpectator:Toggle()
 	local inInstance, instanceType = IsInInstance();
 	if ( instanceType == "arena" and IsSpectator() ) then
-		ArenaLiveSpectator:Enable();
+		ArenaLiveSpectator:Enable();	
+		-- This shit is bugged, never updates when spectating
+		DelayEvent(1,function()for i=1,3 do _G["AlwaysUpFrame"..i]:Hide()end end)
+		DelayEvent(1.5,FixCooldownFrames)
 	else
 		ArenaLiveSpectator:Disable();
 	end
@@ -541,14 +565,15 @@ end
 
 function ArenaLiveSpectator:PlayerUpdate()
     ArenaLiveSpectator:RefreshGUIDs();
-	--ArenaLiveSpectator:UpdateSideFrames();
+	ArenaLiveSpectator:UpdateSideFrames();
 	ArenaLiveSpectator:UpdateCooldownTrackers();
     
-    ArenaLive:TriggerEvent("COMMENTATOR_PLAYER_UPDATE");
-    DelayEvent(1, ArenaLiveSpectator.PlayerUpdate); -- every 1 seconds
+    --ArenaLive:TriggerEvent("COMMENTATOR_PLAYER_UPDATE");
+    --DelayEvent(1, ArenaLiveSpectator.PlayerUpdate); -- every 1 seconds
 end
 
 function ArenaLiveSpectator:SetNumPlayers(numPlayers)
+	ArenaLive:GetDBComponent(addonName).PlayMode = numPlayers
 	ArenaLiveSpectator:SetUpSideFrames(numPlayers);
 	ArenaLiveSpectator:SetUpTargetFrames(numPlayers);
 	ArenaLiveSpectator:SetUpCooldownTracker(numPlayers);
@@ -607,7 +632,7 @@ ArenaLiveSpectator:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED");
 ArenaLiveSpectator:RegisterEvent("BN_TOON_NAME_UPDATED");
 ArenaLiveSpectator:RegisterEvent("CHAT_MSG_ADDON");
 ArenaLiveSpectator:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
-ArenaLiveSpectator:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
+--ArenaLiveSpectator:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 ArenaLiveSpectator:RegisterEvent("DISPLAY_SIZE_CHANGED");
 ArenaLiveSpectator:RegisterEvent("PLAYER_ENTERING_WORLD");
 ArenaLiveSpectator:RegisterEvent("PLAYER_TARGET_CHANGED");

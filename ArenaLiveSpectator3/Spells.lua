@@ -1,3 +1,5 @@
+local GetSpellInfo = GetSpellInfo
+
 ArenaLiveSpectator.SpellDB = {
 	["Dispels"] = { -- Dispels only trigger their cooldown when actively dispelling something.
 					-- In Order to account for that in the cooldown tracker I need a fast way
@@ -28,35 +30,43 @@ ArenaLiveSpectator.SpellDB = {
 		[7744] = { -- Will of the Forsaken
 			[42292] = 30,			-- PvP-Insignia
 		},
-		[48505] = { -- Starfall
-			[78674] = 30,	-- Starsurge
-		},
-		[78674] = { -- Starsurge
-			[48505] = 30,	-- Starfall
-		},
 		[60192] = { -- Freezing Trap: Trap Launcher
-			[1499] = 15,
+			[82941] = 30,			-- Ice Trap: Trap Launcher
+			[13809] = 30,			-- Ice Trap
+			[1499] = 30,			-- Freezing Trap
+		},
+		[1499] = { -- Freezing Trap
+			[82941] = 30,			-- Ice Trap: Trap Launcher
+			[13809] = 30,			-- Ice Trap
+			[60192] = 30,			-- Freezing Trap: Trap Launcher
+		},
+		[82941] = { -- Ice Trap: Trap Launcher
+			[13809] = 30,			-- Ice Trap
+			[60192] = 30,			-- Freezing Trap: Trap Launcher
+			[1499] = 30,			-- Freezing Trap
+		},
+		[13809] = { -- Ice Trap
+			[82941] = 30,			-- Ice Trap: Trap Launcher
+			[60192] = 30,			-- Freezing Trap: Trap Launcher
+			[1499] = 30,			-- Freezing Trap
 		},
 		[2062] = { -- Earth Elemental Totem
 			[2894] = 500,		-- Fire Elemental Totem
-			[152256] = 500,		-- Storm Elemental Totem
 		},
 		[2894] = { -- Fire Elemental Totem
 			[2062] = 500,		-- Earth Elemental Totem
-			[152256] = 500,		-- Storm Elemental Totem
-		},
-		[152256] = { -- Storm Elemental Totem
-			[2062] = 500,		-- Earth Elemental Totem
-			[2894] = 500,		-- Fire Elemental Totem
 		},
 		[119911] = { -- Optical Blast
 			[132409] = 24,				-- Spell lock (Warlock)
 		},
-		[171140] = { -- Shadowlock
-			[132409] = 24,				-- Spell lock (Warlock)
-		},
 		[119910] = { -- Spell lock
 			[132409] = 24,				-- Spell lock (Warlock)
+		},
+		[6552] = { -- Pummel
+			[102060] = 15,				-- Disrupting Shout
+		},
+		[102060] = { -- Disrupting Shout
+			[6552] = 15,				-- Pummel
 		},
 	},
 	["CooldownTypePriorities"] = {
@@ -74,8 +84,8 @@ ArenaLiveSpectator.SpellDB = {
 		[42292] = "TRINKET",
 		
 		
-		-- Racial Abilities:	
-		[59752] = "RACIAL",		-- Human	
+		-- Racial Abilities:
+		[59752] = "RACIAL",		-- Human
 		[20594] = "RACIAL",		-- Dwarf
 		[58984] = "RACIAL",		-- Night Elf
 		[20589] = "RACIAL",		-- Gnome
@@ -115,13 +125,14 @@ ArenaLiveSpectator.SpellDB = {
 		[48982] = "DEF_CD",		-- Rune Tap
 		[55233] = "DEF_CD",		-- Vampiric Blood
 		
-		[152279] = "OFF_CD",	-- Breath of Sindragosa
 		[49028] = "OFF_CD",		-- Dancing Rune Weapon
 		[47568] = "OFF_CD",		-- Empowered Rune Weapon
 		[77575] = "OFF_CD",		-- Outbreak
 		[51271] = "OFF_CD",		-- Pillar of Frost
+		[49016] = "OFF_CD",		-- Unholy Frenzy
 		[49206] = "OFF_CD",		-- Summon Gargoyle
 		[115989] = "OFF_CD",	-- Unholy Blight
+		[46584] = "OFF_CD",		-- Raise dead
 		
 		[47528] = "INTERRUPT",	-- Mind Freeze
 		
@@ -134,24 +145,25 @@ ArenaLiveSpectator.SpellDB = {
 		[77606] = "MISC",		-- Dark Simulacrum
 		[43265] = "MISC",		-- Death and Decay
 		[96268] = "MISC",		-- Death's Advance
-		[152280] = "MISC",		-- Defile
 		[123693] = "MISC",		-- Plague Leech
 		
 		
 		-- Druid
 		[102351] = "DEF_CD",		-- Cenarion Ward
-		[22842] = "DEF_CD",			-- Frenzied Regeneration
 		[22812] = "DEF_CD",			-- Bark Skin 
 		[108291] = "DEF_CD",		-- Heart of the Wild: Balance
 		[108292] = "DEF_CD",		-- Heart of the Wild: Feral
 		[108293] = "DEF_CD",		-- Heart of the Wild: Guardian
 		[108294] = "DEF_CD",		-- Heart of the Wild: Restoration
+		[124974] = "DEF_CD",		-- Nature's Vigil
 		[132158] = "DEF_CD",		-- Nature's Swiftness
 		[108238] = "DEF_CD",		-- Renewal
 		[62606] = "DEF_CD",			-- Savage Defense
 		[61336] = "DEF_CD",			-- Survival Insticts
 		[740] = "DEF_CD",			-- Tranquility
 		[102342] = "DEF_CD",		-- Iron Bark
+		[5229] = "DEF_CD",			-- Enrage
+		[106922] = "DEF_CD",		-- Might of Ursoc
 		
 		[106952] = "OFF_CD",		-- Berserk
 		[112071] = "OFF_CD",		-- Celestial Alignment
@@ -178,11 +190,11 @@ ArenaLiveSpectator.SpellDB = {
 		[102693] = "MISC",			-- Force of Nature
 		[106898] = "MISC",			-- Stampeding Roar
 		[48505] = "MISC",			-- Starfall
-		[78674] = "MISC",			-- Starsurge
 		[18562] = "MISC",			-- Swiftmend
 		[132302] = "MISC",			-- Wild Charge
 		[48438] = "MISC",			-- Wild Growth
-		
+		[29166] = "MISC",			-- Innervate
+
 		
 		-- Hunter:
 		[19263] = "DEF_CD",				-- Deterrence
@@ -191,6 +203,8 @@ ArenaLiveSpectator.SpellDB = {
 		[53271] = "DEF_CD",				-- Master's Call
 		
 		[131894] = "OFF_CD",			-- A Murder of Crows
+		[120697] = "OFF_CD",			-- Lynx Rush
+		[82726] = "OFF_CD",				-- Fervor
 		[120679] = "OFF_CD",			-- Dire Beast
 		[19574] = "OFF_CD",				-- Bestial Wrath
 		[3045] = "OFF_CD",				-- Rapid Fire
@@ -203,7 +217,6 @@ ArenaLiveSpectator.SpellDB = {
 		[19577] = "CC",					-- Intimidation
 		[19386] = "CC",					-- Wyvern Sting
 		
-		--[172106] = "MISC",				-- Aspect of the Fox
 		[3674] = "MISC",				-- Black Arrow
 		[120360] = "MISC",				-- Barrage
 		[51753] = "MISC",				-- Camouflage
@@ -218,18 +231,14 @@ ArenaLiveSpectator.SpellDB = {
 		-- Mage:
 		[108978] = "DEF_CD",			-- Alter Time
 		[11958] = "DEF_CD",				-- Cold Snap
-		[157913] = "DEF_CD",			-- Evanesce
 		[45438] = "DEF_CD",				-- Ice Block
-		[159916] = "DEF_CD",			-- Amplify Magic
 		[12051] = "DEF_CD",				-- Evocation
 		
-		[153626] = "OFF_CD",			-- Arcane Orb
 		[12042] = "OFF_CD",				-- Arcane Power
 		[11129] = "OFF_CD",				-- Combustion
 		[84714] = "OFF_CD",				-- Frozen Orb
 		[12472] = "OFF_CD",				-- Icy Veins
 		[55342] = "OFF_CD",				-- Mirror Images
-		[152087] = "OFF_CD",			-- Prismatic Crystal
 		
 		[2139] = "INTERRUPT",			-- Counterspell
 		
@@ -240,26 +249,23 @@ ArenaLiveSpectator.SpellDB = {
 		[113724] = "CC",				-- Ring of Frost
 		
 		[108843] = "MISC",				-- Blazing Speed
-		[157981] = "MISC",				-- Blast Wave
 		[1953] = "MISC",				-- Blink
-		[153595] = "MISC",				-- Comet Storm
 		[120] = "MISC",					-- Cone of Cold
-		[2136] = "MISC",				-- Fire Blast
+		--[2136] = "MISC",				-- Fire Blast
 		[110959] = "MISC",				-- Greater Invisibility
 		[11426] = "MISC",				-- Ice Barrier
-		[157997] = "MISC",				-- Ice Nova
+		[115610] = "MISC",				-- Temporal Shield
 		[111264] = "MISC",				-- Ice Ward
+		[1463] = "OFF_CD",				-- Incanter's Ward \\ maybe i should set it MISC
 		[66] = "MISC",					-- Invisibility
-		[153561] = "MISC",				-- Meteor
 		[12043] = "MISC",				-- Presence of Mind
-		[157980] = "MISC",				-- Supernova
 		
 		
 		-- Monk:
-		[157535] = "DEF_CD",			-- Breath of the Serpent
 		[122278] = "DEF_CD",			-- Dampen Harm
 		[122783] = "DEF_CD",			-- Diffuse Magic
 		[115295] = "DEF_CD",			-- Guard
+		[115213] = "DEF_CD",			-- Avert Harm
 		[115203] = "DEF_CD",			-- Fortifying Brew
 		[116849] = "DEF_CD",			-- Life Cocoon
 		[137562] = "DEF_CD",			-- Nimble Brew
@@ -271,7 +277,6 @@ ArenaLiveSpectator.SpellDB = {
 		
 		[115288] = "OFF_CD",			-- Energizing Brew
 		[123904] = "OFF_CD",			-- Invoke Xuen, the White Tiger
-		[152173] = "OFF_CD",			-- Serenity
 		[115080] = "OFF_CD",			-- Touch of Death
 
 		[116705] = "INTERRUPT",			-- Spear Hand Strike
@@ -283,20 +288,20 @@ ArenaLiveSpectator.SpellDB = {
 		[119381] = "CC",				-- Leg Sweep
 		[115078] = "CC",				-- Paralysis
 		[116844] = "CC",				-- Ring of Peace
+		[122057] = "CC",				-- Clash
 		
 		[115399] = "MISC";				-- Chi Brew
 		[123986] = "MISC",				-- Chi Burst
-		[115008] = "MISC",				-- Chi Torpedo
-		[115098] = "MISC",				-- Chi Wave
-		[115072] = "MISC",				-- Expel Harm
+		--[115008] = "MISC",				-- Chi Torpedo
+		--[115098] = "MISC",				-- Chi Wave
+		--[115072] = "MISC",				-- Expel Harm
 		[101545] = "MISC",				-- Flying Serpent Kick
-		[152175] = "MISC",				-- Hurricane Strike
-		[109132] = "MISC",				-- Roll
-		[116847] = "MISC",				-- Rushing Jade Wind
+		--[109132] = "MISC",				-- Roll
+		--[116847] = "MISC",				-- Rushing Jade Wind
 		[119996] = "MISC",				-- Transcendence: Transfer
-		[124081] = "MISC",				-- Zen Sphere
-		
-		
+		--[124081] = "MISC",				-- Zen Sphere
+
+
 		-- Paladin:
 		[31850] = "DEF_CD",				-- Ardent Defender
 		[31821] = "DEF_CD",				-- Devotion Aura
@@ -308,10 +313,9 @@ ArenaLiveSpectator.SpellDB = {
 		[114039] = "DEF_CD",			-- Hand of Purity
 		[6940] = "DEF_CD",				-- Hand of Sacrifice
 		
-		[31842] = "OFF_CD",				-- Avenging Wrath: Holy (Off CD in a sense that it increases throughput)
-		[31884] = "OFF_CD",				-- Avenging Wrath: Retribution
+		[31842] = "OFF_CD",				-- Divine Favor
+		[31884] = "OFF_CD",				-- Avenging Wrath
 		[105809] = "OFF_CD",			-- Holy Avenger
-		[152262] = "OFF_CD",			-- Seraphim
 		
 		[96231] = "INTERRUPT",			-- Rebuke
 		
@@ -325,12 +329,14 @@ ArenaLiveSpectator.SpellDB = {
 		[114157] = "MISC",				-- Execution Sentence
 		[114165] = "MISC",				-- Holy Prism
 		[114158] = "MISC",				-- Light's Hammer
+		[54428] = "MISC",				-- Divine Plea
 		[85499] = "MISC",				-- Speed of Light
 
 
 		-- Priest:
-		[114214] = "DEF_CD", 			-- Angelic Bulwark 
-		[19236] = "DEF_CD", 			-- Desperate Prayer 
+		[108968] = "DEF_CD",			-- Void Shift
+		[114214] = "DEF_CD", 			-- Angelic Bulwark
+		[19236] = "DEF_CD", 			-- Desperate Prayer
 		[47585] = "DEF_CD",				-- Dispersion
 		[64843] = "DEF_CD",				-- Divine Hymn
 		[586] = "DEF_CD",				-- Fade
@@ -339,12 +345,12 @@ ArenaLiveSpectator.SpellDB = {
 		[126135] = "DEF_CD",			-- Light Well
 		[33206] = "DEF_CD",				-- Pain Suppression
 		[62618] = "DEF_CD",				-- Power Word: Barrier
+		[89485] = "DEF_CD",				-- Inner focus
 		[109964] = "DEF_CD", 			-- Spirit Shell
 		
 		[123040] = "OFF_CD", 			-- Mind Bender
 		[10060] = "OFF_CD",				-- Power Infusion
 		[34433] = "OFF_CD",				-- Shadow Fiend
-		
 		
 		[32375] = "DISPEL",				-- Mass Dispel
 		[527] = "DISPEL",				-- Purify
@@ -354,11 +360,13 @@ ArenaLiveSpectator.SpellDB = {
 		[8122] = "CC",					-- Psychic Scream
 		[15487] = "CC",					-- Silence
 		[108920] = "CC",				-- Void Tendrils
+		[108921] = "CC",				-- Psyfiend
 		
 		[81700] = "MISC",				-- Arch Angel
 		[121135] = "MISC",				-- Cascade
 		[127632] = "MISC",				-- Cascade (Shadow)
-		[34861] = "MISC",				-- Circle of Healing
+		[64901] = "MISC",				-- Hymn of Hope
+		--[34861] = "MISC",				-- Circle of Healing
 		[110744] = "MISC",				-- Divine Star
 		[122121] = "MISC",				-- Divine Star
 		[6346] = "MISC",				-- Fear Ward
@@ -383,8 +391,8 @@ ArenaLiveSpectator.SpellDB = {
 		[51690] = "OFF_CD",				-- Killing Spree
 		[137619] = "OFF_CD",			-- Marked for Death
 		[51713] = "OFF_CD",				-- Shadow Dance
-		[152151] = "OFF_CD",			-- Shadow Reflection
 		[76577] = "OFF_CD",				-- Smoke Bomb
+		[121471] = "OFF_CD",			-- Shadow Blades
 		[79140] = "OFF_CD",				-- Vendetta
 		
 		[1766] = "INTERRUPT",			-- Kick
@@ -393,16 +401,15 @@ ArenaLiveSpectator.SpellDB = {
 		[1776] = "CC",					-- Gouge
 		[408] = "CC",					-- Kidney Shot
 		
-		[152150] = "MISC",				-- Death form Above
 		[36554] = "MISC",				-- Shadow Step
 		[5938] = "MISC",				-- Shiv
 		[114018] = "MISC",				-- Shroud of Concealment
 		[2983] = "MISC",				-- Sprint
+		[73981] = "MISC",				-- Redirect
 		
 		
 		-- Shaman:
 		[108271] = "DEF_CD",			-- Astral Shift
-		[157153] = "DEF_CD",			-- Cloud Burst Totem
 		[30823] = "DEF_CD",				-- Shamanistic Rage
 		[108280] = "DEF_CD",			-- Healing Tide Totem
 		[98008] = "DEF_CD",				-- Spirit Link Totem
@@ -412,9 +419,7 @@ ArenaLiveSpectator.SpellDB = {
 		[108281] = "DEF_CD",			-- Ancestral Guidance
 		[16188] = "DEF_CD",				-- Ancestral Swiftness
 		
-		[165339] = "OFF_CD",			-- Ascendance: Elemental
-		[165341] = "OFF_CD",			-- Ascendance: Enhancement
-		[165344] = "OFF_CD",			-- Ascendance: Restoration
+		[114049] = "OFF_CD",			-- Ascendance
 		[16166] = "OFF_CD",				-- Elemental Mastery
 		[51533] = "OFF_CD",				-- Feral Spirit
 		[2894] = "OFF_CD",				-- Fire Elemental Totem
@@ -435,15 +440,13 @@ ArenaLiveSpectator.SpellDB = {
 		[8177] = "MISC",				-- Grounding Totem
 		[73920] = "MISC",				-- Healing Rain
 		[5394] = "MISC",				-- Healing Stream Totem
-		[152255] = "MISC",				-- Liquid Magma
 		[370] = "MISC",					-- Purge (Glyphed)
-		[61295] = "MISC",				-- Riptide
+		[16190] = "MISC",				-- Mana Tide Totem
+		--[61295] = "MISC",				-- Riptide
 		[79206] = "MISC",				-- Spirit Walker's Grace
-		[152256] = "MISC",				-- Storm Elemental Totem
 		[51490] = "MISC",				-- Thunderstorm
 		[108287] = "MISC",				-- Totemic Projection
 		[8143] = "MISC",				-- Tremor Totem
-		[165462] = "MISC",				-- Unleash Flame
 
 		
 		-- Warlock: 
@@ -456,7 +459,6 @@ ArenaLiveSpectator.SpellDB = {
 		[113858] = "OFF_CD",			-- Dark Soul: Instability
 		[113861] = "OFF_CD",			-- Dark Soul: Knowledge
 		[113860] = "OFF_CD",			-- Dark Soul: Misery
-		[152108] = "OFF_CD",			-- Cataclysm
 		[108501] = "OFF_CD",			-- Grimoire of Service
 		[108508] = "OFF_CD",			-- Mannoroth's Fury
 		[103958] = "OFF_CD",			-- Metamorphosis
@@ -467,11 +469,12 @@ ArenaLiveSpectator.SpellDB = {
 		[6789] = "CC",					-- Mortal Coil
 		[30283] = "CC",					-- Shadowfury
 		
+		[48020] = "MISC",				-- Demonic Cirle: Teleportation
 		[111397] = "MISC",				-- Blood Horror
 		[17962] = "MISC",				-- Conflagrate
 		[109151] = "MISC",				-- Demonic Leap
 		[120451] = "MISC",				-- Flames of Xoroth
-		[108503] = "MISC",				-- Grimoire of Sacrifice
+		--[108503] = "MISC",				-- Grimoire of Sacrifice
 		[105174] = "MISC",				-- Hand of Gul'dan
 		[80240] = "MISC",				-- Havoc
 		[137587] = "MISC",				-- Kil'jaeden's Cunning
@@ -480,6 +483,7 @@ ArenaLiveSpectator.SpellDB = {
 		-- Warrior:
 		[18499] = "DEF_CD",				-- Berserker Rage
 		[1160] = "OFF_CD",				-- Demoralizing Shout
+		[114203] = "OFF_CD",			-- Demoralizing Banner
 		[118038] = "DEF_CD",			-- Die by the Sword
 		[55694] = "DEF_CD",				-- Enraged Regeneration
 		[12975] = "DEF_CD",				-- Last Stand
@@ -490,33 +494,34 @@ ArenaLiveSpectator.SpellDB = {
 		[114030] = "DEF_CD",			-- Vigilance
 		
 		[1719] = "OFF_CD",				-- Recklessness
+		[114207] = "OFF_CD",			-- Skull Banner
 		[107574] = "OFF_CD",			-- Avatar
 		[12292] = "OFF_CD",				-- Blood Bath
 		[46924] = "OFF_CD",				-- Blade Storm
 		
-		[6552] = "INTERRUPT",			-- Intervene
+		[102060] = "INTERRUPT",			-- Disrupting Shout
+		[6552] = "INTERRUPT",			-- Pummel
 		
+		[107566] = "CC",				-- Staggering Shout
 		[118000] = "CC",				-- Dragon Roar
 		[5246] = "CC",					-- Intimidating Shout
 		[46968] = "CC",					-- Shockwave
 		[107570] = "CC",				-- Storm Bolt
 		
-		[23881] = "MISC",				-- Blood Thirst
+		
+		--[23881] = "MISC",				-- Blood Thirst
 		[100] = "MISC",					-- Charge
-		[167105] = "MISC",				-- Colossus Smash
+		[86346] = "MISC",				-- Colossus Smash
 		[6544] = "MISC",				-- Heroic Leap
-		[57755] = "MISC",				-- Heroic Throw
+		--[57755] = "MISC",				-- Heroic Throw
 		[3411] = "MISC",				-- Intervene
 		[114028] = "MISC",				-- Mass Spell Reflection
-		[152277] = "MISC";				-- Ravager
-		[6572] = "MISC",				-- Revenge
+		--[6572] = "MISC",				-- Revenge
 		[64382] = "MISC",				-- Shattering Throw
-		[156321] = "MISC",				-- Shield Charge
 		[23922] = "MISC",				-- Shield Slam
-		[176289] = "MISC",				-- Siegebreaker
 		[23920] = "MISC",				-- Spell Reflection
-		[12328] = "MISC",				-- Sweeping Strikes
-		[6343] = "MISC",				-- Thunderclap
+		--[12328] = "MISC",				-- Sweeping Strikes
+		--[6343] = "MISC",				-- Thunderclap
 	},
 	["CooldownClassSpecInfo"] = {
 		["DEATHKNIGHT"] = {
@@ -545,6 +550,7 @@ ArenaLiveSpectator.SpellDB = {
 				[48982] = {30, 2},	-- Runetap (with Enhanced Rune Tap Passive)
 				[49576] = 20,		-- Death Grip (with Enhanced Death Grip Passive)
 				[47528] = 15,		-- Mind Freeze
+				[46584] = 60,		-- Raise dead
 			},
 			[251] = { -- Frost
 				[47568] = 300,		-- Empowered Rune Weapon
@@ -557,11 +563,13 @@ ArenaLiveSpectator.SpellDB = {
 				[43265] = 30,		-- Death and Decay
 				[49576] = 25,		-- Death Grip
 				[47528] = 15,		-- Mind Freeze
+				[46584] = 60,		-- Raise dead
 			},
 			[252] = { -- Unholy
 				[47568] = 300,		-- Empowered Rune Weapon
 				[48792] = 180,		-- Icebound Fortitude
 				[49206] = 180,		-- Summon Gargoyle
+				[49016] = 180,		-- Unholy Frenzy
 				[77606] = 60,		-- Dark Simulacrum
 				[77575] = 60,		-- Outbreak
 				[47476] = 60,		-- Strangulate
@@ -575,83 +583,85 @@ ArenaLiveSpectator.SpellDB = {
 			[0] = {
 				[1850] = 180,		-- Dash
 				[106898] = 120,		-- Stampeding Roar
-				[22842] = 90,		-- Frenzied Regeneration
 			},
 			[102] = { -- Balance
 				[112071] = 180,		-- Celestial Alignment
 				[1850] = 180,		-- Dash
 				[106898] = 120,		-- Stampeding Roar
-				[22842] = 90,		-- Frenzied Regeneration
 				[22812] = 60,		-- Bark Skin
+				[132158] = 60,		-- Nature's Swiftness
+				[29166] = 180,		-- Innervate
+				[106922] = 180,		-- Might of Ursoc
 				[78675] = 60,		-- Solar Beam
-				[48505] = {30, 3},	-- Starfall
-				[78674] = {30, 3},	-- Starsurge
+				[48505] = 90,	-- Starfall
 				[2782] = 8,			-- Remove Corruption
 			},
 			[103] = { -- Feral
 				[106952] = 180,		-- Berserk
 				[1850] = 180,		-- Dash
-				[61336] = {180, 2},	-- Survival Instincts
+				[61336] = 180,		-- Survival Instincts
 				[106898] = 120,		-- Stampeding Roar
-				[22842] = 90,		-- Frenzied Regeneration
 				[5217] = 30,		-- Tiger's Fury
+				[29166] = 180,		-- Innervate
+				[106922] = 180,		-- Might of Ursoc
 				[106839] = 15,		-- Skull Bash
 				[2782] = 8,			-- Remove Corruption
 			},
 			[104] = { -- Guardian
 				[106952] = 180,		-- Berserk
 				[1850] = 180,		-- Dash
-				[61336] = {180, 2},	-- Survival Instincts
+				[61336] = 180,		-- Survival Instincts
 				[106898] = 120,		-- Stampeding Roar
-				[22842] = 90,		-- Frenzied Regeneration
 				[22812] = 60,		-- Bark Skin
+				[5229] = 60,		-- Enrage
+				[29166] = 180,		-- Innervate
+				[106922] = 180,		-- Might of Ursoc
 				[106839] = 15,		-- Skull Bash
 				[62606] = {12, 2}, 	-- Savage Defense
 				[2782] = 8,			-- Remove Corruption
-				
 			},
 			[105] = { -- Resto
 				[740] = 180,		-- Tranquility (With Malfurion's Gift Passive)
 				[1850] = 180,		-- Dash
 				[106898] = 120,		-- Stampeding Roar
-				[22842] = 90,		-- Frenzied Regeneration
 				[22812] = 60,		-- Bark Skin
 				[102342] = 60,		-- Ironbark
+				[106922] = 180,		-- Might of Ursoc
+				[29166] = 180,		-- Innervate
 				[132158] = 60,		-- Nature's Swiftness
 				[18562] = 15,		-- Swiftmend
 				[48438] = 8,		-- Wild Growth
 				[88423] = 8,		-- Nature's Cure
-				
 			},
 		},		
 		["HUNTER"] = {
 			[0] = { -- Unskilled
-				--[172106] = 180,			-- Aspect of the Fox
 				[19263] = {180, 2},		-- Deterrence
 				[51753] = 60,			-- Camouflage
 				[53271] = 45,			-- Master's Call
 				[5384] = 30,			-- Feign Death
 				[147362] = 24,			-- Counter Shot
 				[781] = 20,				-- Disengage
-				[13813] = 15,			-- Explosive Trap
-				[1499] = 15,			-- Freezing Trap
-				[13809] = 15,			-- Ice Trap
+				[3045] = 120,			-- Rapid Fire
+				[13813] = 30,			-- Explosive Trap
+				[1499] = 30,			-- Freezing Trap
+				[13809] = 30,			-- Ice Trap
 			},
 			[253] = { -- Beast Mastery
-				--[172106] = 180,			-- Aspect of the Fox
 				[19263] = {180, 2},		-- Deterrence
 				[19574] = 60,			-- Bestial Wrath
 				[51753] = 60,			-- Camouflage
 				[53271] = 45,			-- Master's Call
 				[5384] = 30,			-- Feign Death
+				[3045] = 120,			-- Rapid Fire
 				[147362] = 24,			-- Counter Shot
 				[781] = 20,				-- Disengage
-				[13813] = 15,			-- Explosive Trap
-				[1499] = 15,			-- Freezing Trap
-				[13809] = 15,			-- Ice Trap
+				[13813] = 30,			-- Explosive Trap
+				[1499] = 30,			-- Freezing Trap
+				[13809] = 30,			-- Ice Trap
+				[121818] = 300,			-- Stampede
 			},
 			[254] = { -- Marksmanship
-				--[172106] = 180,			-- Aspect of the Fox
 				[19263] = {180, 2},		-- Deterrence
 				[3045] = 120,			-- Rapid Fire
 				[51753] = 60,			-- Camouflage
@@ -659,52 +669,54 @@ ArenaLiveSpectator.SpellDB = {
 				[5384] = 30,			-- Feign Death
 				[147362] = 24,			-- Counter Shot
 				[781] = 20,				-- Disengage
-				[13813] = 15,			-- Explosive Trap
-				[1499] = 15,			-- Freezing Trap
-				[13809] = 15,			-- Ice Trap
+				[13813] = 30,			-- Explosive Trap
+				[1499] = 30,			-- Freezing Trap
+				[13809] = 30,			-- Ice Trap
+				[121818] = 300,			-- Stampede
 			},
 			[255] = { -- Survival
-				--[172106] = 180,			-- Aspect of the Fox
 				[19263] = {180, 2},		-- Deterrence
 				[51753] = 60,			-- Camouflage
+				[3045] = 120,			-- Rapid Fire
 				[53271] = 45,			-- Master's Call
 				[3674] = 30,			-- Black Arrow
 				[5384] = 30,			-- Feign Death
 				[147362] = 24,			-- Counter Shot
 				[781] = 20,				-- Disengage
-				[13813] = 12,			-- Explosive Trap
-				[1499] = 12,			-- Freezing Trap
-				[13809] = 12,			-- Ice Trap
+				[13813] = 24,			-- Explosive Trap
+				[1499] = 24,			-- Freezing Trap
+				[13809] = 24,			-- Ice Trap
+				[121818] = 300,			-- Stampede
 			},
 		},
 		["MAGE"] = {
 			[0] = { -- Unskilled
 				[45438] = 300,			-- Ice Block
 				[66] = 300,				-- Invisibility
-				[159916] = 120,			-- Amplify Magic
 				[122] = 30,				-- Frost Nova
 				[2139] = 24,			-- Counterspell
 				[1953] = 15,			-- Blink
 				[120] = 12,				-- Cone of Cold
-				[2136] = 8,				-- Fireblast
+				--[2136] = 8,				-- Fireblast
+				[108978] = 180,			-- Alter Time
+				[55342] = 180,			-- Mirror Image
 			},
 			[62] = { -- Arcane
 				[45438] = 300,			-- Ice Block
 				[66] = 300,				-- Invisibility
-				[159916] = 120,			-- Amplify Magic
 				[12051] = 90,			-- Evocation (With Improved Evocation Passive)
 				[12042] = 90,			-- Arcane Power
-				[12043] = 90,			-- Presence of Mind
 				[122] = 30,				-- Frost Nova
 				[2139] = 24,			-- Counterspell
 				[1953] = 15,			-- Blink
 				[120] = 12,				-- Cone of Cold
-				[2136] = 8,				-- Fireblast
+				--[2136] = 8,				-- Fireblast
+				[108978] = 180,			-- Alter Time
+				[55342] = 180,			-- Mirror Image
 			},
 			[63] = { -- Fire
 				[45438] = 300,			-- Ice Block
 				[66] = 300,				-- Invisibility
-				[159916] = 120,			-- Amplify Magic
 				[11129] = 45,			-- Combustion
 				[122] = 30,				-- Frost Nova
 				[2139] = 24,			-- Counterspell
@@ -712,41 +724,48 @@ ArenaLiveSpectator.SpellDB = {
 				[1953] = 15,			-- Blink
 				[120] = 12,				-- Cone of Cold
 				[108853] = 8,			-- Inferno Blast
+				[108978] = 180,			-- Alter Time
+				[55342] = 180,			-- Mirror Image
 			},
 			[64] = { -- Frost
 				[45438] = 300,			-- Ice Block
 				[66] = 300,				-- Invisibility
 				[12472] = 180,			-- Icy Veins
-				[159916] = 120,			-- Amplify Magic
 				[84714] = 60,			-- Frozen Orb
 				[44572] = 30,			-- Deep Freeze
 				[122] = 30,				-- Frost Nova
 				[2139] = 24,			-- Counterspell
 				[1953] = 15,			-- Blink
 				[120] = 12,				-- Cone of Cold
-				[2136] = 8,				-- Fireblast
+				--[2136] = 8,				-- Fireblast
+				[108978] = 180,			-- Alter Time
+				[55342] = 180,			-- Mirror Image
 			},
 		},
 		["MONK"] = {
 			[0] = { -- Unskilled
+				[115176] = 180,			-- Zen Meditation
 				[115203] = 180,			-- Fortifying Brew
 				[137562] = 120,			-- Nimble Brew
 				[115080] = 90,			-- Touch of Death
 				[119996] = 25,			-- Transcendence: Transfer
-				[109132] = {20, 2},		-- Roll
-				[115072] = 15,			-- Expel Harm
+				--[109132] = {20, 2},		-- Roll
+				--[115072] = 15,			-- Expel Harm
 				[115078] = 15,			-- Paralysis
 				[116705] = 15,			-- Spear Hand Strike
 				[115450] = 8,			-- Detox
 			},
 			[268] = { -- Brewmaster
+				[115176] = 180,			-- Zen Meditation
 				[115203] = 180,			-- Fortifying Brew
 				[137562] = 120,			-- Nimble Brew
 				[115080] = 90,			-- Touch of Death
 				[115295] = {30, 2},		-- Guard
+				[115213] = 60,			-- Avert Harm
+				[122057] = 25,			-- Clash
 				[119996] = 25,			-- Transcendence: Transfer
-				[109132] = {20, 2},		-- Roll
-				[115072] = 15,			-- Expel Harm
+				--[109132] = {20, 2},		-- Roll
+				--[115072] = 15,			-- Expel Harm
 				[115078] = 15,			-- Paralysis
 				[116705] = 15,			-- Spear Hand Strike
 				[115450] = 8,			-- Detox
@@ -761,13 +780,14 @@ ArenaLiveSpectator.SpellDB = {
 				[113656] = 25,			-- Fists of Fury
 				[101545] = 25,			-- Flying Serpent Kick
 				[119996] = 25,			-- Transcendence: Transfer
-				[109132] = {20, 2},		-- Roll
-				[115072] = 15,			-- Expel Harm
+				--[109132] = {20, 2},		-- Roll
+				--[115072] = 15,			-- Expel Harm
 				[115078] = 15,			-- Paralysis
 				[116705] = 15,			-- Spear Hand Strike
 				[115450] = 8,			-- Detox
 			},
 			[270] = { -- Mistweaver
+				[115176] = 180,			-- Zen Meditation
 				[115310] = 180,			-- Revival
 				[115203] = 180,			-- Fortifying Brew
 				[137562] = 120,			-- Nimble Brew
@@ -775,8 +795,8 @@ ArenaLiveSpectator.SpellDB = {
 				[115080] = 90,			-- Touch of Death
 				[116680] = 45,			-- Thunder Focus Tea
 				[119996] = 25,			-- Transcendence: Transfer
-				[109132] = {20, 2},		-- Roll
-				[115072] = 15,			-- Expel Harm
+				--[109132] = {20, 2},		-- Roll
+				--[115072] = 15,			-- Expel Harm
 				[115078] = 15,			-- Paralysis
 				[116705] = 15,			-- Spear Hand Strike
 				[115450] = 8,			-- Detox
@@ -786,8 +806,9 @@ ArenaLiveSpectator.SpellDB = {
 			[0] = { -- Unskilled
 				[642] = 300,			-- Divine Shield
 				[1022] = 300,			-- Hand of Protection
-				[6940] = 90,			-- Hand of Sacrifice
+				[6940] = 120,			-- Hand of Sacrifice
 				[498] = 60,				-- Divine Protection
+				[86659] = 180,			-- Guardian of the Ancient Kings
 				[853] = 60,				-- Hammer of Justice
 				[1044] = 25,			-- Hand of Freedom
 				[96231] = 15,			-- Rebuke
@@ -795,9 +816,12 @@ ArenaLiveSpectator.SpellDB = {
 			[65] = { -- Holy
 				[642] = 300,			-- Divine Shield
 				[1022] = 300,			-- Hand of Protection
-				[31842] = 180,			-- Avenging Wrath: Holy
+				[31842] = 180,			-- Divine Favor
+				[86659] = 180,			-- Guardian of the Ancient Kings
+				[31884] = 180,			-- Avenging Wrath
 				[31821] = 180,			-- Devotion Aura
-				[6940] = 90,			-- Hand of Sacrifice
+				[54428] = 120,			-- Divine Plea
+				[6940] = 120,			-- Hand of Sacrifice
 				[498] = 60,				-- Divine Protection
 				[853] = 60,				-- Hammer of Justice
 				[1044] = 25,			-- Hand of Freedom
@@ -808,8 +832,9 @@ ArenaLiveSpectator.SpellDB = {
 				[642] = 300,			-- Divine Shield
 				[1022] = 300,			-- Hand of Protection
 				[31850] = 180,			-- Ardent Defender
+				[31884] = 180,			-- Avenging Wrath
 				[86659] = 180,			-- Guardian of the Ancient Kings
-				[6940] = 90,			-- Hand of Sacrifice
+				[6940] = 120,			-- Hand of Sacrifice
 				[498] = 60,				-- Divine Protection
 				[853] = 60,				-- Hammer of Justice
 				[1044] = 25,			-- Hand of Freedom
@@ -818,9 +843,10 @@ ArenaLiveSpectator.SpellDB = {
 			[70] = { -- Retribution
 				[642] = 300,			-- Divine Shield
 				[1022] = 300,			-- Hand of Protection
-				[31884] = 120,			-- Avenging Wrath: Retribution
-				[6940] = 90,			-- Hand of Sacrifice
+				[31884] = 120,			-- Avenging Wrath
+				[6940] = 120,			-- Hand of Sacrifice
 				[498] = 60,				-- Divine Protection
+				[86659] = 180,			-- Guardian of the Ancient Kings
 				[853] = 60,				-- Hammer of Justice
 				[1044] = 25,			-- Hand of Freedom
 				[96231] = 15,			-- Rebuke
@@ -832,24 +858,29 @@ ArenaLiveSpectator.SpellDB = {
 				[34433] = 180,			-- Shadow Fiend
 				[73325] = 90,			-- Leap of Faith
 				[586] = 30,				-- Fade (Unglyhed)
+				[64901] = 360,			-- Hymn of Hope
 				[32375] = 15,			-- Mass Dispel (Mass Dispel only for Shadow)
 				[33076] = 10,			-- Prayer of Mending
 			},
 			[256] = { -- Disc
+				[108968] = 300,			-- Void shift
 				[6346] = 180,			-- Fear Ward (Unglyhed)
 				[34433] = 180,			-- Shadow Fiend
 				[62618] = 180,			-- Power Word: Barrier
 				[33206] = 120,			-- Pain Suppression (with Setbonus)
 				[73325] = 90,			-- Leap of Faith
-				[15487] = 45,			-- Silence (Unglyphed)
 				[586] = 30,				-- Fade (Unglyhed)
-				[81700] = 30,			-- Arch Angel
-				--[32375] = 15,			-- Mass Dispel
-				[14914] = 10,			-- Holy Fire
+				[64901] = 360,			-- Hymn of Hope
+				[81700] = 30,			-- Archangel
+				[32375] = 15,			-- Mass Dispel
+				--[14914] = 10,			-- Holy Fire
 				[33076] = 10,			-- Prayer of Mending
 				[527] = 8,				-- Purify
+				[109964] = 60,			-- Spirit Shell
+				[89485] = 45,			-- Inner focus
 			},
 			[257] = { -- Holy
+				[108968] = 300,			-- Void shift
 				[6346] = 180,			-- Fear Ward (Unglyhed)
 				[34433] = 180,			-- Shadow Fiend
 				[64843] = 180,			-- Divine Hymn
@@ -859,9 +890,10 @@ ArenaLiveSpectator.SpellDB = {
 				[88685] = 40,			-- Holy Word: Sanctuary
 				[586] = 30,				-- Fade (Unglyhed)
 				[88625] = 30,			-- Holy Word: Chastise
-				--[32375] = 15,			-- Mass Dispel
-				[34861] = 12,			-- Circle of Healing
-				[14914] = 10,			-- Holy Fire
+				[32375] = 15,			-- Mass Dispel
+				[64901] = 360,			-- Hymn of Hope
+				--[34861] = 10,			-- Circle of Healing
+				--[14914] = 10,			-- Holy Fire
 				[88684] = 10,			-- Holy Word: Serenity
 				[33076] = 10,			-- Prayer of Mending
 				[527] = 8,				-- Purify
@@ -872,6 +904,7 @@ ArenaLiveSpectator.SpellDB = {
 				[47585] = 120,			-- Dispersion (Unglyphed)
 				[73325] = 90,			-- Leap of Faith
 				[64044] = 45,			-- Psychic Horror
+				[64901] = 360,			-- Hymn of Hope
 				[15487] = 45,			-- Silence (Unglyphed)
 				[586] = 30,				-- Fade (Unglyhed)
 				[32375] = 15,			-- Mass Dispel
@@ -883,6 +916,7 @@ ArenaLiveSpectator.SpellDB = {
 			[0] = { -- Unskilled
 				[114018] = 300,			-- Shroud of Concealment
 				[14185] = 300,			-- Preparation
+				[121471] = 180,			-- Shadow Blades
 				[76577] = 180,			-- Smoke Bomb
 				[2094] = 120,			-- Blind
 				[5277] = 120,			-- Evasion
@@ -892,11 +926,13 @@ ArenaLiveSpectator.SpellDB = {
 				[408] = 20,				-- Kidney Shot
 				[1766] = 15,			-- Kick
 				[1776] = 10,			-- Gouge
+				[73981] = 60,			-- Redirect
 				[5938] = 10,			-- Shiv
 			},
 			[259] = { -- Assassination
 				[114018] = 300,			-- Shroud of Concealment
 				[14185] = 300,			-- Preparation
+				[121471] = 180,			-- Shadow Blades
 				[76577] = 180,			-- Smoke Bomb
 				[2094] = 120,			-- Blind
 				[5277] = 120,			-- Evasion
@@ -907,12 +943,14 @@ ArenaLiveSpectator.SpellDB = {
 				[408] = 20,				-- Kidney Shot
 				[1766] = 15,			-- Kick
 				[1776] = 10,			-- Gouge
+				[73981] = 60,			-- Redirect
 				[5938] = 10,			-- Shiv
 			},
 			[260] = { -- Combat
 				[114018] = 300,			-- Shroud of Concealment
 				[14185] = 300,			-- Preparation
 				[13750] = 180,			-- Adrenaline Rush
+				[121471] = 180,			-- Shadow Blades
 				[76577] = 180,			-- Smoke Bomb
 				[2094] = 120,			-- Blind
 				[5277] = 120,			-- Evasion
@@ -923,11 +961,13 @@ ArenaLiveSpectator.SpellDB = {
 				[408] = 20,				-- Kidney Shot
 				[1766] = 15,			-- Kick
 				[1776] = 10,			-- Gouge
+				[73981] = 60,			-- Redirect
 				[5938] = 10,			-- Shiv
 			},
 			[261] = { -- Sublety
 				[114018] = 300,			-- Shroud of Concealment
 				[14185] = 300,			-- Preparation
+				[121471] = 180,			-- Shadow Blades
 				[76577] = 180,			-- Smoke Bomb
 				[2094] = 120,			-- Blind
 				[5277] = 120,			-- Evasion
@@ -938,6 +978,7 @@ ArenaLiveSpectator.SpellDB = {
 				[408] = 20,				-- Kidney Shot
 				[1766] = 15,			-- Kick
 				[1776] = 10,			-- Gouge
+				[73981] = 60,			-- Redirect
 				[5938] = 10,			-- Shiv
 			},
 		},		
@@ -958,8 +999,8 @@ ArenaLiveSpectator.SpellDB = {
 			[262] = { -- Elemental
 				[2894] = 300,			-- Fire Elemental Totem
 				[2062] = 300,			-- Earth Elemental Totem
-				[165339] = 180,			-- Ascendance: Elemental
-				[79206] = 120,			-- Spirit Walker's Grace
+				[114049] = 180,			-- Ascendance
+				[79206] = 120,			-- Spiritwalker's Grace
 				[8143] = 60,			-- Tremor Totem
 				[30823] = 60,			-- Shamanistic Rage
 				[5394] = 30,			-- Healing Stream Totem
@@ -968,16 +1009,16 @@ ArenaLiveSpectator.SpellDB = {
 				[108269] = 45,			-- Capacitor Totem
 				[51490] = 45,			-- Thunderstorm
 				[8177] = 25,			-- Grounding Totem
-				[57994] = 15,			-- Wind Shear		
-				[165462] = 15,			-- Unleash Flame
+				[57994] = 15,			-- Wind Shear
 				[73920] = 10,			-- Healing Rain
 				[51886] = 8,			-- Cleanse Spirit
 			},
 			[263] = { -- Enhancement
 				[2894] = 300,			-- Fire Elemental Totem
 				[2062] = 300,			-- Earth Elemental Totem
-				[165341] = 180,			-- Ascendance: Enhancement
+				[114049] = 180,			-- Ascendance
 				[51533] = 120,			-- Feral Spirit
+				[79206] = 120,			-- Spiritwalker's Grace
 				[58875] = 60,			-- Spirit Walk
 				[30823] = 60,			-- Shamanistic Rage
 				[8143] = 60,			-- Tremor Totem
@@ -993,10 +1034,11 @@ ArenaLiveSpectator.SpellDB = {
 			[264] = { -- Restoration
 				[2894] = 300,			-- Fire Elemental Totem
 				[2062] = 300,			-- Earth Elemental Totem
-				[165344] = 180,			-- Ascendance: Restoration
+				[114049] = 180,			-- Ascendance
 				[108280] = 180,			-- Healing Tide Totem
 				[98008] = 180,			-- Spirit Link Totem
-				[79206] = 120,			-- Spirit Walker's Grace
+				[16190] = 180,			-- Mana Tide Totem
+				[79206] = 120,			-- Spiritwalker's Grace
 				[8143] = 60,			-- Tremor Totem
 				[5394] = 30,			-- Healing Stream Totem
 				[2484] = 30,			-- Earthbind Totem
@@ -1006,7 +1048,7 @@ ArenaLiveSpectator.SpellDB = {
 				[57994] = 15,			-- Wind Shear	
 				[73920] = 10,			-- Healing Rain
 				[77130] = 8,			-- Purify Spirit
-				[61295] = 5,			-- Riptide (with Improved Riptide Passive)
+				--[61295] = 5,			-- Riptide (with Improved Riptide Passive)
 			},
 		},		
 		["WARLOCK"] = {
@@ -1039,20 +1081,23 @@ ArenaLiveSpectator.SpellDB = {
 		["WARRIOR"] = {
 			[0] = { -- Unskilled
 				[64382] = 300,			-- Shattering Throw
+				[871] = 180,			-- Shield Wall
 				[5246] = 90,			-- Intimidating Shout
 				[6544] = 45,			-- Heroic Leap
 				[18499] = 30,			-- Berserker Rage
 				[3411] = 30,			-- Intervene
+				[114207] = 180,			-- Skull Banner
 				[23920] = 25,			-- Spell Reflection
 				[100] = 20,				-- Charge
 				[6552] = 15,			-- Pummel
-				[156321] = {15,	2},		-- Shield Charge
-				[57755] = 6,			-- Heroic Throw
+				--[57755] = 6,			-- Heroic Throw
 			},
 			[71] = { -- Arms
 				[64382] = 300,			-- Shattering Throw
 				[97462] = 180,			-- Rallying Cry
 				[1719] = 180,			-- Recklessness
+				[114207] = 180,			-- Skull Banner
+				[871] = 180,			-- Shield Wall
 				[118038] = 120,			-- Die by the Sword
 				[5246] = 90,			-- Intimidating Shout
 				[6544] = 45,			-- Heroic Leap
@@ -1060,17 +1105,19 @@ ArenaLiveSpectator.SpellDB = {
 				[3411] = 30,			-- Intervene
 				[23920] = 25,			-- Spell Reflection
 				[100] = 20,				-- Charge
-				[167105] = 20, 			-- Colossus Smash
+				--[86346] = 20, 			-- Colossus Smash
 				[6552] = 15,			-- Pummel
-				[156321] = {15,	2},		-- Shield Charge
-				[12328] = 10,			-- Sweeping Strikes
-				[57755] = 6,			-- Heroic Throw
-				[6343] = 6,				-- Thunder Clap
+				[114203] = 180,			-- Demoralizing Banner
+				--[12328] = 10,			-- Sweeping Strikes
+				--[57755] = 30,			-- Heroic Throw
+				--[6343] = 6,				-- Thunder Clap
 			},
-			[72] = { -- Furry
+			[72] = { -- Fury
 				[64382] = 300,			-- Shattering Throw
 				[97462] = 180,			-- Rallying Cry
 				[1719] = 180,			-- Recklessness
+				[871] = 180,			-- Shield Wall
+				[114207] = 180,			-- Skull Banner
 				[118038] = 120,			-- Die by the Sword
 				[5246] = 90,			-- Intimidating Shout
 				[6544] = 45,			-- Heroic Leap
@@ -1078,15 +1125,20 @@ ArenaLiveSpectator.SpellDB = {
 				[3411] = 30,			-- Intervene
 				[23920] = 25,			-- Spell Reflection
 				[100] = 20,				-- Charge
+				[86346] = 20, 			-- Colossus Smash
 				[6552] = 15,			-- Pummel
-				[156321] = {15,	2},		-- Shield Charge
-				[57755] = 6,			-- Heroic Throw
-				[23881] = 4.5,			-- Bloodthirst
+				[114203] = 180,			-- Demoralizing Banner
+				--[57755] = 30,			-- Heroic Throw
+				--[6343] = 6,				-- Thunder Clap
+				--[23881] = 4.5,			-- Bloodthirst
 			},
 			[73] = { -- Protection
 				[64382] = 300,			-- Shattering Throw
+				[97462] = 180,			-- Rallying Cry
 				[12975] = 180,			-- Last Stand
 				[871] = 180,			-- Shield Wall
+				[114207] = 180,			-- Skull Banner
+				[1719] = 180,			-- Recklessness
 				[5246] = 90,			-- Intimidating Shout
 				[1160] = 60,			-- Demoralizing Shout
 				[6544] = 45,			-- Heroic Leap
@@ -1095,792 +1147,687 @@ ArenaLiveSpectator.SpellDB = {
 				[23920] = 25,			-- Spell Reflection
 				[100] = 20,				-- Charge
 				[6552] = 15,			-- Pummel
-				[156321] = {15,	2},		-- Shield Charge
+				[114203] = 180,			-- Demoralizing Banner
 				[2565] = 12,			-- Shield Block
-				[6572] = 9,				-- Revenge
+				--[6572] = 9,				-- Revenge
 				[23922] = 6,			-- Shield Slam
-				[6343] = 6,				-- Thunder Clap
+				--[6343] = 6,				-- Thunder Clap
 			},
 		},
 	},
 	["CooldownTalentInfo"] = {
 		["DEATHKNIGHT"] = {
-			[19166] = { -- Plague Leech
+			[GetSpellInfo'123693'] = { -- Plague Leech
 				["action"] = "ADD",
 				["spellID"] = 123693,
 				["value"] = 25,
 			},
-			[19217] = { -- Unholy Blight
+			[GetSpellInfo'115989'] = { -- Unholy Blight
 				["action"] = "ADD",
 				["spellID"] = 115989,
 				["value"] = 90,
 			},
-			[19218] = { -- Lichborne
+			[GetSpellInfo'49039'] = { -- Lichborne
 				["action"] = "ADD",
 				["spellID"] = 49039,
 				["value"] = 120,
 			},
-			[19219] = { -- Anti-Magic Zone
+			[GetSpellInfo'51052'] = { -- Anti-Magic Zone
 				["action"] = "ADD",
 				["spellID"] = 51052,
 				["value"] = 120,
 			},
-			[19221] = { -- Death's Advance
+			[GetSpellInfo'96268'] = { -- Death's Advance
 				["action"] = "ADD",
 				["spellID"] = 96268,
 				["value"] = 30,				
 			},
-			[19223] = { -- Asphyxiate
+			[GetSpellInfo'108194'] = { -- Asphyxiate
 				["action"] = "REPLACE",
 				["spellID"] = 108194,
 				["replace"] = 49576,
 				["value"] = 30,				
 			},  
-			[19226] = { -- Death Pact
+			[GetSpellInfo'48743'] = { -- Death Pact
 				["action"] = "ADD",
 				["spellID"] = 48743,
 				["value"] = 120,				
 			}, 
-			[19230] = { -- Gorefiend's Grasp
+			[GetSpellInfo'108199'] = { -- Gorefiend's Grasp
 				["action"] = "ADD",
 				["spellID"] = 108199,
 				["value"] = 60,				
 			},
-			[19231] = { -- Remorseless Winter
+			[GetSpellInfo'108200'] = { -- Remorseless Winter
 				["action"] = "ADD",
 				["spellID"] = 108200,
 				["value"] = 60,				
 			}, 
-			[19232] = { -- Desecrated Ground
+			[GetSpellInfo'108201'] = { -- Desecrated Ground
 				["action"] = "ADD",
 				["spellID"] = 108201,
-				["value"] = 120,				
-			}, 
-			[21208] = { -- Defile
-				["action"] = "ADD",
-				["spellID"] = 152280,
-				["value"] = 30,				
-			},
-			[21209] = { -- Breath of Sindragosa
-				["action"] = "ADD",
-				["spellID"] = 152279,
 				["value"] = 120,				
 			},
 		},
 		["DRUID"] = { 
-			[18570] = { -- Displacer Beast
+			[GetSpellInfo'102280'] = { -- Displacer Beast
 				["action"] = "ADD",
 				["spellID"] = 102280,
-				["value"] = 30,				
+				["value"] = 30,
 			},
-			[18571] = { -- Wild Charge
+			[GetSpellInfo'132302'] = { -- Wild Charge
 				["action"] = "ADD",
 				["spellID"] = 132302,
-				["value"] = 15,				
+				["value"] = 15,
 			},  
-			[19283] = { -- Renewal
+			[GetSpellInfo'108238'] = { -- Renewal
 				["action"] = "ADD",
 				["spellID"] = 108238,
-				["value"] = 120,				
+				["value"] = 120,
 			},
-			[18574] = { -- Cenarion Ward
+			[GetSpellInfo'102351'] = { -- Cenarion Ward
 				["action"] = "ADD",
 				["spellID"] = 102351,
-				["value"] = 30,				
+				["value"] = 30,
 			},  
-			[18576] = { -- Mass Entanglement
+			[GetSpellInfo'102359'] = { -- Mass Entanglement
 				["action"] = "ADD" ,
 				["spellID"] = 102359,
-				["value"] = 30,				
+				["value"] = 30,
 			}, 
-			[18577] = { -- Typhoon
+			[GetSpellInfo'132469'] = { -- Typhoon
 				["action"] = "ADD",
 				["spellID"] = 132469,
-				["value"] = 30,				
+				["value"] = 30,
 			},
-			[18579] = { -- Incarnation: Chosen of Elune
+			[GetSpellInfo'106731'] = { -- Incarnation
 				["action"] = "ADD",
 				["spellID"] = 102560,
-				["value"] = 180,				
+				["value"] = 180,
 			},
-			[21705] = { -- Incarnation: King of the Jungle
+			[GetSpellInfo'106731'] = { -- Incarnation
 				["action"] = "ADD",
 				["spellID"] = 102543,
-				["value"] = 180,				
-			}, 
-			[21706] = { -- Incarnation: Son of Ursoc
+				["value"] = 180,
+			},
+			[GetSpellInfo'106731'] = { -- Incarnation
 				["action"] = "ADD",
 				["spellID"] = 102558,
-				["value"] = 180,				
+				["value"] = 180,
 			},
-			[21707] = { -- Incarnation: Tree of Life
+			[GetSpellInfo'106731'] = { -- Incarnation
 				["action"] = "ADD",
 				["spellID"] = 33891,
-				["value"] = 180,				
-			}, 
-			[21710] = { -- Force of Nature
+				["value"] = 180,
+			},
+			[GetSpellInfo'102693'] = { -- Force of Nature
 				["action"] = "ADD",
 				["spellID"] = 102693,
-				["value"] = {20, 3},				
+				["value"] = {20, 3},
 			},
-			[18581] = { -- Incapacitating Shout
+			[GetSpellInfo'99'] = { -- Disorienting Roar
 				["action"] = "ADD",
 				["spellID"] = 99,
-				["value"] = 30,				
+				["value"] = 30,
 			},
-			[18582] = { -- Ursol's Vortex
+			[GetSpellInfo'102793'] = { -- Ursol's Vortex
 				["action"] = "ADD",
 				["spellID"] = 102793,
 				["value"] = 60,				
 			}, 
-			[18583] = { -- Mighty Bash
+			[GetSpellInfo'5211'] = { -- Mighty Bash
 				["action"] = "ADD",
 				["spellID"] = 5211,
-				["value"] = 50,				
-			}, 
-			[18584] = { -- Heart of the Wild: Balance
+				["value"] = 50,
+			},
+			[GetSpellInfo'108288'] = { -- Heart of the Wild
 				["action"] = "ADD",
 				["spellID"] = 108291,
-				["value"] = 360,				
+				["value"] = 360,
 			},
-			[21714] = { -- Heart of the Wild: Feral
+			[GetSpellInfo'108288'] = { -- Heart of the Wild
 				["action"] = "ADD",
 				["spellID"] = 108292,
-				["value"] = 360,				
-			}, 
-			[21715] = { -- Heart of the Wild: Guardian
+				["value"] = 360,
+			},
+			[GetSpellInfo'108288'] = { -- Heart of the Wild
 				["action"] = "ADD",
 				["spellID"] = 108293,
-				["value"] = 360,				
-			}, 
-			[21716] = { -- Heart of the Wild: Restoration
+				["value"] = 360,
+			},
+			[GetSpellInfo'108288'] = { -- Heart of the Wild
 				["action"] = "ADD",
 				["spellID"] = 108294,
-				["value"] = 360,				
-			}, 
-			[18568] = { -- Nature's Vigil
+				["value"] = 360,
+			},
+			[GetSpellInfo'124974'] = { -- Nature's Vigil
 				["action"] = "ADD",
 				["spellID"] = 124974,
-				["value"] = 90,				
-			}, 	
+				["value"] = 90,
+			},
 		},  
 		["HUNTER"] = { 
-			[19364] = { -- Crouching Tiger, Hidden Chimaera
+			[GetSpellInfo'118675'] = { -- Crouching Tiger, Hidden Chimaera
 				["action"] = {"MODIFY_COOLDOWN", "REPLACE"},
 				["spellID"] = {781, 148467},
 				["replace"] = { nil, 19263},
 				["value"] = {-10, {120, 2}},
 			},  
-			[19347] = { -- Binding Shot
+			[GetSpellInfo'109248'] = { -- Binding Shot
 				["action"] = "ADD",
 				["spellID"] = 109248,
 				["value"] = 45,				
 			}, 
-			[19348] = { -- Wyvern Sting
+			[GetSpellInfo'19386'] = { -- Wyvern Sting
 				["action"] = "ADD",
 				["spellID"] = 19386,
 				["value"] = 45,				
 			}, 
-			[19359] = { -- Intimidation
+			[GetSpellInfo'19577'] = { -- Intimidation
 				["action"] = "ADD",
 				["spellID"] = 19577,
 				["value"] = 60,				
 			}, 
-			[19350] = { -- Exhilaration
+			[GetSpellInfo'109304'] = { -- Exhilaration
 				["action"] = "ADD",
 				["spellID"] = 109304,
-				["value"] = 120,				
-			},    
-			[19353] = { -- Dire Beast
+				["value"] = 120,
+			},
+			[GetSpellInfo'82726'] = { -- Fervor
+				["action"] = "ADD",
+				["spellID"] = 82726,
+				["value"] = 30,
+			},
+			[GetSpellInfo'120679'] = { -- Dire Beast
 				["action"] = "ADD",
 				["spellID"] = 120679,
-				["value"] = 30,				
+				["value"] = 30,
 			},
-			[19360] = { -- A Murder of Crows
+			[GetSpellInfo'131894'] = { -- A Murder of Crows
 				["action"] = "ADD",
 				["spellID"] = 131894,
-				["value"] = 60,				
+				["value"] = 120,
 			},
-			[19362] = { -- Stampede
+			[GetSpellInfo'120697'] = { -- Lynx Rush
 				["action"] = "ADD",
-				["spellID"] = 121818,
-				["value"] = 300,				
-			},  
-			[19357] = { -- Glaive Toss
+				["spellID"] = 120697,
+				["value"] = 90,
+			},
+			[GetSpellInfo'117050'] = { -- Glaive Toss
 				["action"] = "ADD",
 				["spellID"] = 117050,
 				["value"] = 15,				
 			},
-			[19358] = { -- Powershot
+			[GetSpellInfo'109259'] = { -- Powershot
 				["action"] = "ADD",
 				["spellID"] = 109259,
 				["value"] = 45,				
 			},
-			[19349] = { -- Barrage
+			[GetSpellInfo'120360'] = { -- Barrage
 				["action"] = "ADD",
 				["spellID"] = 120360,
-				["value"] = 20,				
+				["value"] = 30,				
 			},			
 		},
 		["MAGE"] = {
-			[21689] = { -- Evanesce
-				["action"] = "REPLACE",
-				["spellID"] = 157913,
-				["replace"] = 45438,
-				["value"] = 45,			
+			[GetSpellInfo'12043'] = { -- Presence of Mind
+				["action"] = "ADD",
+				["spellID"] = 12043,
+				["value"] = 90,
 			},
-			[21689] = { -- Blazing Speed
+			[GetSpellInfo'108843'] = { -- Blazing Speed
 				["action"] = "ADD",
 				["spellID"] = 108843,
-				["value"] = 25,			
+				["value"] = 25,
 			},
-			[16023] = { -- Alter Time
-				["action"] = "ADD",
-				["spellID"] = 108978,
-				["value"] = 90,			
-			},
-			[16025] = { -- Ice Barrier
+			[GetSpellInfo'11426'] = { -- Ice Barrier
 				["action"] = "ADD",
 				["spellID"] = 11426,
-				["value"] = 25,			
+				["value"] = 25,
 			},
-			[16019] = { -- Ring of Frost
+			[GetSpellInfo'115610'] = { -- Temporal Shield
+				["action"] = "ADD",
+				["spellID"] = 115610,
+				["value"] = 25,
+			},
+			[GetSpellInfo'1463'] = { -- Incanter's Ward
+				["action"] = "ADD",
+				["spellID"] = 1463,
+				["value"] = 25,
+			},
+			[GetSpellInfo'113724'] = { -- Ring of Frost
 				["action"] = "ADD",
 				["spellID"] = 113724,
 				["value"] = 45,			
 			},
-			[16020] = { -- Ice Ward
+			[GetSpellInfo'111264'] = { -- Ice Ward
 				["action"] = "ADD",
 				["spellID"] = 111264,
 				["value"] = 20,			
 			},
-			[16021] = { -- Frostjaw
+			[GetSpellInfo'102051'] = { -- Frostjaw
 				["action"] = "ADD",
 				["spellID"] = 102051,
 				["value"] = 20,			
 			},
-			[16027] = { -- Greater Invisibility
+			[GetSpellInfo'110959'] = { -- Greater Invisibility
 				["action"] = "REPLACE",
 				["spellID"] = 110959,
 				["replace"] = 66,
 				["value"] = 90,			
 			},
-			[16029] = { -- Cold Snap
+			[GetSpellInfo'11958'] = { -- Cold Snap
 				["action"] = "ADD",
 				["spellID"] = 11958,
 				["value"] = 180,			
 			},
-			[21692] = { -- Blast Wave
-				["action"] = "REPLACE",
-				["spellID"] = 157981,
-				["replace"] = 122,
-				["value"] = 25,			
-			},
-			[19301] = { -- Supernova
-				["action"] = "REPLACE",
-				["spellID"] = 157980,
-				["replace"] = 122,
-				["value"] = 25,			
-			},
-			[21693] = { -- Ice Nova
-				["action"] = "REPLACE",
-				["spellID"] = 157997,
-				["replace"] = 122,
-				["value"] = 25,			
-			},
-			[16031] = { -- Mirror Images
-				["action"] = "ADD",
-				["spellID"] = 55342,
-				["value"] = 120,			
-			},
-			[21144] = { -- Prismatic Crystal
-				["action"] = "ADD",
-				["spellID"] = 152087,
-				["value"] = 90,			
-			},
-			[21145] = { -- Arcane Orb
-				["action"] = "ADD",
-				["spellID"] = 153626,
-				["value"] = 15,			
-			},
-			[21633] = { -- Meteor
-				["action"] = "ADD",
-				["spellID"] = 153561,
-				["value"] = 45,			
-			},
-			[21634] = { -- Comet Storm
-				["action"] = "ADD",
-				["spellID"] = 153595,
-				["value"] = 30,			
-			},
-
-		},		
+		},
 		["MONK"] = {   
-			[19302] = { -- Celerity
-				["action"] = {"MODIFY_COOLDOWN", "MODIFY_CHARGES" },
-				["spellID"] = {115008, 115008},
-				["value"] = {-5, 1},			
-			},
-			[19818] = { -- Tiger's Lust
+			-- [GetSpellInfo'115173'] = { -- Celerity
+				-- ["action"] = {"MODIFY_COOLDOWN", "MODIFY_CHARGES" },
+				-- ["spellID"] = {115008, 115008},
+				-- ["value"] = {-5, 1},
+			-- },
+			[GetSpellInfo'116841'] = { -- Tiger's Lust
 				["action"] = "ADD",
 				["spellID"] = 116841,
-				["value"] = 30,			
+				["value"] = 30,
 			},
-			[20185] = { -- Chi Wave
-				["action"] = "ADD",
-				["spellID"] = 115098,
-				["value"] = 15,			
-			},
-			[19820] = { -- Zen Sphere
-				["action"] = "ADD",
-				["spellID"] = 124081,
-				["value"] = 10,			
-			},
-			[19823] = { -- Chi Burst
+			-- [GetSpellInfo'115098'] = { -- Chi Wave
+				-- ["action"] = "ADD",
+				-- ["spellID"] = 115098,
+				-- ["value"] = 15,
+			-- },
+			-- [GetSpellInfo'124081'] = { -- Zen Sphere
+				-- ["action"] = "ADD",
+				-- ["spellID"] = 124081,
+				-- ["value"] = 10,
+			-- },
+			[GetSpellInfo'123986'] = { -- Chi Burst
 				["action"] = "ADD",
 				["spellID"] = 123986,
-				["value"] = 30,			
+				["value"] = 30,
 			},
-			[19772] = { -- Chi Brew
+			[GetSpellInfo'115399'] = { -- Chi Brew
 				["action"] = "ADD",
 				["spellID"] = 115399,
-				["value"] = {60, 2},			
+				["value"] = {45, 2},
 			},
-			[19993] = { -- Ring of Peace
+			[GetSpellInfo'116844'] = { -- Ring of Peace
 				["action"] = "ADD",
 				["spellID"] = 116844,
 				["value"] = 45,			
 			},
-			[19994] = { -- Charging Ox Wave
+			[GetSpellInfo'119392'] = { -- Charging Ox Wave
 				["action"] = "ADD",
 				["spellID"] = 119392,
 				["value"] = 30,			
 			},
-			[19995] = { -- Leg Sweep
+			[GetSpellInfo'119381'] = { -- Leg Sweep
 				["action"] = "ADD",
 				["spellID"] = 119381,
 				["value"] = 45,			
 			}, 
-			[20175] = { -- Dampen Harm
+			[GetSpellInfo'122278'] = { -- Dampen Harm
 				["action"] = "ADD",
 				["spellID"] = 122278,
 				["value"] = 90,			
 			},
-			[20173] = { -- Diffuse Magic
+			[GetSpellInfo'122783'] = { -- Diffuse Magic
 				["action"] = "ADD",
 				["spellID"] = 122783,
 				["value"] = 90,			
 			},  
-			[19819] = { -- Rushing Jade Wind
-				["action"] = "ADD",
-				["spellID"] = 116847,
-				["value"] = 6,			
-			},
-			[20184] = { -- Invoke Xuen, the White Tiger
+			-- [GetSpellInfo'116847'] = { -- Rushing Jade Wind
+				-- ["action"] = "ADD",
+				-- ["spellID"] = 116847,
+				-- ["value"] = 6,			
+			-- },
+			[GetSpellInfo'123904'] = { -- Invoke Xuen, the White Tiger
 				["action"] = "ADD",
 				["spellID"] = 123904,
 				["value"] = 180,			
 			},
-			[19313] = { -- Chi Torpedo
-				["action"] = "REPLACE",
-				["spellID"] = 115008,
-				["replace"] = 109132,
-				["value"] = {20, 2},			
-			},
-			[21189] = { -- Hurricane Strike
-				["action"] = "ADD",
-				["spellID"] = 152175,
-				["value"] = 45,			
-			},
-			[21191] = { -- Serenity
-				["action"] = "ADD",
-				["spellID"] = 152173,
-				["value"] = 90,			
-			},
-			[21676] = { -- Breath of the Serpent
-				["action"] = "ADD",
-				["spellID"] = 157535,
-				["value"] = 90,			
-			},			
+			-- [GetSpellInfo'115008'] = { -- Chi Torpedo
+				-- ["action"] = "REPLACE",
+				-- ["spellID"] = 115008,
+				-- ["replace"] = 109132,
+				-- ["value"] = {20, 2},			
+			-- },
 		},
 		["PALADIN"] = {
-			[17565] = { -- Speed of Light
+			[GetSpellInfo'85499'] = { -- Speed of Light
 				["action"] = "ADD",
 				["spellID"] = 85499,
 				["value"] = 45,			
 			},
-			[17573] = { -- Fist of Justice
+			[GetSpellInfo'105593'] = { -- Fist of Justice
 				["action"] = "REPLACE",
 				["spellID"] = 105593,
 				["replace"] = 853,
 				["value"] = 30,
 			},
-			[17575] = { -- Repentence
+			[GetSpellInfo'20066'] = { -- Repentence
 				["action"] = "ADD",
 				["spellID"] = 20066,
 				["value"] = 15,
 			},
-			[17577] = { -- Blinding Light
-				["action"] = "ADD",
-				["spellID"] = 115750,
-				["value"] = 120,
-			},
-			[17589] = { -- Hand of Purity
+			[GetSpellInfo'114039'] = { -- Hand of Purity
 				["action"] = "ADD",
 				["spellID"] = 114039,
 				["value"] = 30,
 			},
-			[17591] = { -- Unbreakable Will
+			[GetSpellInfo'114154'] = { -- Unbreakable Will
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = {498, 642},
 				["value"] = function(baseValue) return baseValue * 0.5; end,
 			},
-			[17593] = { -- Clemency
+			[GetSpellInfo'105622'] = { -- Clemency
 				["action"] = "MODIFY_CHARGES",
 				["spellID"] = {1044, 1022, 6940},
 				["value"] = 1,
 			},
-			[17597] = { -- Holy Avenger 
+			[GetSpellInfo'105809'] = { -- Holy Avenger
 				["action"] = "ADD",
 				["spellID"] = 105809,
 				["value"] = 120,				
 			},
-			[17605] = { -- Holy Prism
+			[GetSpellInfo'114165'] = { -- Holy Prism
 				["action"] = "ADD",
 				["spellID"] = 114165,
 				["value"] = 20,	
 			},
-			[17607] = { -- Light's Hammer
+			[GetSpellInfo"114158"] = { -- Light's Hammer
 				["action"] = "ADD",
 				["spellID"] = 114158,
 				["value"] = 60,	
 			},
-			[17609] = { -- Execution Sentence
+			[GetSpellInfo'114157'] = { -- Execution Sentence
 				["action"] = "ADD",
 				["spellID"] = 114157,
 				["value"] = 60,	
 			},
-			[21202] = { -- Seraphim
-				["action"] = "ADD",
-				["spellID"] = 152262,
-				["value"] = 30,
-			},
 		},
 		["PRIEST"] = {
-			[19752] = { -- Desperate Prayer
+			[GetSpellInfo'19236'] = { -- Desperate Prayer
 				["action"] = "ADD",
 				["spellID"] = 19236,
 				["value"] = 120,
 			},
-			[19753] = { -- Spectral Guise
+			[GetSpellInfo'112833'] = { -- Spectral Guise
 				["action"] = "ADD",
 				["spellID"] = 112833,
 				["value"] = 30,
 			},		
-			[19754] = { -- Angelic Bulwark
+			[GetSpellInfo'114214'] = { -- Angelic Bulwark
 				["action"] = "ADD",
 				["spellID"] = 114214,
 				["value"] = 90,
 			},
-			[19769] = { -- Mind Bender
+			[GetSpellInfo'123040'] = { -- Mindbender
 				["action"] = "REPLACE",
 				["spellID"] = 123040,
 				["replace"] = 34433,
 				["value"] = 60,
 			},
-			[19762] = { -- Void Tendrils
+			[GetSpellInfo'108920'] = { -- Void Tendrils
 				["action"] = "ADD",
 				["spellID"] = 108920,
 				["value"] = 30,
-			},		
-			[19768] = { -- Psychic Scream
+			},
+			[GetSpellInfo'108921'] = { -- Psyfiend
+				["action"] = "ADD",
+				["spellID"] = 108921,
+				["value"] = 45,
+			},
+			[GetSpellInfo'8122'] = { -- Psychic Scream
 				["action"] = "ADD",
 				["spellID"] = 8122,
-				["value"] = 42,				-- With PvP-Glove Bonus
+				["value"] = 27,				-- With PvP-Glove Bonus
 			},								
-			[19765] = { -- Power Infusion
+			[GetSpellInfo'10060'] = { -- Power Infusion
 				["action"] = "ADD",
 				["spellID"] = 10060,
 				["value"] = 120,
 			},
-			[21754] = { -- Spirit Shell
-				["action"] = "ADD",
-				["spellID"] = 109964,
-				["value"] = 60,
-			},
-			[19767] = { -- Cascade
+			[GetSpellInfo'121135'] = { -- Cascade
 				["action"] = "ADD",
 				["spellID"] = 121135,
 				["value"] = 25,
 			},					
-			[19760] = { -- Divine Star
+			[GetSpellInfo'110744'] = { -- Divine Star
 				["action"] = "ADD",
 				["spellID"] = 110744,
 				["value"] = 15,
 			},					
-			[19763] = { -- Halo
+			[GetSpellInfo'120517'] = { -- Halo
 				["action"] = "ADD",
 				["spellID"] = 120517,
 				["value"] = 40,
 			},					
-			[21718] = { -- Cascade (Shadow)
+			[GetSpellInfo'127632'] = { -- Cascade (Shadow)
 				["action"] = "ADD",
 				["spellID"] = 127632,
 				["value"] = 25,
 			},					
-			[21719] = { -- Divine Star (Shadow)
+			[GetSpellInfo'122121'] = { -- Divine Star (Shadow)
 				["action"] = "ADD",
 				["spellID"] = 122121,
 				["value"] = 15,
 			},					
-			[21720] = { -- Halo (Shadow)
+			[GetSpellInfo'120644'] = { -- Halo (Shadow)
 				["action"] = "ADD",
 				["spellID"] = 120644,
 				["value"] = 40,
 			},
 		},
 		["ROGUE"] = {
-			[19238] = { -- Combat Readiness
+			[GetSpellInfo'74001'] = { -- Combat Readiness
 				["action"] = "ADD",
 				["spellID"] = 74001,
 				["value"] = 120,
 			},
-			[19243] = { -- Shadowstep
+			[GetSpellInfo'36554'] = { -- Shadowstep
 				["action"] = "ADD",
 				["spellID"] = 36554,
 				["value"] = 20,
 			},
-			[19249] = { -- Marked for Death
+			[GetSpellInfo'137619'] = { -- Marked for Death
 				["action"] = "ADD",
 				["spellID"] = 137619,
 				["value"] = 60,
 			},
-			[21187] = { -- Shadow Reflection
-				["action"] = "ADD",
-				["spellID"] = 152151,
-				["value"] = 60,
-			},
-			[21188] = { -- Death from Above
-				["action"] = "ADD",
-				["spellID"] = 152150,
-				["value"] = 60,
-			},
 		},
 		["SHAMAN"] = {
-			[19263] = { -- Stone Bulwark Totem
+			[GetSpellInfo'108270'] = { -- Stone Bulwark Totem
 				["action"] = "ADD",
 				["spellID"] = 108270,
 				["value"] = 60,
 			},
-			[19264] = { -- Astral Shift
+			[GetSpellInfo'108271'] = { -- Astral Shift
 				["action"] = "ADD",
 				["spellID"] = 108271,
 				["value"] = 90,
 			},
-			[19260] = { -- Earthgrab Totem
+			[GetSpellInfo'51485'] = { -- Earthgrab Totem
 				["action"] = "ADD",
 				["spellID"] = 51485,
 				["value"] = 30,
 			},
-			[19261] = { -- Windwalk Totem
+			[GetSpellInfo'108273'] = { -- Windwalk Totem
 				["action"] = "ADD",
 				["spellID"] = 108273,
 				["value"] = 10,
 			}, 
-			[19275] = { -- Call of the Elements
+			[GetSpellInfo'108285'] = { -- Call of the Elements
 				["action"] = "ADD",
 				["spellID"] = 108285,
 				["value"] = 180,
 			},
-			[19276] = { -- Totemic Projection
+			[GetSpellInfo'108287'] = { -- Totemic Projection
 				["action"] = "ADD",
 				["spellID"] = 108287,
 				["value"] = 10,
 			}, 
-			[19271] = { -- Elemental Mastery
+			[GetSpellInfo'16166'] = { -- Elemental Mastery
 				["action"] = "ADD",
 				["spellID"] = 16166,
-				["value"] = 120,
+				["value"] = 90,
 			},
-			[19272] = { -- Ancestral Swiftness
+			[GetSpellInfo'16188'] = { -- Ancestral Swiftness
 				["action"] = "ADD",
 				["spellID"] = 16188,
 				["value"] = 90,
 			},
-			[19269] = { -- Ancestral Guidance
+			[GetSpellInfo'108281'] = { -- Ancestral Guidance
 				["action"] = "ADD",
 				["spellID"] = 108281,
 				["value"] = 120,
 			},
-			[19267] = { -- Elemental Blast
+			[GetSpellInfo'117014'] = { -- Elemental Blast
 				["action"] = "ADD",
 				["spellID"] = 117014,
-				["value"] = 120,
-			},
-			[21674] = { -- Cloudburst Totem
-				["action"] = "ADD",
-				["spellID"] = 157153,
-				["value"] = 30,
-			},
-			[21199] = { -- Storm Elemental Totem
-				["action"] = "ADD",
-				["spellID"] = 152256,
-				["value"] = 300,
-			},
-			[21200] = { -- Liquid Magma
-				["action"] = "ADD",
-				["spellID"] = 152255,
-				["value"] = 45,
+				["value"] = 12,
 			},
 		}, 		
 		["WARLOCK"] = {
-			[19279] = { -- Dark Regeneration
+			[GetSpellInfo'108359'] = { -- Dark Regeneration
 				["action"] = "ADD",
 				["spellID"] = 108359,
 				["value"] = 120,
 			},
-			[19284] = { -- Howl of Terror
+			[GetSpellInfo'5484'] = { -- Howl of Terror
 				["action"] = "ADD",
 				["spellID"] = 5484,
 				["value"] = 40,
 			},
-			[19285] = { -- Mortal Coil
+			[GetSpellInfo'6789'] = { -- Mortal Coil
 				["action"] = "ADD",
 				["spellID"] = 6789,
 				["value"] = 45,
 			},
-			[19286] = { -- Shadowfury
+			[GetSpellInfo'30283'] = { -- Shadowfury
 				["action"] = "ADD",
 				["spellID"] = 30283,
 				["value"] = 30,
 			},
-			[19288] = { -- Sacrificial Pact
+			[GetSpellInfo'108416'] = { -- Sacrificial Pact
 				["action"] = "ADD",
 				["spellID"] = 108416,
 				["value"] = 60,
 			},
-			[19289] = { -- Dark Bargain
+			[GetSpellInfo'110913'] = { -- Dark Bargain
 				["action"] = "ADD",
 				["spellID"] = 110913,
 				["value"] = 180,
 			},
-			[19290] = { -- Blood Horror
+			[GetSpellInfo'111397'] = { -- Blood Horror
 				["action"] = "ADD",
 				["spellID"] = 111397,
 				["value"] = 60,
 			},
-			[19292] = { -- Unbound Will
+			[GetSpellInfo'108482'] = { -- Unbound Will
 				["action"] = "ADD",
 				["spellID"] = 108482,
 				["value"] = 120,
 			}, 
-			[19294] = { -- Grimoire of Service
+			[GetSpellInfo'108501'] = { -- Grimoire of Service
 				["action"] = "ADD",
 				["spellID"] = 108501,
 				["value"] = 120,
 			},
-			[19295] = { -- Grimoire of Sacrifice
-				["action"] = "ADD",
-				["spellID"] = 108503,
-				["value"] = 30,
-			},
-			[19296] = { -- Archimonde's Darkness
+			-- [GetSpellInfo'108503'] = { -- Grimoire of Sacrifice
+				-- ["action"] = "ADD",
+				-- ["spellID"] = 108503,
+				-- ["value"] = 30,
+			-- },
+			[GetSpellInfo'108505'] = { -- Archimonde's Darkness
 				["action"] = "MODIFY_CHARGES",
 				["spellID"] = {113861, 113860, 113858},
 				["value"] = 1,
-			}, 
-			[19297] = { -- Kil'jaeden's Cunning
-				["action"] = "ADD",
-				["spellID"] = 137587,
-				["value"] = 60,
 			},
-			[19298] = { -- Mannoroth's Fury
+			[GetSpellInfo'108508'] = { -- Mannoroth's Fury
 				["action"] = "ADD",
 				["spellID"] = 108508,
-				["value"] = 30,
-			},
-			[21181] = { -- Cataclysm
-				["action"] = "ADD",
-				["spellID"] = 152108,
 				["value"] = 60,
 			},
 		},
 		["WARRIOR"] = {
-			[15775] = { -- Juggernaut
+			[GetSpellInfo'103826'] = { -- Juggernaut
 				["action"] = "MODIFY",
 				["spellID"] = 100,
 				["value"] = -8,
 			},
-			[16035] = { -- Double Time
+			[GetSpellInfo'103827'] = { -- Double Time
 				["action"] = "MODIFY_CHARGES",
 				["spellID"] = 100,
 				["value"] = 1,
 			},
-			[16036] = { -- Enraged Regeneration
+			[GetSpellInfo'55694'] = { -- Enraged Regeneration
 				["action"] = "ADD",
 				["spellID"] = 55694,
 				["value"] = 60,
 			},  
-			[15759] = { -- Storm Bolt
+			[GetSpellInfo'107570'] = { -- Stormbolt
 				["action"] = "ADD",
 				["spellID"] = 107570,
 				["value"] = 30,
 			},
-			[15760] = { -- Shockwave
+			[GetSpellInfo'102060'] = { -- Disrupting Shout
+				["action"] = "ADD",
+				["spellID"] = 102060,
+				["value"] = 40,
+			},
+			[GetSpellInfo'107566'] = { -- Staggering Shout
+				["action"] = "ADD",
+				["spellID"] = 107566,
+				["value"] = 40,
+			},
+			[GetSpellInfo'46968'] = { -- Shockwave
 				["action"] = "ADD",
 				["spellID"] = 46968,
 				["value"] = 40,
 			},
-			[16037] = { -- Dragon Roar
+			[GetSpellInfo'118000'] = { -- Dragon Roar
 				["action"] = "ADD",
 				["spellID"] = 118000,
 				["value"] = 60,
 			},
-			[15765] = { -- Mass Spell Reflection
+			[GetSpellInfo'114028'] = { -- Mass Spell Reflection
 				["action"] = "ADD",
 				["spellID"] = 114028,
 				["value"] = 30,
 			},
-			[15766] = { -- Safeguard
+			[GetSpellInfo'114029'] = { -- Safeguard
 				["action"] = "ADD",
 				["spellID"] = 114029,
 				["value"] = 30,
 			},
-			[19676] = { -- Vigilance
+			[GetSpellInfo'114030'] = { -- Vigilance
 				["action"] = "ADD",
 				["spellID"] = 114030,
 				["value"] = 30,
-			},  
-			[19138] = { -- Avatar
+			},
+			[GetSpellInfo'107574'] = { -- Avatar
 				["action"] = "ADD",
 				["spellID"] = 107574,
 				["value"] = 180,
-			},   
-			[19139] = { -- Bloodbath
+			},
+			[GetSpellInfo'12292'] = { -- Bloodbath
 				["action"] = "ADD",
 				["spellID"] = 12292,
 				["value"] = 60,
 			},
-			[19140] = { -- Bladestorm
+			[GetSpellInfo'46924'] = { -- Bladestorm
 				["action"] = "ADD",
 				["spellID"] = 46924,
 				["value"] = 60,
-			}, 
-			[21205] = { -- Ravager
-				["action"] = "ADD",
-				["spellID"] = 152277,
-				["value"] = 60,
-			},
-			[21760] = { -- Siegebreaker
-				["action"] = "ADD",
-				["spellID"] = 176289,
-				["value"] = 45,
 			},
 		},
 	},
 	["CooldownGlyphInfo"] = {
 		["DEATHKNIGHT"] = {
-			[62210] = { -- Glyph of Dark Simulacrum
+			[63331] = { -- Glyph of Dark Simulacrum
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 77606,
 				["value"] = -30,
@@ -1900,12 +1847,7 @@ ArenaLiveSpectator.SpellDB = {
 				["spellID"] = 77575,
 				["value"] = function(baseValue) return 0; end,
 			},
-			[159428] = { -- Glyph of Rune Tap
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 48982,
-				["value"] = -10,
-			},
-		},		
+		},
 		["DRUID"] = {
 			[116216] = { -- Glyph of Skull Bash
 				["action"] = "MODIFY_COOLDOWN",
@@ -1915,7 +1857,7 @@ ArenaLiveSpectator.SpellDB = {
 			[114223] = { -- Glyph of Survival Instincts
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 61336,
-				["value"] = -40,
+				["value"] = -60,
 			},
 			[59219] = { -- Glyph of Dash
 				["action"] = "MODIFY_COOLDOWN",
@@ -1976,9 +1918,9 @@ ArenaLiveSpectator.SpellDB = {
 				["spellID"] = 31821,
 				["value"] = -60,
 			},
-			[162604] = { -- Glyph of Merciful Wrath
+			[63223] = { -- Glyph of Divine Plea
 				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 31842,
+				["spellID"] = 54428,
 				["value"] = function(baseValue) return baseValue * 0.5; end,
 			},
 		},
@@ -1987,11 +1929,6 @@ ArenaLiveSpectator.SpellDB = {
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 6346,
 				["value"] = -60,
-			},
-			[159628] = { -- Glyph of Shadow Magic
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 586,
-				["value"] = 60,
 			},
 			[63229] = { -- Glyph of Dispersion
 				["action"] = "MODIFY_COOLDOWN",
@@ -2003,36 +1940,15 @@ ArenaLiveSpectator.SpellDB = {
 				["spellID"] = 64044,
 				["value"] = -10,
 			},
-			
 		},
 		["ROGUE"] = {
-			[56810] = { -- Glyph of Shiv
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 152150,
-				["value"] = -3,
-			},
-			[159635] = { -- Glyph of Elusiveness
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 5277,
-				["value"] = -30,
-			},
 			[56805] = { -- Glyph of Kick
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 1766,
 				["value"] = 4,
 			},
-			[159638] = { -- Glyph of Disappearance
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 1856,
-				["value"] = -60,
-			},
 		},
 		["SHAMAN"] = {
-			[159643] = { -- Glyph of Grounding
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 8177,
-				["value"] = -3,
-			},
 			[55441] = { -- Glyph of Grounding Totem
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 8177,
@@ -2048,25 +1964,15 @@ ArenaLiveSpectator.SpellDB = {
 				["spellID"] = 370,
 				["value"] = 6,
 			},
-			[63273] = { -- Glyph of Riptide
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 61295,
-				["value"] = function(baseValue) return 0; end,
-			},
-			[159648] = { -- Glyph of Shamanistic Resolve
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 30823,
-				["value"] = 60,
-			},
+			-- [63273] = { -- Glyph of Riptide
+				-- ["action"] = "MODIFY_COOLDOWN",
+				-- ["spellID"] = 61295,
+				-- ["value"] = function(baseValue) return 0; end,
+			-- },
 			[55454] = { -- Glyph of Spirit Walk
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 58875,
 				["value"] = function(baseValue) return baseValue * 0.75; end,
-			},
-			[159650] = { -- Glyph of Spiritwalker's Focus
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 79206,
-				["value"] = -60,
 			},
 			[63270] = { -- Glyph of Thunder
 				["action"] = "MODIFY_COOLDOWN",
@@ -2078,11 +1984,6 @@ ArenaLiveSpectator.SpellDB = {
 				["spellID"] = 57994,
 				["value"] = 3,
 			},
-			[159640] = { -- Glyph of Ephemeral Spirits
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 51533,
-				["value"] = -60,
-			},
 			[55455] = { -- Glyph of Disappearance
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 2894,
@@ -2090,20 +1991,10 @@ ArenaLiveSpectator.SpellDB = {
 			},
 		},
 		["WARLOCK"] = {
-			[159665] = { -- Glyph of Dark Soul
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = {113861, 113860, 113858},
-				["value"] = function(baseValue) return baseValue * 0.5; end,
-			},
 			[146964] = { -- Glyph of Unending Resolve
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 104773,
 				["value"] = -60,
-			},
-			[159697] = { -- Glyph of Strengthened Resolve
-				["action"] = "MODIFY_COOLDOWN",
-				["spellID"] = 104773,
-				["value"] = 60,
 			},
 			[146962] = { -- Glyph of Havoc
 				["action"] = "MODIFY_COOLDOWN",
@@ -2127,11 +2018,12 @@ ArenaLiveSpectator.SpellDB = {
 				["spellID"] = 6544,
 				["value"] = -15,
 			},
+			--[=[
 			[63325] = { -- Glyph of Resonating Power
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 6343,
 				["value"] = function(baseValue) return baseValue * 1.5; end,
-			},
+			},]=]
 			[63329] = { -- Glyph of Shield Wall
 				["action"] = "MODIFY_COOLDOWN",
 				["spellID"] = 871,

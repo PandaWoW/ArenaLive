@@ -1,3 +1,6 @@
+--Nameplates currently not working while we spectate
+--[=[
+
 --[[ ArenaLive Spectator Functions: Nameplate Handler
 Created by: Vadrak
 Creation Date: 08.01.2015
@@ -436,7 +439,7 @@ function NamePlateClass:UpdateAppearance()
 		
 		self.classIcon:Show();
 		
-		self.border:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\PlayerNamePlate");
+		self.border:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3_deadmouse\\Textures\\PlayerNamePlate");
 		self.border:SetTexCoord(0.181640625, 0.818359375, 0.2421875, 0.7578125);
 		
 		self.HealthBar:ClearAllPoints();
@@ -448,7 +451,7 @@ function NamePlateClass:UpdateAppearance()
 		self:SetSize(137, 22);
 		self.classIcon:Hide();
 		
-		self.border:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\NamePlateBorder");
+		self.border:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3_deadmouse\\Textures\\NamePlateBorder");
 		self.border:SetTexCoord(0.28125, 0.81640625, 0.2421875, 0.5859375);
 
 		self.HealthBar:ClearAllPoints();
@@ -525,7 +528,7 @@ function NamePlateClass:UpdateHealthBar()
 	local red, green, blue = blizzPlate.healthBar:GetStatusBarColor();
 	if ( self.unit ) then
 		HealthBar:Update(self);
-		if ( not UnitIsPlayer(self.unit) ) then
+--[[		if ( not UnitIsPlayer(self.unit) ) then
 			-- A player's pet, use team colour instead:
 			local database = ArenaLive:GetDBComponent(addonName);
 			local unitType = string.match(self.unit, "^([a-z]+)[0-9]+$") or self.unit;
@@ -535,7 +538,7 @@ function NamePlateClass:UpdateHealthBar()
 				red, green, blue = unpack(database.TeamB.Colour);
 			end
 			self.HealthBar:SetStatusBarColor(red, green, blue);
-		end
+		end]]
 	else
 		local minValue, maxValue = blizzPlate.healthBar:GetMinMaxValues();
 		local value = blizzPlate.healthBar:GetValue();
@@ -609,3 +612,5 @@ function NamePlateClass:OnShow()
 		NamePlate:UpdateNamePlate(self);
 	end
 end
+
+]=]

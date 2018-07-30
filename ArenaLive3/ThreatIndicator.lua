@@ -1,9 +1,9 @@
---[[ ArenaLive Core Functions: Threat Indicator Handler
+--[=[ ArenaLive Core Functions: Threat Indicator Handler
 Created by: Vadrak
 Creation Date: 23.05.2014
 Last Update: "
 This file contains the data for indicators that will show the unit frame's unit's aggro status.
-]]--
+
 
 -- ArenaLive addon Name and localisation table:
 local addonName, L = ...;
@@ -74,3 +74,5 @@ function ThreatIndicator:OnEvent(event, ...)
 		end
 	end
 end
+
+]=]
