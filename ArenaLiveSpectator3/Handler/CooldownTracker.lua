@@ -226,7 +226,7 @@ function CooldownTracker:GatherCooldownInfo(unit, isInspectReady)
 	local guid = UnitGUID(unit);
 	local isPlayer = UnitIsPlayer(unit);
 	ArenaLive:Message(L["Gather Cooldown info for %s: GUID = %s, isPlayer = %s, isInspectReady = %s."], "debug", unit, tostring(guid), tostring(isPlayer), tostring(isInspectReady));
-	if ( guid and isPlayer and UnitIsConnected(unit)==1 and not isInspectReady ) then -- UnitIsConnected чтобы не осматривал инвизеров(ибо незя)
+	if ( guid and isPlayer and not isInspectReady ) then -- UnitIsConnected чтобы не осматривал инвизеров(ибо незя)
 		inspectQueue[unit] = guid;
 		if ( not UNIT_WAITING_FOR_INSPECT_EVENT ) then
 			CooldownTracker:CallInspect();
@@ -526,7 +526,7 @@ end
 function CooldownTracker:CallInspect()
 	local unit, guid = next(inspectQueue);
 	
-	if ( unit and CanInspect(unit) ) then
+	if ( unit and CanInspect(unit) and UnitIsConnected(unit)==1 ) then
 		local name = GetUnitName(unit);
 		NotifyInspect(unit);
 		UNIT_WAITING_FOR_INSPECT_EVENT = unit;

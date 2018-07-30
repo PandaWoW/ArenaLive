@@ -1,4 +1,4 @@
-## Interface: 60003
+## Interface: 50400
 ## Title: ArenaLive3 [Core]
 ## Notes: Framework for ArenaLive.
 ## Author: Vadrak

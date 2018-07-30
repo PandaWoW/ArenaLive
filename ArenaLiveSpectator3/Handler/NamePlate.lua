@@ -439,7 +439,7 @@ function NamePlateClass:UpdateAppearance()
 		
 		self.classIcon:Show();
 		
-		self.border:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3_deadmouse\\Textures\\PlayerNamePlate");
+		self.border:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\PlayerNamePlate");
 		self.border:SetTexCoord(0.181640625, 0.818359375, 0.2421875, 0.7578125);
 		
 		self.HealthBar:ClearAllPoints();
@@ -451,7 +451,7 @@ function NamePlateClass:UpdateAppearance()
 		self:SetSize(137, 22);
 		self.classIcon:Hide();
 		
-		self.border:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3_deadmouse\\Textures\\NamePlateBorder");
+		self.border:SetTexture("Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\NamePlateBorder");
 		self.border:SetTexCoord(0.28125, 0.81640625, 0.2421875, 0.5859375);
 
 		self.HealthBar:ClearAllPoints();

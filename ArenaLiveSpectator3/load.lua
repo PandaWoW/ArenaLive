@@ -345,6 +345,8 @@ end
 ]]--
 function IsSpectator()
     return CommentatorGetMode() == 2;
+    --local inInstance, instanceType = IsInInstance();
+	--return instanceType == "arena";
 end
 
 -- таймер арены. временное и конечно не самое элегантное решение
@@ -375,8 +377,12 @@ function ArenaLiveSpectator:Enable()
     ArenaLiveSpectator:PlayerUpdate();
 	self.enabled = true;
     self.hasStarted = true;
-	ArenaLiveSpectator:SetNumPlayers(max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents()));
-    --ArenaLiveSpectator:SetNumPlayers(3);
+	local numPlayers = max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents())
+	if numPlayers==1 then
+		ArenaLiveSpectator:SetNumPlayers(2) -- для 1х1 арены багнуто расположение трекеров. заставим думать что это 2х2
+    else
+		ArenaLiveSpectator:SetNumPlayers(numPlayers)
+	end
 end
 
 function ArenaLiveSpectator:Disable()
@@ -436,10 +442,10 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		ArenaLiveSpectatorHideUIButton:SetScript("OnClick", ArenaLiveSpectatorHideUIButton.OnClick);
 		
 		-- Register addon prefix for receiving team data broadcasts:
-		local success = RegisterAddonMessagePrefix("ALSPEC");
-		if ( not success ) then
-			ArenaLive:Message(L["WARNING! Couldn't register addon message prefix for ArenaLive [Spectator]. You won't be able to receive broadcast data during this session."], "message");
-		end
+		-- local success = RegisterAddonMessagePrefix("ALSPEC");
+		-- if ( not success ) then
+			-- ArenaLive:Message(L["WARNING! Couldn't register addon message prefix for ArenaLive [Spectator]. You won't be able to receive broadcast data during this session."], "message");
+		-- end
 		
 		ArenaLive:Message(L["Spectator addon has been loaded successfully! Type /alspec to open the spectator war game menu or /alspec help for a list of available commands."], "message");
 	-- elseif ( event == "AL_SPEC_MATCH_START" ) then
@@ -626,11 +632,11 @@ function ArenaLiveSpectator:ValueToBoolean(value)
 end
 
 ArenaLive:ConstructAddon(ArenaLiveSpectator, addonName, true, ArenaLiveSpectator.defaults, false, "ALSPEC_Database");
-ArenaLiveSpectator:RegisterEvent("AL_SPEC_MATCH_START"); -- Custom Event triggered by ArenaLiveSpectator:OnEvent() WORLD_STATE_UI_TIMER_UPDATE
+-- ArenaLiveSpectator:RegisterEvent("AL_SPEC_MATCH_START"); -- Custom Event triggered by ArenaLiveSpectator:OnEvent() WORLD_STATE_UI_TIMER_UPDATE
 ArenaLiveSpectator:RegisterEvent("ADDON_LOADED");
 ArenaLiveSpectator:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED");
 ArenaLiveSpectator:RegisterEvent("BN_TOON_NAME_UPDATED");
-ArenaLiveSpectator:RegisterEvent("CHAT_MSG_ADDON");
+-- ArenaLiveSpectator:RegisterEvent("CHAT_MSG_ADDON");
 ArenaLiveSpectator:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
 --ArenaLiveSpectator:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 ArenaLiveSpectator:RegisterEvent("DISPLAY_SIZE_CHANGED");
@@ -640,5 +646,5 @@ ArenaLiveSpectator:RegisterEvent("START_TIMER");
 ArenaLiveSpectator:RegisterEvent("UI_SCALE_CHANGED");
 ArenaLiveSpectator:RegisterEvent("UNIT_PET");
 ArenaLiveSpectator:RegisterEvent("UNIT_AURA");
-ArenaLiveSpectator:RegisterEvent("WORLD_STATE_UI_TIMER_UPDATE");
+-- ArenaLiveSpectator:RegisterEvent("WORLD_STATE_UI_TIMER_UPDATE");
 ArenaLiveSpectator:RegisterEvent("UPDATE_BATTLEFIELD_STATUS");

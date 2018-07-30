@@ -103,7 +103,7 @@ function ArenaLiveSpectatorScoreBoard:UpdateTimer(minutes, seconds)
 		ArenaLiveSpectatorScoreBoardDampeningIndicator:Update(numberMin, numberSec);
 	end
 end
-
+	
 function ArenaLiveSpectatorScoreBoardDampeningIndicator:Update(minutes, seconds)
 	local totalTime = 20;
 	local minutes = totalTime - minutes;
@@ -161,6 +161,7 @@ SpeedFrame:SetNormalFontObject(GameFontGreenLarge)
 SpeedFrame:SetText(SpeedFrame:GetText()or'x1')
 SpeedFrame:SetScript('OnShow',function(self)
 	self:SetText('x1')
+	self:SetID(1)
 end)
 SpeedFrame:RegisterForClicks("AnyUp")
 SpeedFrame:SetScript('OnClick',function(self, button)

@@ -723,7 +723,7 @@ ArenaLiveSpectator.SpellDB = {
 				[31661] = 20,			-- Dragon's Breath
 				[1953] = 15,			-- Blink
 				[120] = 12,				-- Cone of Cold
-				[108853] = 8,			-- Inferno Blast
+				--[108853] = 8,			-- Inferno Blast
 				[108978] = 180,			-- Alter Time
 				[55342] = 180,			-- Mirror Image
 			},
