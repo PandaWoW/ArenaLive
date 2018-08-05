@@ -586,9 +586,10 @@ function CooldownTracker:OnEvent(event, ...)
 			-- Update cooldown info after match has
 			-- started to make sure for talent and
 			-- glyph switches etc.
-			ArenaLiveSpectator:PlayerUpdate()
-			self:ResetAll()
-			ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
+			-- ArenaLiveSpectator:PlayerUpdate()
+			-- self:ResetAll()
+			-- ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
+			DelayEvent(2, function()ArenaLiveSpectator:PlayerUpdate()self:ResetAll()CooldownTracker:CallGatherForAll()end);
 		else
 			self:ResetAll();
 		end

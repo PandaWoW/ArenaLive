@@ -153,9 +153,9 @@ local RestoreIcon2 = [[Interface\PaperDollInfoFrame\UI-GearManager-Undo]]
 
 -- Change speed button
 local speeds = {'1','1.5','2','3','5'}
-local SpeedFrame = CreateFrame('Button','SpeedFrame',ArenaLiveSpectatorScoreBoard)
+local SpeedFrame = CreateFrame('Button',nil,ArenaLiveSpectatorScoreBoard)
 SpeedFrame:SetSize(22,22)
-SpeedFrame:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard.timer,-48,0)
+SpeedFrame:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard,-48,-15)
 SpeedFrame:SetNormalFontObject(GameFontGreenLarge)
 SpeedFrame:SetText(SpeedFrame:GetText()or'x1')
 SpeedFrame:SetScript('OnShow',function(self)
@@ -178,12 +178,13 @@ SpeedFrame.__icon:SetTexture(BootsIcon)
 SpeedFrame.__icon:SetAllPoints()
 
 -- Leave button
-local LeaveButton = CreateFrame('Button','LeaveButton',ArenaLiveSpectatorScoreBoard)
+local LeaveButton = CreateFrame('Button',nil,ArenaLiveSpectatorScoreBoard)
 LeaveButton:SetSize(28,28)
-LeaveButton:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard.timer,0,-23)
+LeaveButton:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard,0,-36)
 LeaveButton:SetFrameStrata'LOW'
 LeaveButton:SetNormalFontObject(GameFontHighlightSmallOutline)
 LeaveButton:SetText(L['Leave']or'Leave')
+LeaveButton:SetFrameLevel(LeaveButton:GetFrameLevel()+1)
 LeaveButton:SetScript('OnClick',function(self)
 	SendChatMessage('','AFK')--since LeaveBattlefield() is bugged we will use dirty /afk command :(
 end)
@@ -192,7 +193,7 @@ LeaveButton.__icon:SetTexture(CrossIcon)
 LeaveButton.__icon:SetAllPoints()
 
 -- Reset player button
-local ResetPlayer = CreateFrame('Button','ResetPlayer',ArenaLiveSpectatorScoreBoard,'SecureActionButtonTemplate')
+local ResetPlayer = CreateFrame('Button',nil,ArenaLiveSpectatorScoreBoard,'SecureActionButtonTemplate')
 ResetPlayer:SetSize(28,28)
 ResetPlayer:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard,40,-16)
 ResetPlayer:SetAttribute('type','target')

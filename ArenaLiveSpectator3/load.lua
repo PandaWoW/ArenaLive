@@ -16,6 +16,9 @@ ArenaLiveSpectator.defaults = {
 	["PlayMode"] = 3,
 	["ShowScoreBoard"] = true,
 	["Version"] = "3.0.0b",
+	["ImportantMessageFrame"] = {
+		["NumMaxMessages"] = 2,
+	},
 	["TeamA"] = {
 		["Name"] = "Gold Team",
 		["Leader"] = "",
@@ -27,8 +30,6 @@ ArenaLiveSpectator.defaults = {
 		["Leader"] = "",
 		["Score"] = 0,
 		["Colour"] = { 0.39, 0.71, 0.33, 1 }, -- Green Team (old: red 1, 0.19, 0, 1)
-	},
-	["MatchStatistic"] = {
 	},
 	["FrameMover"] = {
 		["FrameLock"] = true,
@@ -322,7 +323,6 @@ local onMatchStartCallbackList = {};
 local slashCMDs = {
 	["help"] = L["Shows this info message."],
 	["menu"] = L["Shows the War Game Menu"],
-	["stats"] = L["Shows the Match Statistic"],
 };
 
 -- Slash Commands:
@@ -435,6 +435,7 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		self:InitialiseCooldownTracker();
 		ArenaLiveSpectatorScoreBoard:Initialise();
 		ArenaLiveSpectatorWarGameMenu:Initialise();
+		ArenaLive:ConstructHandlerObject(ArenaLiveSpectatorMessageFrame, "ImportantMessageFrame", addonName, nil)
 		
 		-- Set up hide normal UI button, it shows up if UIParent is somehow shown during a match:
 		ArenaLiveSpectatorHideUIButtonText:SetText(L["Hide normal UI"]);
@@ -596,6 +597,9 @@ function ArenaLiveSpectator:UpdateDB()
 	end
 	
 	if ( database.Version == "3.0.0b" ) then
+		if not database.ImportantMessageFrame then 
+			database['ImportantMessageFrame']=ArenaLiveSpectator.defaults.ImportantMessageFrame
+		end
 	end
 end
 

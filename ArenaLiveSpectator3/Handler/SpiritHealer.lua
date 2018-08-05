@@ -84,12 +84,9 @@ function SpiritHealerFrame:OnEvent(event, timestamp, eventType, hideCaster, sour
 		elseif eventType:find("_DAMAGE", 1, true) and not eventType:find("_DURABILITY_DAMAGE", 1, true) then
 			_, _, _, _, overkill = ...
 		end
-		
-		if eventType == "PARTY_KILL" or overkill and overkill >= 0 then
-		-- if (swingOverkill and type(swingOverkill)=='number' and swingOverkill > 0) or
-		-- (spellPeriodicOverkill and type(spellPeriodicOverkill)=='number' and spellPeriodicOverkill > 0) or
-		-- (spellOverkill and type(spellOverkill)=='number' and spellOverkill > 0)
-		-- then
+		-- 5384 feign death
+		-- 47788 guardian spirit
+		if eventType == "PARTY_KILL" or overkill and overkill > 0 then
 			DelayEvent(0.5,SpiritHealerFrame.UpdateNumPlayers)
 		end
 	end

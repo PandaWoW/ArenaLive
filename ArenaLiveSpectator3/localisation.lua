@@ -20,7 +20,6 @@ L["Spectator addon has been loaded successfully! Type /alspec to open the specta
 L["Available Slash Commands for ArenaLive [Spectator] are:"] = "Available Slash Commands for ArenaLive [Spectator] are:";
 L["Shows this info message."] = "Shows this info message.";
 L["Shows the War Game Menu"] = "Shows the War Game Menu";
-L["Shows the Match Statistic"] = "Shows the Match Statistic";
 L["%s: %s"] = "%s: %s";
 
 
@@ -30,6 +29,13 @@ L["If checked, team names and scores will be broadcast to the spectator group, w
 L["Sending team data to raid..."] = "Sending team data to raid...";
 L["Received team data from group leader (%s). Updating team entries..."] = "Received team data from group leader (%s). Updating team entries...";
 L["WARNING! Couldn't register addon message prefix for ArenaLive [Spectator]. You won't be able to receive broadcast data during this session."] = "WARNING! Couldn't register addon message prefix for ArenaLive [Spectator]. You won't be able to receive broadcast data during this session.";
+
+-- Important Message Frame Handler:
+L["|c%s%s|r disconnected."] = "|c%s%s|r disconnected.";
+L["|c%s%s|r reconnected."] = "|c%s%s|r reconnected.";
+L["|c%s%s|r has low health."] = "|c%s%s|r has low health.";
+L["|c%s%s|r tries to resurrect |c%s%s|r."] = "|c%s%s|r tries to resurrect |c%s%s|r.";
+L["|c%s%s|r is drinking."] = "|c%s%s|r is drinking.";
 
 -- Settings Tab:
 L["Settings"] = "Settings";
@@ -50,6 +56,7 @@ L["Settings"] = "Settings";
 	-- Play Mode DropDown:
 	L["Bracket:"] = "Bracket:";
 	L["Choose the number of players per team."] = "Choose the number of players per team.";
+	L["1v1"] = "1v1";
 	L["2v2"] = "2v2";
 	L["3v3"] = "3v3";
 	L["5v5"] = "5v5";
@@ -89,7 +96,7 @@ L["Spectated War Games"] = "Spectated War Games";
 
 	-- Team Name Editbox:
 	L["Team Name:"] = "Team Name:";
-	L["Enter the name of the team. The name will be shown on the scoreboard and on the match statistic."] = "Enter the name of the team. The name will be shown on the scoreboard and on the match statistic.";
+	L["Enter the name of the team. The name will be shown on the scoreboard."] = "Enter the name of the team. The name will be shown on the scoreboard.";
 
 	-- Team Score Editbox:
 	L["Score:"] = "Score:";

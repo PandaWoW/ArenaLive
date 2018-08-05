@@ -113,7 +113,7 @@ local OPTION_ITEMS_SETTINGS = {
 		["yOffset"] = -50,
 		["maxLetters"] = 19,
 		["title"] = L["Team Name:"],
-		["tooltip"] = L["Enter the name of the team. The name will be shown on the scoreboard and on the match statistic."],
+		["tooltip"] = L["Enter the name of the team. The name will be shown on the scoreboard."],
 		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); return database.Name; end,
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); database.Name = newValue; end,
 		["postUpdate"] = function (frame, newValue, oldValue) ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamA");  end
@@ -131,7 +131,7 @@ local OPTION_ITEMS_SETTINGS = {
 		["yOffset"] = -50,
 		["maxLetters"] = 19,
 		["title"] = L["Team Name:"],
-		["tooltip"] = L["Enter the name of the team. The name will be shown on the scoreboard and on the match statistic."],
+		["tooltip"] = L["Enter the name of the team. The name will be shown on the scoreboard."],
 		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); return database.Name; end,
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, nil, frame.group); database.Name = newValue; end,
 		["postUpdate"] = function (frame, newValue, oldValue) ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamB");  end
