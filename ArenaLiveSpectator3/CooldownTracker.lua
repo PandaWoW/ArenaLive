@@ -5,17 +5,20 @@ local DEFAULT_CD_TRACKER_Y_OFFSET = 7;
 
 local COOLDOWN_TRACKER_BORDER_SIZES = {
 	["DIVIDED"] = {
+		[1] = {403, 64},
 		[2] = {403, 106},
 		[3] = {403, 148},
 		[5] = {403, 230},
 	},
 	["UNITED"] = {
 		["Left"] = {
+			[1] = {403, 64},
 			[2] = {403, 106},
 			[3] = {403, 148},
 			[5] = {403, 230},
 		},
 		["Right"] = {
+			[1] = {403, 64},
 			[2] = {403, 106},
 			[3] = {403, 148},
 			[5] = {403, 230},
@@ -24,17 +27,20 @@ local COOLDOWN_TRACKER_BORDER_SIZES = {
 };
 local COOLDOWN_TRACKER_BORDER_TEX_COORDS = {
 	["DIVIDED"] = {
+		[1] = {0.1064453125, 0.8935546875, 0.037109375, 0.330859375},
 		[2] = {0.1064453125, 0.8935546875, 0.037109375, 0.451171875},
 		[3] = {0.1064453125, 0.8935546875, 0.037109375, 0.615234375},
 		[5] = {0.1064453125, 0.8935546875, 0.037109375, 0.935546875},
 	},
 	["UNITED"] = {
 		["Left"] = {
+			[1] = {0, 0.7802734375, 0.07421875, 0.39484375},
 			[2] = {0, 0.7802734375, 0.07421875, 0.51953125},
 			[3] = {0, 0.7802734375, 0.07421875, 0.68359375},
 			[5] = {0, 0.7802734375, 0.07421875, 0.97265625},
 		},
 		["Right"] = {
+			[1] = {0, 0.7861328125, 0.07421875, 0.39484375},
 			[2] = {0, 0.7861328125, 0.07421875, 0.51953125},
 			[3] = {0, 0.7861328125, 0.07421875, 0.68359375},
 			[5] = {0, 0.7861328125, 0.07421875, 0.97265625},
@@ -44,13 +50,15 @@ local COOLDOWN_TRACKER_BORDER_TEX_COORDS = {
 
 local COOLDOWN_TRACKER_GLOW_TEX_COORDS = {
 	["Left"] = {
-		[2] = {0.125, 0.8740234375, 0.052734375, 0.435546875}, 
+		[1] = {0.125, 0.8740234375, 0.052734375, 0.316374440},
+		[2] = {0.125, 0.8740234375, 0.052734375, 0.435546875},
 		[3] = {0.125, 0.8740234375, 0.052734375, 0.599609375},
 		[5] = {0.125, 0.8740234375, 0.052734375, 0.927734375},
 	},
 	["Right"] = {
+		[1] = {0.8740234375, 0.125, 0.052734375, 0.316374440},
 		[2] = {0.8740234375, 0.125, 0.052734375, 0.435546875},
-		[3] = {0.8740234375, 0.125, 0.052734375, 0.599609375}, 
+		[3] = {0.8740234375, 0.125, 0.052734375, 0.599609375},
 		[5] = {0.8740234375, 0.125, 0.052734375, 0.927734375},
 	},
 };
@@ -121,6 +129,30 @@ function ArenaLiveSpectator:SetUpCooldownTracker(numPlayers)
 	-- Set Anchors according to player number:
 	ALSPEC_CDTrackersLeft:ClearAllPoints();
 	ALSPEC_CDTrackersRight:ClearAllPoints();
+	
+	-- Fix cooldowns button
+	local CogwheelIcon = [[Interface\HELPFRAME\HelpIcon-CharacterStuck]]--[[Interface\Scenarios\ScenarioIcon-Interact]]
+	local FixCooldownFrame = CreateFrame('Button','FixCooldownFrame',ALSPEC_CDTrackersLeft)
+	FixCooldownFrame:SetSize(40,40)
+	hooksecurefunc(ALSPEC_CDTrackersLeftHeader,'SetPoint',function()
+		if database.HideTargetFrames == 1 then
+			FixCooldownFrame:SetPoint('RIGHT',ALSPEC_CDTrackersLeftHeader,-45,15)
+		else
+			FixCooldownFrame:SetPoint('RIGHT',ALSPEC_CDTrackersLeftHeader,152,0)
+		end
+	end)
+	FixCooldownFrame:SetFrameStrata'MEDIUM'
+	FixCooldownFrame:RegisterForClicks'AnyUp'
+	FixCooldownFrame:SetScript('OnClick',function(self,button)
+		if button == 'LeftButton' then
+			FixCooldownFrames()
+		else
+			ReloadUI()
+		end
+	end)
+	FixCooldownFrame.__icon = FixCooldownFrame:CreateTexture(nil,"BACKGROUND")
+	FixCooldownFrame.__icon:SetTexture(CogwheelIcon)
+	FixCooldownFrame.__icon:SetAllPoints()
 
 	if ( numPlayers > 3 or database.HideTargetFrames ) then
 		

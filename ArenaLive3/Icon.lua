@@ -9,6 +9,11 @@ NOTE: Improve fall back option
 -- ArenaLive addon Name and localisation table:
 local addonName, L = ...;
 
+local spellcache = setmetatable({}, {__index=function(t,v) local a = {GetSpellInfo(v)} if GetSpellInfo(v) then t[v] = a end return a end})
+local function GetSpellInfo(a)
+	return unpack(spellcache[a])
+end
+
 --[[
 **************************************************
 ******* GENERAL HANDLER SET UP STARTS HERE *******

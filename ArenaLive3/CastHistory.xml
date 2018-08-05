@@ -50,6 +50,11 @@
 		</Animations>
 		<Scripts>
 			<OnEnter>
+				local spellcache = setmetatable({}, {__index=function(t,v) local a = {GetSpellInfo(v)} if GetSpellInfo(v) then t[v] = a end return a end})
+				local function GetSpellInfo(a)
+					return unpack(spellcache[a])
+				end
+
 				if (self.spellID) then
 					GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 15, -25);
 					local name, rank, icon, cost, isFunnel, powerType, castTime, minRange, maxRange = GetSpellInfo(self.spellID);

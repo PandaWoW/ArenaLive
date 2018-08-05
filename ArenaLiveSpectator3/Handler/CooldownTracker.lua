@@ -226,7 +226,7 @@ function CooldownTracker:GatherCooldownInfo(unit, isInspectReady)
 	local guid = UnitGUID(unit);
 	local isPlayer = UnitIsPlayer(unit);
 	ArenaLive:Message(L["Gather Cooldown info for %s: GUID = %s, isPlayer = %s, isInspectReady = %s."], "debug", unit, tostring(guid), tostring(isPlayer), tostring(isInspectReady));
-	if ( guid and isPlayer and not isInspectReady ) then -- UnitIsConnected чтобы не осматривал инвизеров(ибо незя)
+	if ( guid and isPlayer and not isInspectReady ) then
 		inspectQueue[unit] = guid;
 		if ( not UNIT_WAITING_FOR_INSPECT_EVENT ) then
 			CooldownTracker:CallInspect();
@@ -387,6 +387,11 @@ function CooldownTracker:ExecuteCooldownInfo(unit, action, spellID, value, repla
 		end
 	end
 	
+end
+
+local spellcache = setmetatable({}, {__index=function(t,v) local a = {GetSpellInfo(v)} if GetSpellInfo(v) then t[v] = a end return a end})
+local function GetSpellInfo(a)
+	return unpack(spellcache[a])
 end
 
 -- DeadMouse, check this function
@@ -585,12 +590,10 @@ function CooldownTracker:OnEvent(event, ...)
 			self:ResetAll()
 			ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
 		else
-			--CooldownTracker:UnregisterUnit
 			self:ResetAll();
 		end
 	elseif ( event == "INSPECT_READY" and unit == inspectQueue[UNIT_WAITING_FOR_INSPECT_EVENT] ) then
-		-- unit actually has the value of a GUID in case of inspect	
-		ClearInspectPlayer()
+		-- unit actually has the value of a GUID in case of inspect
 		ArenaLive:Message(L["Inspect data received for %s..."], "debug", UNIT_WAITING_FOR_INSPECT_EVENT);
 		CooldownTracker:GatherCooldownInfo(UNIT_WAITING_FOR_INSPECT_EVENT, true);
 		
@@ -751,7 +754,7 @@ function CooldownTrackerClass:Update()
 		icon.group = self.group;
         
         if trackedUnits[unit]["cooldowns"][spellID] == nil then
-            print(spellID.." нулл!");
+            print(spellID.." нулл!", unit);
         end
 			
 		-- Set Texture:
@@ -954,12 +957,7 @@ function CooldownTrackerClass:UpdateUnit(unit)
 end
 
 function FixCooldownFrames()
-	--dumpTable(activeCooldowns)
-	--dumpTable(trackedUnits)
-	-- for i=1,max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents())do
-		-- CooldownTrackerClass:UpdateUnit('arena'..i)
-		-- CooldownTrackerClass:UpdateUnit('raid'..i)
-	-- end
+	ArenaLiveSpectator:PlayerUpdate()
 	CooldownTracker:ResetAll()
 	CooldownTracker:CallGatherForAll()
 end

@@ -50,9 +50,9 @@ ArenaLive.spellDB = {
 					[122] = true,			-- Frost Nova
 					[45438] = true,			-- Ice Block
 				},
-				[11129] = {				-- Mage: Combustion
-					[108853] = true,
-				},
+				--[11129] = {				-- Mage: Combustion
+				--	[108853] = true,
+				--},
 				[14185] = {				-- Rogue: Preparation
 					[2983] = true,
 					[1856] = true,
@@ -542,7 +542,6 @@ ArenaLive.spellDB = {
 				[46924] = "Bladestorm",
 				[12292] = "Bloodbath",
 				[118038] = "Die by the Sword",
-				[85730] = "Deadly Calm",
 				[55694] = "Enraged Regeneration",
 				[3411] = "Intervene",
 				[12975] = "Last Stand",

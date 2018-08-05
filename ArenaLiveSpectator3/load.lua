@@ -5,6 +5,9 @@ Players = {};
 GreenTeam = 67;
 GoldTeam = 469;
 
+local nameAsterisk = FOREIGN_SERVER_LABEL
+local deselect = GetCVar'deselectOnClick'
+
 ArenaLiveSpectator.defaults = {
 	["Broadcast"] = true,
 	["FirstLogin"] = true,
@@ -367,6 +370,8 @@ end)
 frame:Hide()
 
 function ArenaLiveSpectator:Enable()
+	if nameAsterisk ~= '' then FOREIGN_SERVER_LABEL='' end
+	
 	ArenaLiveSpectatorWarGameMenu:Hide();
 	UIParent:Hide();
 	self:Show();
@@ -378,14 +383,12 @@ function ArenaLiveSpectator:Enable()
 	self.enabled = true;
     self.hasStarted = true;
 	local numPlayers = max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents())
-	if numPlayers==1 then
-		ArenaLiveSpectator:SetNumPlayers(2) -- для 1х1 арены багнуто расположение трекеров. заставим думать что это 2х2
-    else
-		ArenaLiveSpectator:SetNumPlayers(numPlayers)
-	end
+	ArenaLiveSpectator:SetNumPlayers(numPlayers)
 end
 
 function ArenaLiveSpectator:Disable()
+	if FOREIGN_SERVER_LABEL == '' then FOREIGN_SERVER_LABEL=nameAsterisk end
+	
 	self:Hide();
 	frame:Hide();
 	
@@ -420,7 +423,6 @@ function ArenaLiveSpectator:Disable()
 	self.enabled = false;
 	self.hasStarted = nil;
 	self.worldStateTimerIndex = nil;
-	
 end
 
 function ArenaLiveSpectator:OnEvent(event, ...)
@@ -492,9 +494,12 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 	elseif ( event == "PLAYER_TARGET_CHANGED" and self.enabled ) then
 		if ( self.enabled ) then
 			local database = ArenaLive:GetDBComponent(addonName);
-			if ( database.FollowTarget ) and UnitIsPlayer"target" then
-				SendChatMessage(".spec view " .. UnitName"target", "EMOTE")
-				--CommentatorFollowUnit("target"); DeadMouse
+			if ( database.FollowTarget ) then
+				if UnitIsPlayer"target"then
+					SendChatMessage(".spec view " .. UnitName"target", "EMOTE")
+				elseif not UnitExists"target"then
+					SendChatMessage(".spec view " .. UnitName"player", "EMOTE") --CommentatorFollowUnit("target"); DeadMouse
+				end
 			end
 			if ( database.HideTargetFrames or database.PlayMode > 3 ) then
 				for i = 1, database.PlayMode do
@@ -512,36 +517,6 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		local screenHeight = math.ceil(GetScreenHeight());
 		local scale = 786 / screenHeight;
 		ArenaLiveSpectatorTooltip:SetScale(scale);
-	--[=[	
-	elseif ( event == "WORLD_STATE_UI_TIMER_UPDATE" and self.enabled ) then
-		if ( ArenaLiveSpectatorScoreBoard.enabled ) then
-			if ( not self.worldStateTimerIndex ) then
-				for index = 1, GetNumWorldStateUI() do
-					local uiType = GetWorldStateUIInfo(index);
-					if ( uiType == 1 ) then -- Its pwow baby! --( uiType == 3 ) then -- 3 seems to be the identifier for timers.
-						self.worldStateTimerIndex = index;
-						break;
-					end
-				end
-			end
-			
-			if ( self.worldStateTimerIndex ) then
-				local uiType, state, _, text = GetWorldStateUIInfo(self.worldStateTimerIndex);
-				local minutes, seconds = string.match(text,("([0-9]+):([0-9]+)$"));
-				
-				local minNum, secNum = tonumber(minutes), tonumber(seconds);
-				if ( minNum + secNum > 0 and not self.hasStarted ) then
-					ArenaLive:TriggerEvent("AL_SPEC_MATCH_START");
-					self.hasStarted = true;
-				end
-				
-				if ( state ) then
-					ArenaLiveSpectatorScoreBoard:UpdateTimer(minutes, seconds)
-				else
-					ArenaLiveSpectatorScoreBoard:UpdateTimer("00", "00")
-				end
-			end
-		end]=]
 	end
 end
 
@@ -560,12 +535,13 @@ end
 function ArenaLiveSpectator:Toggle()
 	local inInstance, instanceType = IsInInstance();
 	if ( instanceType == "arena" and IsSpectator() ) then
-		ArenaLiveSpectator:Enable();	
-		-- This shit is bugged, never updates when spectating
+		ArenaLiveSpectator:Enable();
+		DelayEvent(1,function()ConsoleExec("deselectOnClick 0")end)
 		DelayEvent(1,function()for i=1,3 do _G["AlwaysUpFrame"..i]:Hide()end end)
 		DelayEvent(1.5,FixCooldownFrames)
 	else
 		ArenaLiveSpectator:Disable();
+		DelayEvent(1,function()ConsoleExec("deselectOnClick "..deselect)end)
 	end
 end
 
@@ -634,8 +610,8 @@ end
 ArenaLive:ConstructAddon(ArenaLiveSpectator, addonName, true, ArenaLiveSpectator.defaults, false, "ALSPEC_Database");
 -- ArenaLiveSpectator:RegisterEvent("AL_SPEC_MATCH_START"); -- Custom Event triggered by ArenaLiveSpectator:OnEvent() WORLD_STATE_UI_TIMER_UPDATE
 ArenaLiveSpectator:RegisterEvent("ADDON_LOADED");
-ArenaLiveSpectator:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED");
-ArenaLiveSpectator:RegisterEvent("BN_TOON_NAME_UPDATED");
+-- ArenaLiveSpectator:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED");
+-- ArenaLiveSpectator:RegisterEvent("BN_TOON_NAME_UPDATED");
 -- ArenaLiveSpectator:RegisterEvent("CHAT_MSG_ADDON");
 ArenaLiveSpectator:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
 --ArenaLiveSpectator:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
@@ -644,7 +620,7 @@ ArenaLiveSpectator:RegisterEvent("PLAYER_ENTERING_WORLD");
 ArenaLiveSpectator:RegisterEvent("PLAYER_TARGET_CHANGED");
 ArenaLiveSpectator:RegisterEvent("START_TIMER");
 ArenaLiveSpectator:RegisterEvent("UI_SCALE_CHANGED");
-ArenaLiveSpectator:RegisterEvent("UNIT_PET");
-ArenaLiveSpectator:RegisterEvent("UNIT_AURA");
+-- ArenaLiveSpectator:RegisterEvent("UNIT_PET");
+-- ArenaLiveSpectator:RegisterEvent("UNIT_AURA");
 -- ArenaLiveSpectator:RegisterEvent("WORLD_STATE_UI_TIMER_UPDATE");
-ArenaLiveSpectator:RegisterEvent("UPDATE_BATTLEFIELD_STATUS");
+-- ArenaLiveSpectator:RegisterEvent("UPDATE_BATTLEFIELD_STATUS");
