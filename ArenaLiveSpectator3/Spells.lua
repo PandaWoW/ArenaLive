@@ -236,12 +236,14 @@ ArenaLiveSpectator.SpellDB = {
 		[11958] = "DEF_CD",				-- Cold Snap
 		[45438] = "DEF_CD",				-- Ice Block
 		[12051] = "DEF_CD",				-- Evocation
+		[115610] = "DEF_CD",			-- Temporal Shield
 		
 		[12042] = "OFF_CD",				-- Arcane Power
 		[11129] = "OFF_CD",				-- Combustion
 		[84714] = "OFF_CD",				-- Frozen Orb
 		[12472] = "OFF_CD",				-- Icy Veins
 		[55342] = "OFF_CD",				-- Mirror Images
+		[1463] = "OFF_CD",				-- Incanter's Ward \\ maybe i should set it MISC
 		
 		[2139] = "INTERRUPT",			-- Counterspell
 		
@@ -251,16 +253,14 @@ ArenaLiveSpectator.SpellDB = {
 		[122] = "CC",					-- Frost Nova
 		[113724] = "CC",				-- Ring of Frost
 		
-		[108843] = "MISC",				-- Blazing Speed
+		--[108843] = "MISC",				-- Blazing Speed
 		[1953] = "MISC",				-- Blink
-		[120] = "MISC",					-- Cone of Cold
+		--[120] = "MISC",					-- Cone of Cold
 		--[2136] = "MISC",				-- Fire Blast
+		[66] = "MISC",					-- Invisibility
 		[110959] = "MISC",				-- Greater Invisibility
 		[11426] = "MISC",				-- Ice Barrier
-		[115610] = "MISC",				-- Temporal Shield
 		[111264] = "MISC",				-- Ice Ward
-		[1463] = "OFF_CD",				-- Incanter's Ward \\ maybe i should set it MISC
-		[66] = "MISC",					-- Invisibility
 		[12043] = "MISC",				-- Presence of Mind
 		
 		
@@ -476,6 +476,7 @@ ArenaLiveSpectator.SpellDB = {
 		
 		[111397] = "MISC",				-- Blood Horror
 		[48020] = "MISC",				-- Demonic Cirle: Teleportation
+		[47897] = "MISC",				-- Demonic Breath
 		--[17962] = "MISC",				-- Conflagrate
 		[109151] = "MISC",				-- Demonic Leap
 		[120451] = "MISC",				-- Flames of Xoroth
@@ -701,7 +702,7 @@ ArenaLiveSpectator.SpellDB = {
 				[122] = 30,				-- Frost Nova
 				[2139] = 24,			-- Counterspell
 				[1953] = 15,			-- Blink
-				[120] = 12,				-- Cone of Cold
+				--[120] = 12,				-- Cone of Cold
 				--[2136] = 8,				-- Fireblast
 				[108978] = 180,			-- Alter Time
 				[55342] = 180,			-- Mirror Image
@@ -714,7 +715,7 @@ ArenaLiveSpectator.SpellDB = {
 				[122] = 30,				-- Frost Nova
 				[2139] = 24,			-- Counterspell
 				[1953] = 15,			-- Blink
-				[120] = 12,				-- Cone of Cold
+				--[120] = 12,				-- Cone of Cold
 				--[2136] = 8,				-- Fireblast
 				[108978] = 180,			-- Alter Time
 				[55342] = 180,			-- Mirror Image
@@ -727,7 +728,7 @@ ArenaLiveSpectator.SpellDB = {
 				[2139] = 24,			-- Counterspell
 				[31661] = 20,			-- Dragon's Breath
 				[1953] = 15,			-- Blink
-				[120] = 12,				-- Cone of Cold
+				--[120] = 12,				-- Cone of Cold
 				--[108853] = 8,			-- Inferno Blast
 				[108978] = 180,			-- Alter Time
 				[55342] = 180,			-- Mirror Image
@@ -741,7 +742,7 @@ ArenaLiveSpectator.SpellDB = {
 				[122] = 30,				-- Frost Nova
 				[2139] = 24,			-- Counterspell
 				[1953] = 15,			-- Blink
-				[120] = 12,				-- Cone of Cold
+				--[120] = 12,				-- Cone of Cold
 				--[2136] = 8,				-- Fireblast
 				[108978] = 180,			-- Alter Time
 				[55342] = 180,			-- Mirror Image
@@ -1387,11 +1388,11 @@ ArenaLiveSpectator.SpellDB = {
 				["spellID"] = 12043,
 				["value"] = 90,
 			},
-			[GetSpellInfo'108843'] = { -- Blazing Speed
-				["action"] = "ADD",
-				["spellID"] = 108843,
-				["value"] = 25,
-			},
+			-- [GetSpellInfo'108843'] = { -- Blazing Speed
+				-- ["action"] = "ADD",
+				-- ["spellID"] = 108843,
+				-- ["value"] = 25,
+			-- },
 			[GetSpellInfo'11426'] = { -- Ice Barrier
 				["action"] = "ADD",
 				["spellID"] = 11426,
@@ -1426,7 +1427,7 @@ ArenaLiveSpectator.SpellDB = {
 				["action"] = "REPLACE",
 				["spellID"] = 110959,
 				["replace"] = 66,
-				["value"] = 90,			
+				["value"] = 90,
 			},
 			[GetSpellInfo'11958'] = { -- Cold Snap
 				["action"] = "ADD",

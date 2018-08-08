@@ -119,6 +119,8 @@ function CCIndicator:UpdateCache (event, unit)
 		unit = "focus";
 	end
 
+	if not UnitExists(unit)then return end
+	
 	-- Reset table if there is one:
 	if ( unitCCCache[unit] ) then
 		table.wipe(unitCCCache[unit]);

@@ -16,7 +16,7 @@ local addonName, L = ...;
 -- Create new Handler and register for all important events:
 local ImportantMessageFrame = ArenaLive:ConstructHandler("ImportantMessageFrame", true, true);
 local NameText = ArenaLive:GetHandler("NameText");
---ImportantMessageFrame:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
+ImportantMessageFrame:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 ImportantMessageFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
 ImportantMessageFrame:RegisterEvent("UNIT_AURA");
 --ImportantMessageFrame:RegisterEvent("UNIT_CONNECTION");
@@ -30,6 +30,7 @@ local unitLowHealthCache = {}; -- This table will store, if a unit was below 25%
 local MessageFrameClass = {};
 local feignDeathName;
 local unitFeignDeathCache = {};
+local unitDrinkingCache = {};
 
 local function MessageFrameAnimation_OnFinished(animation)
 	local singleFrame = animation:GetParent();
@@ -220,14 +221,21 @@ function ImportantMessageFrame:OnEvent(event, ...)
 			unitFeignDeathCache[unit] = true;
 		elseif ( not name and type(unitFeignDeathCache[unit]) == "boolean" ) then
 			unitFeignDeathCache[unit] = GetTime() + 1;
+
+		-- Drinking
+		elseif type(unitDrinkingCache[unit]) == "boolean" then
+			unitDrinkingCache[unit] = GetTime() + 8;
+		elseif UnitBuff(unit, GetSpellInfo'104270')
+		and not unitDrinkingCache[unit]or type(unitDrinkingCache[unit])=='number' and unitDrinkingCache[unit]<=GetTime()
+		then
+			unitDrinkingCache[unit] = true;
+			ImportantMessageFrame:CreateMessage(event, unit);
+		elseif not UnitBuff(unit, GetSpellInfo'104270')then
+			unitDrinkingCache[unit] = nil;
 		end
 	-- elseif ( event == "UNIT_CONNECTION" and unitCache[unit] ) then
 		-- ImportantMessageFrame:CreateMessage(event, ...);
-	elseif ( event == "UNIT_AURA" ) then
-		if UnitBuff(unit, GetSpellInfo'104270') then
-			ImportantMessageFrame:CreateMessage(event, unit)
-		end
-	elseif ( event == "UNIT_HEALTH" and unitCache[unit] ) then
+	elseif ( event == "UNIT_HEALTH" and unitCache[unit] and UnitIsConnected(unit) ) then
 		-- Use health cache instead of UnitHealth and UnitHealthMax functions: 
 		local healthPercent = unitHealthCache[unit];
 		local theTime = GetTime();

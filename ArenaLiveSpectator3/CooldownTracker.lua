@@ -141,7 +141,8 @@ function ArenaLiveSpectator:SetUpCooldownTracker(numPlayers)
 			FixCooldownFrame:SetPoint('RIGHT',ALSPEC_CDTrackersLeftHeader,152,0)
 		end
 	end)
-	FixCooldownFrame:SetFrameStrata'MEDIUM'
+	FixCooldownFrame:SetFrameStrata'LOW'
+	FixCooldownFrame:SetFrameLevel(FixCooldownFrame:GetFrameLevel()+2)
 	FixCooldownFrame:RegisterForClicks'AnyUp'
 	FixCooldownFrame:SetScript('OnClick',function(self,button)
 		if button == 'LeftButton' then

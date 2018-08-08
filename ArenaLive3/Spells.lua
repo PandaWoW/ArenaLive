@@ -109,6 +109,7 @@ ArenaLive.spellDB = {
 				-- Hunter
 				[5384] = "defCD",			-- Feign Death
 				[19263] = "defCD",			-- Deterrence
+				[148467] = "defCD",			-- Deterrence (Crouching Tiger, Hidden Chimera),
 				[117526] = "stun",			-- Binding Shot
 				[19577] = "stun",			-- Intimidation (stun)
 				[3355] = "crowdControl",	-- Freezing Trap
@@ -383,8 +384,11 @@ ArenaLive.spellDB = {
 
 				
 				--Mage
+				[115610] = "Temporal Shield",
+				[108843] = "Blazing Speed",
 				[110909] = "Alter Time",
 				[1459] = "Arcane Brilliance",
+				[1463] = "Incanter's Ward",
 				[12042] = "Arcane Power",
 				[57761] = "Brain Freeze",
 				[87023] = "Cauterize",

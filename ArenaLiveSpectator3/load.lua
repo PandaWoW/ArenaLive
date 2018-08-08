@@ -1,10 +1,5 @@
 local addonName, L = ...;
 
-Players = {};
-
-GreenTeam = 67;
-GoldTeam = 469;
-
 local nameAsterisk = FOREIGN_SERVER_LABEL
 local deselect = GetCVar'deselectOnClick'
 
@@ -353,9 +348,9 @@ function IsSpectator()
 end
 
 -- таймер арены. временное и конечно не самое элегантное решение
-local frame = CreateFrame"Frame"
+local ScoreboardTimer = CreateFrame"Frame"
 local TimeSinceLastUpdate = 0
-frame:SetScript("OnUpdate",function(self,elapsed)
+ScoreboardTimer:SetScript("OnUpdate",function(self,elapsed)
 	TimeSinceLastUpdate = TimeSinceLastUpdate + elapsed
 	if TimeSinceLastUpdate >= 1 then
 		TimeSinceLastUpdate = 0
@@ -363,11 +358,10 @@ frame:SetScript("OnUpdate",function(self,elapsed)
 		ArenaLiveSpectatorScoreBoard:UpdateTimer(mm,strlen(ss)==1 and'0'..ss or ss)
 	end
 end)
-
-frame:SetScript("OnShow", function(self)
+ScoreboardTimer:SetScript("OnShow", function(self)
 	TimeSinceLastUpdate = 0
 end)
-frame:Hide()
+ScoreboardTimer:Hide()
 
 function ArenaLiveSpectator:Enable()
 	if nameAsterisk ~= '' then FOREIGN_SERVER_LABEL='' end
@@ -375,7 +369,7 @@ function ArenaLiveSpectator:Enable()
 	ArenaLiveSpectatorWarGameMenu:Hide();
 	UIParent:Hide();
 	self:Show();
-	frame:Show();
+	ScoreboardTimer:Show();
 	
 	local database = ArenaLive:GetDBComponent(addonName);
 	ArenaLiveSpectatorHideUIButton:Show();
@@ -390,13 +384,13 @@ function ArenaLiveSpectator:Disable()
 	if FOREIGN_SERVER_LABEL == '' then FOREIGN_SERVER_LABEL=nameAsterisk end
 	
 	self:Hide();
-	frame:Hide();
+	ScoreboardTimer:Hide();
 	
 	ArenaLiveSpectatorHideUIButton:Hide();
 	UIParent:Show();
 	
 	ArenaLiveSpectatorScoreBoard:Reset();
-	
+
 	-- Disable Side frames:
 	local frame;
 	for i = 1, 5 do
@@ -498,9 +492,12 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 			if ( database.FollowTarget ) then
 				if UnitIsPlayer"target"then
 					SendChatMessage(".spec view " .. UnitName"target", "EMOTE")
+					ClearInspectPlayer()
+					NotifyInspect('target')
 				elseif not UnitExists"target"then
-					SendChatMessage(".spec view " .. UnitName"player", "EMOTE") --CommentatorFollowUnit("target"); DeadMouse
-				end
+					SendChatMessage(".spec view " .. UnitName"player", "EMOTE")
+					ClearInspectPlayer()
+				end--CommentatorFollowUnit("target"); DeadMouse
 			end
 			if ( database.HideTargetFrames or database.PlayMode > 3 ) then
 				for i = 1, database.PlayMode do
@@ -534,12 +531,12 @@ function ArenaLiveSpectator:CallOnMatchStart(callbackFunc)
 end
 
 function ArenaLiveSpectator:Toggle()
-	local inInstance, instanceType = IsInInstance();
+	local _, instanceType = IsInInstance();
 	if ( instanceType == "arena" and IsSpectator() ) then
 		ArenaLiveSpectator:Enable();
 		DelayEvent(1,function()ConsoleExec("deselectOnClick 0")end)
-		DelayEvent(1,function()for i=1,3 do _G["AlwaysUpFrame"..i]:Hide()end end)
-		DelayEvent(1.5,FixCooldownFrames)
+		DelayEvent(1,function()for i=1,3 do _G["AlwaysUpFrame"..i]:Hide()end WorldStateAlwaysUpFrame:Hide()end)
+		--DelayEvent(1.5,FixCooldownFrames)
 	else
 		ArenaLiveSpectator:Disable();
 		DelayEvent(1,function()ConsoleExec("deselectOnClick "..deselect)end)
@@ -551,7 +548,7 @@ function ArenaLiveSpectator:PlayerUpdate()
 	ArenaLiveSpectator:UpdateSideFrames();
 	ArenaLiveSpectator:UpdateCooldownTrackers();
     
-    --ArenaLive:TriggerEvent("COMMENTATOR_PLAYER_UPDATE");
+    ArenaLive:TriggerEvent("COMMENTATOR_PLAYER_UPDATE");
     --DelayEvent(1, ArenaLiveSpectator.PlayerUpdate); -- every 1 seconds
 end
 

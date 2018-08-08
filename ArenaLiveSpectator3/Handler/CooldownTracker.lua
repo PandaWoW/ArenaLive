@@ -17,11 +17,11 @@ local Cooldown = ArenaLive:GetHandler("Cooldown");
 local NameText = ArenaLive:GetHandler("NameText");
 
 local CooldownTrackerClass = {};
- trashTable = {};
+local trashTable = {};
 local trackers = {};
- trackedUnits = {};
+local trackedUnits = {};
 local inspectQueue = {};
- activeCooldowns = {};
+local activeCooldowns = {};
 local UNIT_WAITING_FOR_INSPECT_EVENT;
 local NUM_GLPYH_SLOTS = 6;
 local MAX_TALENT_TIERS = 6;
@@ -176,7 +176,8 @@ function CooldownTracker:RegisterUnit(unit)
 end
 
 function CooldownTracker:UnregisterUnit(unit)
-	if ( trackedUnits[self.unit] ) then
+	if trackedUnits[self.unit] then local unit = self.unit end
+	if ( trackedUnits[unit] ) then
 		trackedUnits[unit]["#"] = trackedUnits[unit]["#"] - 1;
 		
 		if ( trackedUnits[unit]["#"] < 1 ) then
@@ -231,7 +232,7 @@ function CooldownTracker:GatherCooldownInfo(unit, isInspectReady)
 		if ( not UNIT_WAITING_FOR_INSPECT_EVENT ) then
 			CooldownTracker:CallInspect();
 		end
-	elseif ( guid and isInspectReady ) then
+	elseif ( guid and isPlayer and isInspectReady ) then
 		print('inspected '..unit)
 		-- Reset old information first:
 		CooldownTracker:ResetCooldownInfo(unit);
@@ -294,7 +295,7 @@ function CooldownTracker:GatherCooldownInfo(unit, isInspectReady)
 		
 		-- Apply glyphs:
 		local glyphQueue = {};
-		for slot = 1, NUM_GLPYH_SLOTS, 2 do
+		for slot = 1, NUM_GLPYH_SLOTS do
 			local _, _, _, glyphSpellID = GetGlyphSocketInfo(slot, nil, true, unit);
 			
 			if ( glyphSpellID ) then
@@ -545,9 +546,17 @@ end
 
 function CooldownTracker:CallGatherForAll()
 	ArenaLiveSpectator:RefreshGUIDs()
-	--for i=1,max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents())do
-		-- ArenaLiveSpectator:GetNumPlayersInTeam'arena'
-	-- end
+	for i=1,5 do
+		local trashUnit
+		trashUnit = 'raid'..i
+		if UnitExists(trashUnit) and not trackedUnits[trashUnit]then
+			CooldownTrackerClass:UpdateUnit(trashUnit)
+		end
+		trashUnit = 'arena'..i
+		if UnitExists(trashUnit) and not trackedUnits[trashUnit]then
+			CooldownTrackerClass:UpdateUnit(trashUnit)
+		end
+	end
 	for unit, cdTable in pairs(trackedUnits) do
 		CooldownTracker:GatherCooldownInfo(unit, false);
 	end
@@ -589,8 +598,36 @@ function CooldownTracker:OnEvent(event, ...)
 			-- ArenaLiveSpectator:PlayerUpdate()
 			-- self:ResetAll()
 			-- ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
-			DelayEvent(2, function()ArenaLiveSpectator:PlayerUpdate()self:ResetAll()CooldownTracker:CallGatherForAll()end);
+			self:ResetAll()
+			DelayEvent(2, function()ArenaLiveSpectator:PlayerUpdate()CooldownTracker:CallGatherForAll()end);
 		else
+			local trashUnit
+			DelayEvent(1, function()for i=1,5 do
+				trashUnit = 'raid'..i
+				CooldownTracker:UnregisterUnit(trashUnits)
+				trashUnit = 'arena'..i
+				CooldownTracker:UnregisterUnit(trashUnits)
+			end	end)
+			local iconParent
+			for i=1,5 do
+				trashUnit = 'Right'
+				iconParent = _G['ALSPEC_CDTrackers'.. trashUnit ..'Tracker'..i]
+				if iconParent.icon1 then
+					for j=1,9 do
+						if not iconParent['icon'..j] then break end
+						iconParent['icon'..j].cooldown:Reset()
+					end
+				end
+				trashUnit = 'Left'
+				iconParent = _G['ALSPEC_CDTrackers'.. trashUnit ..'Tracker'..i]
+				if iconParent.icon1 then
+					for j=1,9 do
+						if not iconParent['icon'..j] then break end
+						iconParent['icon'..j].cooldown:Reset()
+					end
+				end
+			end
+			table.wipe(activeCooldowns)
 			self:ResetAll();
 		end
 	elseif ( event == "INSPECT_READY" and unit == inspectQueue[UNIT_WAITING_FOR_INSPECT_EVENT] ) then
@@ -656,7 +693,7 @@ end
 -- The function is throttled to prevent inspect call spam, which could
 -- let the server refuse our queries.
 local elapsedTillNow = 0;
-local THROTTLE = 1.0;
+local THROTTLE = 1.5;
 function CooldownTracker:OnUpdate(elapsed)
 	elapsedTillNow = elapsedTillNow + elapsed;
 	if ( elapsedTillNow > THROTTLE ) then
@@ -932,11 +969,13 @@ function CooldownTrackerClass:Reset()
 	end
 	
 	local icon;
-	for i = 1, self.numIcons do
-		icon = self["icon"..i];
-		self:ResetIcon(icon);
+	if self.numIcons then
+		for i = 1, self.numIcons do
+			icon = self["icon"..i];
+			self:ResetIcon(icon);
+		end
+		self:Hide();
 	end
-	self:Hide();
 end
 
 function CooldownTrackerClass:ResetIcon(icon)
@@ -958,6 +997,9 @@ function CooldownTrackerClass:UpdateUnit(unit)
 end
 
 function FixCooldownFrames()
+	if max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents()) > ArenaLive:GetDBComponent(addonName).PlayMode then
+		ArenaLiveSpectator:SetNumPlayers(max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents()))
+	end
 	ArenaLiveSpectator:PlayerUpdate()
 	CooldownTracker:ResetAll()
 	CooldownTracker:CallGatherForAll()

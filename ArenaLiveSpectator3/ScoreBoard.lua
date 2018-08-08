@@ -184,7 +184,7 @@ LeaveButton:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard,0,-36)
 LeaveButton:SetFrameStrata'LOW'
 LeaveButton:SetNormalFontObject(GameFontHighlightSmallOutline)
 LeaveButton:SetText(L['Leave']or'Leave')
-LeaveButton:SetFrameLevel(LeaveButton:GetFrameLevel()+1)
+LeaveButton:SetFrameLevel(LeaveButton:GetFrameLevel()+2)
 LeaveButton:SetScript('OnClick',function(self)
 	SendChatMessage('','AFK')--since LeaveBattlefield() is bugged we will use dirty /afk command :(
 end)
