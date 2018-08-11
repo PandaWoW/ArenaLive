@@ -539,7 +539,7 @@ function ArenaLiveSpectator:Toggle()
 		--DelayEvent(1.5,FixCooldownFrames)
 	else
 		ArenaLiveSpectator:Disable();
-		DelayEvent(1,function()ConsoleExec("deselectOnClick "..deselect)end)
+		DelayEvent(1,function()WorldStateAlwaysUpFrame:Show()ConsoleExec("deselectOnClick "..deselect)end)
 	end
 end
 

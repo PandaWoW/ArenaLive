@@ -297,6 +297,21 @@ local OPTION_ITEMS_SETTINGS = {
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, frame.handler, frame.group); database.ShowTooltip = newValue; end,
 		["postUpdate"] = function (frame, newValue, oldValues) local database = ArenaLive:GetDBComponent(frame.addon, frame.handler, "Right"); database.ShowTooltip = newValue; end,
 	},
+	["ShowCDText"] = {
+		["type"] = "CheckButton",
+		["name"] = "ArenaLiveSpectatorWarGameMenuSettingsShowCDTextCheckButton",
+		["parent"] = "ArenaLiveSpectatorWarGameMenuSettings",
+		["point"] = "LEFT",
+		["relativeTo"] = "ArenaLiveSpectatorWarGameMenuSettingsShowCDTrackerTooltipCheckButtonText",
+		["relativePoint"] = "RIGHT",
+		["xOffset"] = 5,
+		["yOffset"] = -2,
+		["title"] = L["Show Cooldown Text"],
+		["tooltip"] = L["Shows a timer text for cooldowns. Disable this to enable support for cooldown count addons."],
+		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, "Cooldown"); return database.ShowText; end,
+		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, "Cooldown"); database.ShowText = newValue; end,
+		["postUpdate"] = function (frame, newValue, oldValue) local database = ArenaLive:GetDBComponent(frame.addon, frame.handler); database.ShowText = newValue; ArenaLive:GetHandler('Cooldown').optionSets.ShowText:postUpdate(frame, newValue, oldValue)ReloadUI() end,
+	},
 };
 
 function ArenaLiveSpectatorWarGameMenu:Initialise()
@@ -379,6 +394,10 @@ function ArenaLiveSpectatorWarGameMenu:Initialise()
 	-- Setup Cooldown Tracker Option Frames:
 	ArenaLive:ConstructOptionFrame(OPTION_ITEMS_SETTINGS["ShowCDTrackerTooltip"], addonName, "CooldownTracker", "Left");
 	ArenaLiveSpectatorWarGameMenuSettingsShowCDTrackerTooltipCheckButtonText:SetTextColor(1,1,1);
+	
+	-- Setup Cooldown Text Showing Option Frames:
+	ArenaLive:ConstructOptionFrameByHandler(OPTION_ITEMS_SETTINGS["ShowCDText"], addonName, "Cooldown", "ShowText");
+	ArenaLiveSpectatorWarGameMenuSettingsShowCDTextCheckButtonText:SetTextColor(1,1,1);
 	-- Setup Nickname Option Frames:
 	ArenaLiveSpectatorWarGameMenuSettingsNicknamePlayerButton:Initialise();
 	ArenaLiveSpectatorWarGameMenuSettingsNicknameEditBox:Initialise();

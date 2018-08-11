@@ -295,7 +295,6 @@ CCIndicator.optionSets = {
 		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, frame.handler, frame.group); return database.Priorities.root; end,
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, frame.handler, frame.group); database.Priorities.root = newValue; end,
 	},
-	--[[ Disarms were removed in WoD
 	["Disarm"] = {
 		["type"] = "Slider",
 		["title"] = L["Disarms"],
@@ -307,7 +306,7 @@ CCIndicator.optionSets = {
 		["inputType"] = "NUMERIC",
 		["GetDBValue"] = function (frame) local database = ArenaLive:GetDBComponent(frame.addon, frame.handler, frame.group); return database.Priorities.disarm; end,
 		["SetDBValue"] = function (frame, newValue) local database = ArenaLive:GetDBComponent(frame.addon, frame.handler, frame.group); database.Priorities.disarm = newValue; end,
-	},]]
+	},
 	["UsefulBuff"] = {
 		["type"] = "Slider",
 		["title"] = L["Useful Buffs"],
