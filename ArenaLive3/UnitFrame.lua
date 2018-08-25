@@ -655,3 +655,26 @@ function UnitFrame:OnEvent(event, ...)
 
 	end
 end
+
+CompactUnitFrame_UpdateAll = function(frame)
+	CompactUnitFrame_UpdateInVehicle(frame);
+	CompactUnitFrame_UpdateVisible(frame);
+	if ( UnitExists(frame.displayedUnit) and frame.displayedUnit ~= nil ) then
+		CompactUnitFrame_UpdateMaxHealth(frame);
+		CompactUnitFrame_UpdateHealth(frame);
+		CompactUnitFrame_UpdateHealthColor(frame);
+		CompactUnitFrame_UpdateMaxPower(frame);
+		CompactUnitFrame_UpdatePower(frame);
+		CompactUnitFrame_UpdatePowerColor(frame);
+		CompactUnitFrame_UpdateName(frame);
+		CompactUnitFrame_UpdateSelectionHighlight(frame);
+		CompactUnitFrame_UpdateAggroHighlight(frame);
+		CompactUnitFrame_UpdateInRange(frame);
+		CompactUnitFrame_UpdateStatusText(frame);
+		CompactUnitFrame_UpdateHealPrediction(frame);
+		CompactUnitFrame_UpdateRoleIcon(frame);
+		CompactUnitFrame_UpdateReadyCheck(frame);
+		CompactUnitFrame_UpdateAuras(frame);
+		CompactUnitFrame_UpdateCenterStatusIcon(frame);
+	end
+end
