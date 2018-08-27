@@ -135,7 +135,7 @@ function ArenaLiveSpectator:SetUpCooldownTracker(numPlayers)
 	local FixCooldownFrame = CreateFrame('Button','FixCooldownFrame',ALSPEC_CDTrackersLeft)
 	FixCooldownFrame:SetSize(40,40)
 	hooksecurefunc(ALSPEC_CDTrackersLeftHeader,'SetPoint',function()
-		if database.HideTargetFrames == 1 then
+		if database.HideTargetFrames then
 			FixCooldownFrame:SetPoint('RIGHT',ALSPEC_CDTrackersLeftHeader,-45,15)
 		else
 			FixCooldownFrame:SetPoint('RIGHT',ALSPEC_CDTrackersLeftHeader,152,0)

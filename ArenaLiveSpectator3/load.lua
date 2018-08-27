@@ -534,8 +534,7 @@ function ArenaLiveSpectator:Toggle()
 	local _, instanceType = IsInInstance();
 	if ( instanceType == "arena" and IsSpectator() ) then
 		ArenaLiveSpectator:Enable();
-		DelayEvent(1,function()ConsoleExec("deselectOnClick 0")end)
-		DelayEvent(1,function()for i=1,3 do _G["AlwaysUpFrame"..i]:Hide()end WorldStateAlwaysUpFrame:Hide()end)
+		DelayEvent(1,function()ConsoleExec("deselectOnClick 0")for i=1,3 do if _G["AlwaysUpFrame"..i]then _G["AlwaysUpFrame"..i]:Hide()end end if WorldStateAlwaysUpFrame then WorldStateAlwaysUpFrame:Hide()end end)
 		--DelayEvent(1.5,FixCooldownFrames)
 	else
 		ArenaLiveSpectator:Disable();
