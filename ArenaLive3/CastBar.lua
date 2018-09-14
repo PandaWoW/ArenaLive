@@ -217,7 +217,7 @@ function CastBar:UpdateCast(castBar, unit, event)
 	local name, subText, text, icon, startTime, endTime, value, maxValue;
 	if ( event == "UNIT_SPELLCAST_DELAYED" ) then
 		name, subText, text, icon, startTime, endTime = UnitCastingInfo(unit);
-		value = (GetTime() - (startTime / 1000));
+		if name then value = (GetTime() - (startTime / 1000)); end
 	elseif ( event == "UNIT_SPELLCAST_CHANNEL_UPDATE" ) then
 		name, subText, text, icon, startTime, endTime = UnitChannelInfo(unit);
 		value = ((endTime / 1000) - GetTime());

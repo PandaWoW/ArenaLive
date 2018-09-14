@@ -347,7 +347,6 @@ function IsSpectator()
 	--return instanceType == "arena";
 end
 
--- таймер арены. временное и конечно не самое элегантное решение
 local ScoreboardTimer = CreateFrame"Frame"
 local TimeSinceLastUpdate = 0
 ScoreboardTimer:SetScript("OnUpdate",function(self,elapsed)
@@ -364,24 +363,36 @@ end)
 ScoreboardTimer:Hide()
 
 function ArenaLiveSpectator:Enable()
+    -- Прячем отображение (*) на именах во фреймах указывающее на 
+    --принадлежность к другому реалму
+    -- TODO: опционально реализовать вместо (*) отображение реалма.
 	if nameAsterisk ~= '' then FOREIGN_SERVER_LABEL='' end
-	
+
 	ArenaLiveSpectatorWarGameMenu:Hide();
 	UIParent:Hide();
 	self:Show();
 	ScoreboardTimer:Show();
-	
-	local database = ArenaLive:GetDBComponent(addonName);
+
+	--local database = ArenaLive:GetDBComponent(addonName);
 	ArenaLiveSpectatorHideUIButton:Show();
     ArenaLiveSpectator:PlayerUpdate();
 	self.enabled = true;
     self.hasStarted = true;
-	local numPlayers = max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents())
-	ArenaLiveSpectator:SetNumPlayers(numPlayers)
+	--local numPlayers = max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents())
+	ArenaLiveSpectator:SetNumPlayers(max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents()))
 end
 
 function ArenaLiveSpectator:Disable()
+    -- Возвращаем (*) на именах
 	if FOREIGN_SERVER_LABEL == '' then FOREIGN_SERVER_LABEL=nameAsterisk end
+    
+    --[[Багфикс: когда игрок делает /reload на спектатор арене у игрока
+    пропадает отображение панелей. Следующие строчки пофиксят это]]
+    local bar1,bar2,bar3,bar4 = GetActionBarToggles()
+    if bar1 and tonumber(SHOW_MULTI_ACTIONBAR_1) ~= bar1 then InterfaceOptionsActionBarsPanelBottomLeft:Click()end
+    if bar2 and tonumber(SHOW_MULTI_ACTIONBAR_2) ~= bar2 then InterfaceOptionsActionBarsPanelBottomRight:Click()end
+    if bar3 and tonumber(SHOW_MULTI_ACTIONBAR_3) ~= bar4 then InterfaceOptionsActionBarsPanelRight:Click()end
+    if bar4 and tonumber(SHOW_MULTI_ACTIONBAR_4) ~= bar4 then InterfaceOptionsActionBarsPanelRightTwo:Click()end
 	
 	self:Hide();
 	ScoreboardTimer:Hide();
@@ -534,7 +545,13 @@ function ArenaLiveSpectator:Toggle()
 	local _, instanceType = IsInInstance();
 	if ( instanceType == "arena" and IsSpectator() ) then
 		ArenaLiveSpectator:Enable();
-		DelayEvent(1,function()ConsoleExec("deselectOnClick 0")for i=1,3 do if _G["AlwaysUpFrame"..i]then _G["AlwaysUpFrame"..i]:Hide()end end if WorldStateAlwaysUpFrame then WorldStateAlwaysUpFrame:Hide()end end)
+		DelayEvent(1,function()
+            ConsoleExec("deselectOnClick 0")
+            for i=1,3 do
+                if _G["AlwaysUpFrame"..i]then _G["AlwaysUpFrame"..i]:Hide()end
+            end
+            if WorldStateAlwaysUpFrame then WorldStateAlwaysUpFrame:Hide()end
+        end)
 		--DelayEvent(1.5,FixCooldownFrames)
 	else
 		ArenaLiveSpectator:Disable();

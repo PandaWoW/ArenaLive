@@ -604,9 +604,9 @@ function CooldownTracker:OnEvent(event, ...)
 			local trashUnit
 			DelayEvent(1, function()for i=1,5 do
 				trashUnit = 'raid'..i
-				CooldownTracker:UnregisterUnit(trashUnits)
+				CooldownTracker:UnregisterUnit(trashUnit)
 				trashUnit = 'arena'..i
-				CooldownTracker:UnregisterUnit(trashUnits)
+				CooldownTracker:UnregisterUnit(trashUnit)
 			end	end)
 			local iconParent
 			for i=1,5 do
