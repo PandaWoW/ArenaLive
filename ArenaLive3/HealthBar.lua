@@ -29,16 +29,16 @@ local frequentUpdates =
 {
     ["player"] = 0,
     ["target"] = 0,
-    ["raid1"]  = 0,
-    ["raid2"]  = 0,
-    ["raid3"]  = 0,
-    ["raid4"]  = 0,
-    ["raid5"]  = 0,
-    ["arena1"] = 0,
-    ["arena2"] = 0,
-    ["arena3"] = 0,
-    ["arena4"] = 0,
-    ["arena5"] = 0,
+    ["commentator1"]  = 0,
+    ["commentator2"]  = 0,
+    ["commentator3"]  = 0,
+    ["commentator4"]  = 0,
+    ["commentator5"]  = 0,
+    ["commentator6"] = 0,
+    ["commentator7"] = 0,
+    ["commentator8"] = 0,
+    ["commentator9"] = 0,
+    ["commentator10"] = 0,
 };
 
 --[[

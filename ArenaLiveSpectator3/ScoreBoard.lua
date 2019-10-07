@@ -186,7 +186,7 @@ LeaveButton:SetNormalFontObject(GameFontHighlightSmallOutline)
 LeaveButton:SetText(L['Leave']or'Leave')
 LeaveButton:SetFrameLevel(LeaveButton:GetFrameLevel()+2)
 LeaveButton:SetScript('OnClick',function(self)
-	SendChatMessage('','AFK')--since LeaveBattlefield() is bugged we will use dirty /afk command :(
+	CommentatorExitInstance();
 end)
 LeaveButton.__icon = LeaveButton:CreateTexture(nil,"BACKGROUND")
 LeaveButton.__icon:SetTexture(CrossIcon)
