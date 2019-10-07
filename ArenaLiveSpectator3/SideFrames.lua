@@ -43,12 +43,12 @@ function ArenaLiveSpectator:SetUpSideFrames(numPlayers)
 			frame = _G["ALSPEC_LeftSideFramesFrame"..i];
 			self:UpdateSideFrameConstituents(frame);
 			frame:Enable();
-			frame:UpdateUnit("raid"..i);--
+			frame:UpdateUnit("commentator"..i);--
 
 			frame = _G["ALSPEC_RightSideFramesFrame"..i];
 			self:UpdateSideFrameConstituents(frame)
 			frame:Enable();
-			frame:UpdateUnit("arena"..i);--
+			frame:UpdateUnit("commentator"..5+i);
 		else
 			frame = _G["ALSPEC_LeftSideFramesFrame"..i];
 			frame:Disable();

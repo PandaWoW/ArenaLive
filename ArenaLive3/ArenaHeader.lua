@@ -289,6 +289,7 @@ function ArenaHeaderClass:Enable()
 	self:SetScript("OnAttributeChanged", self.OnAttributeChanged);
 	self:WrapScript(self, "OnAttributeChanged", onAttributeChangedSnippet);
 	
+    -- TODO CHECK WTF IS THIS
 	-- Enable frames:
 	for i = 1, NUM_MAX_ARENA_OPPONENTS do
 		local frame = self["Frame"..i];

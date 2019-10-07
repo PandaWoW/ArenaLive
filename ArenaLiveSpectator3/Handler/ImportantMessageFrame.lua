@@ -111,13 +111,13 @@ function ImportantMessageFrame:CreateMessage(event, ...)
 		return;
 	end
 
-	local unitType = string.match(unit, "^([a-z]+)[0-9]+$");
+	local unitIndex = tonumber(string.match(unit, '%d+'));
 	local classColour = RAID_CLASS_COLORS[class].colorStr;
 
 	local texture, texCoords, msg, team;
-	if ( unitType == "raid" ) then
+	if ( unitIndex < 6 ) then
 		team = "A";
-	else --if ( unitType == "spectatedb" ) then
+	else
 		team = "B";
 	end
 	
@@ -169,10 +169,8 @@ function ImportantMessageFrame:UpdatePlayerCache()
 	table.wipe(unitHealthCache);
 	
 	-- Check how many players are on both sides:
-	-- local teamA = CommentatorGetNumPlayers(2);
-	-- local teamB = CommentatorGetNumPlayers(1);    
-    local teamA = ArenaLiveSpectator:GetNumPlayersInTeam'raid';
-	local teamB = ArenaLiveSpectator:GetNumPlayersInTeam'arena';
+	local teamA = CommentatorGetNumPlayers(2);
+	local teamB = CommentatorGetNumPlayers(1);    
 
 	-- Update cache tables:
 	if ( teamA > 0 or teamB > 0 ) then
@@ -182,13 +180,13 @@ function ImportantMessageFrame:UpdatePlayerCache()
 				break;
 			end
 			
-			unit = "raid"..i;
+			unit = "commentator"..i;
 			if ( i <= teamA ) then
 				unitCache[unit] = true;
 				unitHealthCache[unit] = 0;
 			end
 			
-			unit = "arena"..i;
+			unit = "commentator"..5+i;
 			if ( i <= teamB ) then
 				unitCache[unit] = true;
 				unitHealthCache[unit] = 0;

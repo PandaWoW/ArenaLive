@@ -7,35 +7,20 @@ function ArenaLiveSpectator:RefreshGUIDs()
 	local unit, guid;
 
     for i = 1, 5 do
-		unit = "raid"..i;
-		guid = UnitGUID(unit);
-
-        if guid then
-			guidToUnit[guid] = unit;
-		end
---[[
-		unit = "raidpet"..i;
-		guid = UnitGUID(unit);
-
-        if guid then
-			guidToUnit[guid] = unit;
-		end
-]]
-		unit = "arena"..i;
+		unit = "commentator"..i;
 		guid = UnitGUID(unit);
 
         if guid then
 			guidToUnit[guid] = unit;
 		end
 
---[[
-		unit = "arenapet"..i;
+		unit = "commentator"..5+i;
 		guid = UnitGUID(unit);
 
         if guid then
 			guidToUnit[guid] = unit;
 		end
-]]
+
 	end
 end
 

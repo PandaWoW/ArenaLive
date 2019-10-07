@@ -157,12 +157,14 @@ function UnitCache:CheckUnitState(unit)
 	
 	local state = ( exists and guid and unitName and unitName ~= UNKNOWN );
 	if ( state ~= unitCache[unit] or ( unitInfo[unit] and guid ~= unitInfo[unit].guid ) ) then
-		local unitType = string.match(unit, "^([a-z]+)[0-9]+$") or unit;
+		local unitIndex = tonumber(string.match(unit, '%d+'));
 		
+        print("CheckUnitState: "..unit)
+        
 		local teamID;
-		if ( unitType == "spectateda" ) then
+		if ( unitIndex < 6 ) then
 			teamID = 1;
-		elseif ( unitType == "spectatedb" ) then
+		else
 			teamID = 2;
 		end		
 		
@@ -193,10 +195,11 @@ function UnitCache:PopulateUnitCacheTables()
 			unitCache["party"..i] = false;
 		end
 	end
+    
 	for i = 1, NUM_MAX_PLAYERS do
-		local unit = "spectateda"..i;
+		local unit = "commentator"..i;
 		unitCache[unit] = false;
-		unit = "spectatedb"..i;
+		unit = "commentator"..5+i;
 		unitCache[unit] = false;
 	end
 end
@@ -209,12 +212,12 @@ function UnitCache:SetUnitInfo(unit)
 			realm = GetRealmName();
 		end
 		name = name.."-"..realm;
-		local unitType = string.match(unit, "^([a-z]+)[0-9]+$") or unit;
+        local unitIndex = tonumber(string.match(unit, '%d+'));
 		local teamID;
 		local database = ArenaLive:GetDBComponent(addonName);
-		if ( unitType == "spectateda" or unitType == "spectatedpeta" ) then
+		if ( unitIndex < 6 ) then
 			teamID = 1; -- (Alliance or yellow team);
-		elseif ( unitType == "spectatedb"  or unitType == "spectatedpetb" ) then
+		else
 			teamID = 0; -- (Horde or green team);
 		end
 		
@@ -389,15 +392,7 @@ function UnitCache:OnEvent(event, ...)
 	if ( event == "UNIT_PET" ) then
 		local unit = ...;
 		local unitType = string.match(unit, "^([a-z]+)[0-9]+$") or unit;
-		if ( unitType == "spectateda" or unitType == "spectatedb" ) then
-			local number = string.match(unit, "^[a-z]+([0-9]+)$");
-			local unit;
-			if ( unitType == "spectateda" ) then
-				unit = "spectatedpeta"..number;
-			else
-				unit = "spectatedpetb"..number;
-			end
-			
+		if ( unitType == "commentator" ) then			
 			self:CheckUnitState(unit);
 		end
 	elseif ( event == "INSPECT_READY" and GUID_WAITING_FOR_INSPECT_EVENT ) then		
@@ -446,10 +441,11 @@ function UnitCache:OnUpdate(elapsed)
 					UnitCache:CheckUnitState(unit);
 				end
 			end
-			for i = 1, NUM_MAX_PLAYERS do
-				local unit = "spectateda"..i;
+			
+            for i = 1, NUM_MAX_PLAYERS do
+				local unit = "commentator"..i;
 				UnitCache:CheckUnitState(unit);
-				unit = "spectatedb"..i;
+				unit = "commentator"..5+i;
 				UnitCache:CheckUnitState(unit);
 			end
 		

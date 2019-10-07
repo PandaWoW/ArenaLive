@@ -497,12 +497,12 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		if ( self.enabled ) then
 			local database = ArenaLive:GetDBComponent(addonName);
 			if ( database.FollowTarget ) then
-				if UnitIsPlayer"target"then
-					SendChatMessage(".spec view " .. UnitName"target", "EMOTE")
+				if UnitIsPlayer("target") then
+					--CommentatorFollowUnit("target"); todo playerIndex and faction index
 					ClearInspectPlayer()
 					NotifyInspect('target')
-				elseif not UnitExists"target"then
-					SendChatMessage(".spec view " .. UnitName"player", "EMOTE")
+				elseif not UnitExists ("target") then
+					--SendChatMessage(".spec view " .. UnitName"player", "EMOTE")
 					ClearInspectPlayer()
 				end--CommentatorFollowUnit("target"); DeadMouse
 			end
@@ -554,6 +554,7 @@ function ArenaLiveSpectator:PlayerUpdate()
 end
 
 function ArenaLiveSpectator:SetNumPlayers(numPlayers)
+print(numPlayers);
 	ArenaLive:GetDBComponent(addonName).PlayMode = numPlayers
 	ArenaLiveSpectator:SetUpSideFrames(numPlayers);
 	ArenaLiveSpectator:SetUpTargetFrames(numPlayers);

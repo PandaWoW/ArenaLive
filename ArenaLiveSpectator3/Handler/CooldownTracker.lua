@@ -233,7 +233,6 @@ function CooldownTracker:GatherCooldownInfo(unit, isInspectReady)
 			CooldownTracker:CallInspect();
 		end
 	elseif ( guid and isPlayer and isInspectReady ) then
-		print('inspected '..unit)
 		-- Reset old information first:
 		CooldownTracker:ResetCooldownInfo(unit);
 		
@@ -548,16 +547,19 @@ function CooldownTracker:CallGatherForAll()
 	ArenaLiveSpectator:RefreshGUIDs()
 	for i=1,5 do
 		local trashUnit
-		trashUnit = 'raid'..i
+		trashUnit = 'commentator'..i
 		if UnitExists(trashUnit) and not trackedUnits[trashUnit]then
 			CooldownTrackerClass:UpdateUnit(trashUnit)
 		end
-		trashUnit = 'arena'..i
-		if UnitExists(trashUnit) and not trackedUnits[trashUnit]then
+		
+        trashUnit = 'commentator'..5+i
+		
+        if UnitExists(trashUnit) and not trackedUnits[trashUnit]then
 			CooldownTrackerClass:UpdateUnit(trashUnit)
 		end
 	end
-	for unit, cdTable in pairs(trackedUnits) do
+	
+    for unit, cdTable in pairs(trackedUnits) do
 		CooldownTracker:GatherCooldownInfo(unit, false);
 	end
 end
@@ -603,9 +605,9 @@ function CooldownTracker:OnEvent(event, ...)
 		else
 			local trashUnit
 			DelayEvent(1, function()for i=1,5 do
-				trashUnit = 'raid'..i
+				trashUnit = 'commentator'..i
 				CooldownTracker:UnregisterUnit(trashUnit)
-				trashUnit = 'arena'..i
+				trashUnit = 'commentator'..5+i
 				CooldownTracker:UnregisterUnit(trashUnit)
 			end	end)
 			local iconParent

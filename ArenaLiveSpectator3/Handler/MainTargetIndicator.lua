@@ -37,13 +37,13 @@ function MainTargetIndicator:Update(unitFrame)
 	end
 	
 	local guid = unitFrame.guid;
-	local unitType = string.match(unit, "^([a-z]+)[0-9]+$") or unit;
+	local unitIndex = tonumber(string.match(unit, '%d+'));
 	
 	-- Get correct main target according to unit type: 
 	local mainTarget;
-	if ( unitType == "raid" ) then
+	if ( unitIndex < 6 ) then
 		mainTarget = MAIN_TARGET_RIGHT;
-	elseif ( unitType == "arena" ) then
+	else
 		mainTarget = MAIN_TARGET_LEFT;
 	end
 	
@@ -62,19 +62,19 @@ end
 
 function MainTargetIndicator:UpdateNumPlayers()
 	-- For some reason 2 is team A and 1 is team B...
-	NUM_PLAYERS_LEFT = ArenaLiveSpectator:GetNumPlayersInTeam("raid");
-	NUM_PLAYERS_RIGHT = ArenaLiveSpectator:GetNumPlayersInTeam("arena");
-	
+	NUM_PLAYERS_LEFT = CommentatorGetNumPlayers(2);
+	NUM_PLAYERS_RIGHT = CommentatorGetNumPlayers(1);
+
 	local unit;
 	for i = 1, 5 do
-		unit = "raid"..i;
+		unit = "commentator"..i;
 		if ( i <= NUM_PLAYERS_LEFT ) then
 			playerTargets[unit] = false;
 		else
 			playerTargets[unit] = nil;
 		end
 		
-		unit = "arena"..i;
+		unit = "commentator"..5+i;
 		if ( i <= NUM_PLAYERS_RIGHT ) then
 			playerTargets[unit] = false;
 		else
@@ -204,10 +204,10 @@ function MainTargetIndicator:OnEvent(event, ...)
 		self:UpdateNumPlayers();
 	elseif ( event == "UNIT_TARGET" ) then
 		local unit = ...;
-		local unitType = string.match(unit, "^([a-z]+)[0-9]+$") or unit;
-		if ( unitType == "raid" ) then
+        local unitIndex = tonumber(string.match(unit, '%d+'));
+		if ( unitIndex < 6 ) then
 			MainTargetIndicator:UpdateMainTarget(1);
-		elseif ( unitType == "arena" ) then
+		else
 			MainTargetIndicator:UpdateMainTarget(2);
 		end
 	end

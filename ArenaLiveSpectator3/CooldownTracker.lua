@@ -107,10 +107,10 @@ function ArenaLiveSpectator:SetUpCooldownTracker(numPlayers)
 		if ( i <= numPlayers ) then
 			tracker = _G["ALSPEC_CDTrackersLeftTracker"..i];
 			tracker:Enable();
-			tracker:UpdateUnit("raid"..i);
+			tracker:UpdateUnit("commentator"..i);
 			tracker = _G["ALSPEC_CDTrackersRightTracker"..i];
 			tracker:Enable();
-			tracker:UpdateUnit("arena"..i);
+			tracker:UpdateUnit("commentator"..5+i);
 		else
 			tracker = _G["ALSPEC_CDTrackersLeftTracker"..i];
 			tracker:Disable();

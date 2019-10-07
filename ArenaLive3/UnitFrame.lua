@@ -349,12 +349,10 @@ end
 			value (depends): New value of the affected attribute.
 ]]--
 function UnitFrameClass:OnAttributeChanged (name, value)
-
 	if ( name ~= "unit" or value == self.unit ) then
 		return;
 	end	
-	
-	
+
 	if ( self.unit ) then
 		-- Delete old entry:
 		UnitFrame.IndexByUnit[self.unit][self.id] = nil;
@@ -379,7 +377,7 @@ end
 --[[ Method: OnEnter
 	 Function to use for the OnEnter script.
 ]]--
-function UnitFrameClass:OnEnter ()
+function UnitFrameClass:OnEnter()
 
 	local database = ArenaLive:GetDBComponent(self.addon, "UnitFrame", self.group);
 	local showTooltip = database.TooltipMode;

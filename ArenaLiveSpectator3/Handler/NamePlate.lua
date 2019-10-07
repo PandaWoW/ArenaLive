@@ -251,10 +251,10 @@ function NamePlate:OnEvent(event, ...)
 		-- local numTeamB = CommentatorGetNumPlayers(1);
 
         for i = 1, 5 do
-			local unit = "raid"..i;
+			local unit = "commentator"..i;
 			NamePlate:UpdateUnitCacheEntry(unit);
 			
-			unit = "arena"..i;
+			unit = "commentator"..5+i;
 			NamePlate:UpdateUnitCacheEntry(unit);
 		end
 		NamePlate:UpdateAll();

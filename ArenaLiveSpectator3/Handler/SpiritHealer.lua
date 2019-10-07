@@ -15,11 +15,11 @@ function SpiritHealerFrame:ConstructObject(spiritHealerFrame)
 end
 
 function SpiritHealerFrame:UpdateNumPlayers()
-	local numTeamA = ArenaLiveSpectator:GetNumPlayersInTeam("raid");
-	local numTeamB = ArenaLiveSpectator:GetNumPlayersInTeam("arena");
+	local numTeamA = CommentatorGetNumPlayers(2);
+	local numTeamB = CommentatorGetNumPlayers(1);
 	
 	for i = 1, 5 do
-		local unit = "raid"..i;
+		local unit = "commentator"..i;
 		if ( i <= numTeamA ) then
 			playerStates[unit] = ArenaLiveSpectator:ValueToBoolean(UnitIsDeadOrGhost(unit));
 			SpiritHealerFrame:CallUpdateForUnit(unit)
@@ -27,7 +27,7 @@ function SpiritHealerFrame:UpdateNumPlayers()
 			playerStates[unit] = nil;
 		end
 		
-		unit = "arena"..i;
+		unit = "commentator"..5+i;
 		if ( i <= numTeamB ) then
 			playerStates[unit] = ArenaLiveSpectator:ValueToBoolean(UnitIsDeadOrGhost(unit));
 			SpiritHealerFrame:CallUpdateForUnit(unit)
