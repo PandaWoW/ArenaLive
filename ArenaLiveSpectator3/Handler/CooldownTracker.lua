@@ -589,47 +589,15 @@ end
 
 function CooldownTracker:OnEvent(event, ...)
 	local unit = ...;
-	--if ( event == "COMMENTATOR_PLAYER_UPDATE" and ArenaLiveSpectator:HasMatchStarted() ) then
-		--CooldownTracker:CallGatherForAll();
-	--elseif
-	if ( event == "PLAYER_ENTERING_WORLD" ) then
+	if ( event == "COMMENTATOR_PLAYER_UPDATE" and ArenaLiveSpectator:HasMatchStarted() ) then
+		CooldownTracker:CallGatherForAll();
+	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		if ( IsSpectator() ) then
 			-- Update cooldown info after match has
 			-- started to make sure for talent and
 			-- glyph switches etc.
-			-- ArenaLiveSpectator:PlayerUpdate()
-			-- self:ResetAll()
-			-- ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
-			self:ResetAll()
-			DelayEvent(2, function()ArenaLiveSpectator:PlayerUpdate()CooldownTracker:CallGatherForAll()end);
+			ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
 		else
-			local trashUnit
-			DelayEvent(1, function()for i=1,5 do
-				trashUnit = 'commentator'..i
-				CooldownTracker:UnregisterUnit(trashUnit)
-				trashUnit = 'commentator'..5+i
-				CooldownTracker:UnregisterUnit(trashUnit)
-			end	end)
-			local iconParent
-			for i=1,5 do
-				trashUnit = 'Right'
-				iconParent = _G['ALSPEC_CDTrackers'.. trashUnit ..'Tracker'..i]
-				if iconParent.icon1 then
-					for j=1,9 do
-						if not iconParent['icon'..j] then break end
-						iconParent['icon'..j].cooldown:Reset()
-					end
-				end
-				trashUnit = 'Left'
-				iconParent = _G['ALSPEC_CDTrackers'.. trashUnit ..'Tracker'..i]
-				if iconParent.icon1 then
-					for j=1,9 do
-						if not iconParent['icon'..j] then break end
-						iconParent['icon'..j].cooldown:Reset()
-					end
-				end
-			end
-			table.wipe(activeCooldowns)
 			self:ResetAll();
 		end
 	elseif ( event == "INSPECT_READY" and unit == inspectQueue[UNIT_WAITING_FOR_INSPECT_EVENT] ) then

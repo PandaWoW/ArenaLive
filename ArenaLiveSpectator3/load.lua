@@ -335,7 +335,7 @@ end
 
 -- Custom function to check if player currently is a spectator.
 function IsSpectator()
-    return CommentatorGetMode() == 3;
+    return CommentatorGetMode() > 0;
 end
 
 local ScoreboardTimer = CreateFrame"Frame"
