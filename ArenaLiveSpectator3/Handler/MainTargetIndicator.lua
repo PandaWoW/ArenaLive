@@ -62,8 +62,8 @@ end
 
 function MainTargetIndicator:UpdateNumPlayers()
 	-- For some reason 2 is team A and 1 is team B...
-	NUM_PLAYERS_LEFT = CommentatorGetNumPlayers(2);
-	NUM_PLAYERS_RIGHT = CommentatorGetNumPlayers(1);
+	NUM_PLAYERS_LEFT = CommentatorGetNumPlayers(1);
+	NUM_PLAYERS_RIGHT = CommentatorGetNumPlayers(2);
 
 	local unit;
 	for i = 1, 5 do
@@ -93,13 +93,13 @@ local tempTargetInfo = {};
 function MainTargetIndicator:UpdateMainTarget(team)
 	local numPlayers, numTargets, playerUnitMod, targetUnitMod;
 	if ( team == 1 ) then
-		playerUnitMod = "raid";
-		targetUnitMod = "arena";
+		playerUnitMod = "commentator";
+		targetUnitMod = "commentator6";
 		numPlayers = NUM_PLAYERS_LEFT;
 		numTargets = NUM_PLAYERS_RIGHT;
 	elseif ( team == 2 ) then
-		playerUnitMod = "arena";
-		targetUnitMod = "raid";
+		playerUnitMod = "commentator6";
+		targetUnitMod = "commentator";
 		numPlayers = NUM_PLAYERS_RIGHT;
 		numTargets = NUM_PLAYERS_LEFT;
 	else
@@ -121,7 +121,7 @@ function MainTargetIndicator:UpdateMainTarget(team)
 	local unit, guid, health, healthMax, health, healthPercent;
 	for i = 1, numTargets do
 		-- Gather target data:
-		unit = targetUnitMod..i;
+		unit = targetUnitMod == "commentator6" and "commentator" .. 5+i or targetUnitMod..i;
 		guid = UnitGUID(unit);
 		if ( guid ) then
 			if ( not tempTargetInfo[guid] ) then
@@ -143,7 +143,7 @@ function MainTargetIndicator:UpdateMainTarget(team)
 	
 	-- Now gather targeting data:
 	for i = 1, numPlayers do
-		unit = playerUnitMod..i;
+		unit = playerUnitMod == "commentator6" and "commentator" .. 5+i or playerUnitMod..i;
 		guid = playerTargets[unit];
 		if ( guid and tempTargetInfo[guid] ) then
 			tempTargetInfo[guid].targetedBy = tempTargetInfo[guid].targetedBy + 1;

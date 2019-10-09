@@ -28,7 +28,7 @@ local MAX_TALENT_TIERS = 6;
 local NUM_TALENT_COLUMNS = 3;
 
 CooldownTracker:RegisterEvent("PLAYER_ENTERING_WORLD");
---CooldownTracker:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
+CooldownTracker:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 CooldownTracker:RegisterEvent("INSPECT_READY");
 CooldownTracker:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED");
 --CooldownTracker:RegisterEvent("UNIT_NAME_UPDATE");
@@ -592,12 +592,41 @@ function CooldownTracker:OnEvent(event, ...)
 	if ( event == "COMMENTATOR_PLAYER_UPDATE" and ArenaLiveSpectator:HasMatchStarted() ) then
 		CooldownTracker:CallGatherForAll();
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
-		if ( IsSpectator() ) then
+		if ( IsSpectator() or CommentatorGetMode() == 2 ) then
 			-- Update cooldown info after match has
 			-- started to make sure for talent and
 			-- glyph switches etc.
-			ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
+			-- ArenaLiveSpectator:PlayerUpdate()
+			-- self:ResetAll()
+			-- ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
+			self:ResetAll()
+			DelayEvent(2, function()ArenaLiveSpectator:PlayerUpdate()CooldownTracker:CallGatherForAll()end);
 		else
+			local trashUnit
+			DelayEvent(1, function()for i=1,10 do
+				trashUnit = 'commentator'..i
+				CooldownTracker:UnregisterUnit(trashUnit)
+			end	end)
+			local iconParent
+			for i=1,5 do
+				trashUnit = 'Right'
+				iconParent = _G['ALSPEC_CDTrackers'.. trashUnit ..'Tracker'..i]
+				if iconParent.icon1 then
+					for j=1,9 do
+						if not iconParent['icon'..j] then break end
+						iconParent['icon'..j].cooldown:Reset()
+					end
+				end
+				trashUnit = 'Left'
+				iconParent = _G['ALSPEC_CDTrackers'.. trashUnit ..'Tracker'..i]
+				if iconParent.icon1 then
+					for j=1,9 do
+						if not iconParent['icon'..j] then break end
+						iconParent['icon'..j].cooldown:Reset()
+					end
+				end
+			end
+			table.wipe(activeCooldowns)
 			self:ResetAll();
 		end
 	elseif ( event == "INSPECT_READY" and unit == inspectQueue[UNIT_WAITING_FOR_INSPECT_EVENT] ) then
@@ -967,8 +996,8 @@ function CooldownTrackerClass:UpdateUnit(unit)
 end
 
 function FixCooldownFrames()
-	if max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents()) > ArenaLive:GetDBComponent(addonName).PlayMode then
-		ArenaLiveSpectator:SetNumPlayers(max(GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),GetNumArenaOpponents()))
+	if CommentatorGetMapInfo(1) > ArenaLive:GetDBComponent(addonName).PlayMode then
+		ArenaLiveSpectator:SetNumPlayers(CommentatorGetMapInfo(1))
 	end
 	ArenaLiveSpectator:PlayerUpdate()
 	CooldownTracker:ResetAll()

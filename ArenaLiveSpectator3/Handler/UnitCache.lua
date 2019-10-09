@@ -419,7 +419,7 @@ function UnitCache:OnEvent(event, ...)
 	elseif ( event == "UPDATE_BATTLEFIELD_STATUS" ) then
 		local statusID = ...;
 		local status = GetBattlefieldStatus(statusID);
-		local isSpectator = IsSpectator();
+		local isSpectator = IsSpectator() or CommentatorGetMode() == 2;
 		if( status == "active" and isSpectator and ( not self.enabled or statusID ~= self.statusID ) ) then -- 
 			self:Enable(statusID);
 		elseif ( status == "none" and statusID == self.statusID ) then
