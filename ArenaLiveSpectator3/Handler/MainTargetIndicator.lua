@@ -185,7 +185,7 @@ function MainTargetIndicator:CallUpdateForUnitType(unitType)
 	end
 	
 	for i = 1, 5 do
-		local unit = unitType..i;
+		local unit = unitType == "commentator6" and "commentator" .. 5+i or unitType..i;
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
