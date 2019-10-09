@@ -200,7 +200,7 @@ function ImportantMessageFrame:OnEvent(event, ...)
 	if ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
 		ImportantMessageFrame:UpdatePlayerCache();
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
-		if ( IsSpectator() or CommentatorGetMode() == 2 ) then
+		if ( IsSpectator() ) then
 			feignDeathName = GetSpellInfo(5384);
 			DelayEvent(2,function()ImportantMessageFrame:UpdatePlayerCache()end);
 			self:Show();

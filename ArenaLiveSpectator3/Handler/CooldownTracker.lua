@@ -592,7 +592,7 @@ function CooldownTracker:OnEvent(event, ...)
 	if ( event == "COMMENTATOR_PLAYER_UPDATE" and ArenaLiveSpectator:HasMatchStarted() ) then
 		CooldownTracker:CallGatherForAll();
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
-		if ( IsSpectator() or CommentatorGetMode() == 2 ) then
+		if ( IsSpectator() ) then
 			-- Update cooldown info after match has
 			-- started to make sure for talent and
 			-- glyph switches etc.

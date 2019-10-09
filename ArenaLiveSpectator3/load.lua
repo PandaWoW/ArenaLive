@@ -335,7 +335,7 @@ end
 
 -- Custom function to check if player currently is a spectator.
 function IsSpectator()
-    return CommentatorGetMode() == 2;
+    return CommentatorGetMode() > 0;
 end
 
 local ScoreboardTimer = CreateFrame"Frame"
@@ -539,7 +539,7 @@ end
 
 function ArenaLiveSpectator:Toggle()
 	local _, instanceType = IsInInstance();
-	if ( instanceType == "arena" and CommentatorGetMode() == 2 ) then
+	if ( instanceType == "arena" and IsSpectator() ) then
         CommentatorToggleMode();
 	else
 		ArenaLiveSpectator:Disable();
