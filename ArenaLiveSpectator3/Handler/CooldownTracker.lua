@@ -30,7 +30,8 @@ local NUM_TALENT_COLUMNS = 3;
 CooldownTracker:RegisterEvent("PLAYER_ENTERING_WORLD");
 CooldownTracker:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 CooldownTracker:RegisterEvent("INSPECT_READY");
-CooldownTracker:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED");
+-- CooldownTracker:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED");
+CooldownTracker:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS");
 --CooldownTracker:RegisterEvent("UNIT_NAME_UPDATE");
 CooldownTracker:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_DISPEL");
 function ArenaLiveSpectator:GetTrackedUnits()
@@ -648,8 +649,13 @@ function CooldownTracker:OnEvent(event, ...)
 		-- print(event, ...)
 		-- CooldownTracker:ResetCooldownInfo(unit);
 		-- CooldownTracker:GatherCooldownInfo(unit, false);
-	elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" and trackedUnits[unit] ) then
-		local spellID = select(5, ...);
+	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" )then
+		local srcGuid, src, _, _, destGuid, dest, _, _, spellID, spellName = select(4, ...);
+		unit = ArenaLiveSpectator:GetUnitByGUID(srcGuid);
+		if not unit and not spellID then return end
+		if not trackedUnits[unit] then return end
+	-- elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" and trackedUnits[unit] ) then
+		-- local spellID = select(5, ...);
 		
 		-- Dispels need to be filtered, because they only trigger when they dispel something.
 		-- Their cooldown is, therefore, triggered by COMBAT_LOG_EVENT_UNFILTERED_SPELL_DISPEL

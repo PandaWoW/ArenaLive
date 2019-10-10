@@ -24,12 +24,15 @@ local CastHistory = ArenaLive:ConstructHandler("CastHistory", true, true);
 CastHistory.canToggle = true;
 
 -- Register the handler for all needed events.
-CastHistory:RegisterEvent("UNIT_SPELLCAST_START");
-CastHistory:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED");
-CastHistory:RegisterEvent("UNIT_SPELLCAST_STOP");
-CastHistory:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START");
-CastHistory:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE");
-CastHistory:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP");
+-- CastHistory:RegisterEvent("UNIT_SPELLCAST_START");
+-- CastHistory:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED");
+-- CastHistory:RegisterEvent("UNIT_SPELLCAST_STOP");
+-- CastHistory:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START");
+-- CastHistory:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE");
+-- CastHistory:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP");
+CastHistory:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START");
+CastHistory:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_FAILED");
+
 CastHistory:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_DAMAGE");
 CastHistory:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_HEAL");
 CastHistory:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS");
@@ -338,10 +341,12 @@ function CastHistory:Rotate (unitFrame, event, spellID, lineID)
 	CastHistory:UpdateIcon(unitFrame, icon);
 	icon:Show();
 	
-	if ( event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_CHANNEL_START" ) then
+	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" ) then
+	-- if ( event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_CHANNEL_START" ) then
 		castHistory.castingIcon = icon;
 		icon.castAnim:Play();
-	elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" ) then
+	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" ) then
+	-- elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" ) then
 		icon.fadeInAnim:Play();
 	end
 	
@@ -389,16 +394,14 @@ function CastHistory:StartCast (unitFrame, event, spellID, lineID)
 	
 	local castHistory = unitFrame[self.name];
 	-- If we're already channeling the same spell, ignore the new one:
-	if ( event == "UNIT_SPELLCAST_CHANNEL_START" and castHistory.channeling and spellID == castHistory.spellID ) then
+	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" and castHistory.channeling and spellID == castHistory.spellID ) then
+	-- if ( event == "UNIT_SPELLCAST_CHANNEL_START" and castHistory.channeling and spellID == castHistory.spellID ) then
 		return;
 	end
 	
-	if ( event == "UNIT_SPELLCAST_START" ) then
-		castHistory.casting = true;
-		castHistory.channeling = nil;
-	elseif ( event == "UNIT_SPELLCAST_CHANNEL_START" ) then
-		castHistory.channeling = true;
-		castHistory.casting = nil;
+	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" ) then
+		castHistory.casting = not UnitChannelInfo(unitFrame:GetAttribute("unit"))and true;
+		castHistory.channeling = UnitChannelInfo(unitFrame:GetAttribute("unit"))and true;
 	end
 	
 	castHistory.spellID = spellID;
@@ -408,7 +411,8 @@ end
 
 function CastHistory:StopCast (castHistory, event, lineID)
 	
-	if ( event == "UNIT_SPELLCAST_STOP" and lineID ~= castHistory.lineID ) then
+	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_FAILED" and lineID ~= castHistory.lineID ) then
+	-- if ( event == "UNIT_SPELLCAST_STOP" and lineID ~= castHistory.lineID ) then
 		return;
 	end
 	
@@ -417,7 +421,8 @@ function CastHistory:StopCast (castHistory, event, lineID)
 		return;
 	end
 	
-	if ( event == "UNIT_SPELLCAST_STOP" ) then
+	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_FAILED" ) then
+	-- if ( event == "UNIT_SPELLCAST_STOP" ) then
 		icon.fading = true;
 	else
 		icon.fading = nil;
@@ -438,7 +443,8 @@ function CastHistory:SuccessfulCast (unitFrame, spellID, lineID)
 	local castHistory = unitFrame[self.name];
 	if ( not castHistory.channeling and not castHistory.casting and not ArenaLive.spellDB.FilteredSpells[spellID] ) then
 		-- Instant cast:
-		CastHistory:Rotate(unitFrame, "UNIT_SPELLCAST_SUCCEEDED", spellID, lineID);
+		CastHistory:Rotate(unitFrame, "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS", spellID, lineID);
+		-- CastHistory:Rotate(unitFrame, "UNIT_SPELLCAST_SUCCEEDED", spellID, lineID);
 	elseif ( castHistory.casting and castHistory.castingIcon and lineID == castHistory.lineID ) then
 		local icon = castHistory.castingIcon;
 		castHistory.castingIcon = nil;
@@ -487,9 +493,12 @@ function CastHistory:UpdateBorder (castHistory, spellID, destGUID)
 end
 
 function CastHistory:OnEvent (event, ...)
-	
-	local unit, _, _, lineID, spellID = ...;
-	if ( event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_CHANNEL_START" ) then
+	local srcGuid, src, _, _, destGuid, dest, _, _, spellID, spellName, lineID = select(4, ...);
+	local unit = ArenaLiveSpectator:GetUnitByGUID(srcGuid);
+
+	-- local unit, _, _, lineID, spellID = ...;
+	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" ) then
+	-- if ( event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_CHANNEL_START" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
@@ -498,7 +507,8 @@ function CastHistory:OnEvent (event, ...)
 				end
 			end
 		end
-	elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" ) then
+	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" ) then
+	-- elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
@@ -507,7 +517,8 @@ function CastHistory:OnEvent (event, ...)
 				end
 			end
 		end
-	elseif ( event == "UNIT_SPELLCAST_STOP" or event == "UNIT_SPELLCAST_CHANNEL_STOP" ) then
+	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_STOP" ) then
+	-- elseif ( event == "UNIT_SPELLCAST_STOP" or event == "UNIT_SPELLCAST_CHANNEL_STOP" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);

@@ -16,7 +16,10 @@ local addonName, L = ...;
 -- Create new Handler and register for aura event:
 local CCIndicator = ArenaLive:ConstructHandler("CCIndicator", true);
 CCIndicator.canToggle = true;
-CCIndicator:RegisterEvent("UNIT_AURA", "UpdateCache");
+CCIndicator:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_AURA_APPLIED", "UpdateCache");
+CCIndicator:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_AURA_REFRESH", "UpdateCache");
+CCIndicator:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_AURA_REMOVED", "UpdateCache");
+-- CCIndicator:RegisterEvent("UNIT_AURA", "UpdateCache");
 CCIndicator:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateCache");
 CCIndicator:RegisterEvent("PLAYER_FOCUS_CHANGED", "UpdateCache");
 
@@ -111,7 +114,7 @@ function CCIndicator:Reset(unitFrame)
 	indicator:Hide();
 end
 
-function CCIndicator:UpdateCache (event, unit)
+function CCIndicator:UpdateCache (event, unit, ...)
 	
 	if ( event == "PLAYER_TARGET_CHANGED" ) then
 		unit = "target";
@@ -119,7 +122,9 @@ function CCIndicator:UpdateCache (event, unit)
 		unit = "focus";
 	end
 
-	if not UnitExists(unit)then return end
+	local srcGuid, src, _, _, destGuid, dest, _, _, spellID, spellName, lineID = select(3, ...);
+	local unit = ArenaLiveSpectator:GetUnitByGUID(destGuid);
+	if not UnitExists(unit) then return end
 	
 	-- Reset table if there is one:
 	if ( unitCCCache[unit] ) then

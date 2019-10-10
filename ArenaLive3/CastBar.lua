@@ -23,17 +23,20 @@ CastBar.canToggle = true;
 -- Register the handler for all needed events.
 CastBar:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_INTERRUPT");
 CastBar:RegisterEvent("PLAYER_ENTERING_WORLD");
-CastBar:RegisterEvent("UNIT_SPELLCAST_START");
-CastBar:RegisterEvent("UNIT_SPELLCAST_DELAYED");
-CastBar:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE");
-CastBar:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE");
-CastBar:RegisterEvent("UNIT_SPELLCAST_FAILED");
-CastBar:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED");
-CastBar:RegisterEvent("UNIT_SPELLCAST_STOP");
-CastBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START");
-CastBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE");
-CastBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP");
-CastBar:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED");
+CastBar:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START");
+CastBar:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS");
+CastBar:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_FAILED");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_START");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_DELAYED");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_FAILED");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_STOP");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP");
+-- CastBar:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED");
 
 
 
@@ -100,10 +103,11 @@ function CastBar:Update(unitFrame)
 	local event;
 	if ( not spell ) then
 		spell = UnitChannelInfo(unit);
-		event = "UNIT_SPELLCAST_CHANNEL_START"
-	else
-		event = "UNIT_SPELLCAST_START";
+		-- event = "UNIT_SPELLCAST_CHANNEL_START"
+	-- else
+		-- event = "UNIT_SPELLCAST_START";
 	end
+	event = "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START"
 	
 	-- Start cast if there is one:
 	if ( spell ) then
@@ -136,24 +140,27 @@ function CastBar:StartCast(castBar, unit, event)
 	end
 
 	local name, subText, text, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible, value, maxValue;
-	if ( event == "UNIT_SPELLCAST_START" ) then
-		name, subText, text, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible = UnitCastingInfo(unit);
-		if ( not startTime ) then
-			return;
+	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" ) then
+	-- if ( event == "UNIT_SPELLCAST_START" ) then
+		if not UnitChannelInfo(unit) then
+			name, subText, text, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible = UnitCastingInfo(unit);
+			if ( not startTime ) then
+				return;
+			end
+			value = (GetTime() - (startTime / 1000));
+			castBar.lineID = lineID;
+			castBar.casting = true;
+			castBar.channeling = nil;
+		else
+			name, subText, text, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit);
+			if ( not endTime ) then
+				return;
+			end
+			value = ((endTime / 1000) - GetTime());
+			castBar.lineID = nil;
+			castBar.casting = nil;
+			castBar.channeling = true;
 		end
-		value = (GetTime() - (startTime / 1000));
-		castBar.lineID = lineID;
-		castBar.casting = true;
-		castBar.channeling = nil;	
-	elseif ( event == "UNIT_SPELLCAST_CHANNEL_START" ) then
-		name, subText, text, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit);
-		if ( not endTime ) then
-			return;
-		end
-		value = ((endTime / 1000) - GetTime());
-		castBar.lineID = nil;
-		castBar.casting = nil;
-		castBar.channeling = true;
 	end
 
 	-- Check if we show trade skills:
@@ -239,9 +246,11 @@ function CastBar:StopCast(castBar, event, lineID)
 		return;
 	end
 
-	if ( event == "UNIT_SPELLCAST_SUCCEEDED" and castBar.casting and lineID == castBar.lineID ) then
+	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" and castBar.casting and lineID == castBar.lineID ) then
+	-- if ( event == "UNIT_SPELLCAST_SUCCEEDED" and castBar.casting and lineID == castBar.lineID ) then
 		CastBar:FinishCast(castBar, true);
-	elseif ( event == "UNIT_SPELLCAST_FAILED" and castBar.casting  and lineID == castBar.lineID ) then
+	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_FAILED" and castBar.casting  and lineID == castBar.lineID ) then
+	-- elseif ( event == "UNIT_SPELLCAST_FAILED" and castBar.casting  and lineID == castBar.lineID ) then
 		if ( castBar.text ) then
 			castBar.text:SetText(FAILED);
 		end	
@@ -342,8 +351,10 @@ function CastBar:OnUpdate(elapsed)
 end
 
 function CastBar:OnEvent(event, ...)
+	local srcGuid, src, _, _, guid, dest, _, _, spellID, spellName, lineID = select(4, ...);
+	local unit = ArenaLiveSpectator:GetUnitByGUID(srcGuid);
 	
-	local unit, _, _, lineID = ...;	
+	-- local unit, _, _, lineID = ...;
 	if ( event == "PLAYER_ENTERING_WORLD" ) then
 		-- Update all cast bars after the loading screen finished:
 		for id, unitFrame in ArenaLive:GetAllUnitFrames() do
@@ -351,8 +362,10 @@ function CastBar:OnEvent(event, ...)
 				CastBar:Update(unitFrame);
 			end
 		end
-	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_INTERRUPT" ) then
-		local guid = select(8, ...); -- DestGUID
+	end
+	if not unit then return end;
+	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_INTERRUPT" ) then
+		-- local guid = select(8, ...); -- DestGUID
 		local school = select(17, ...); -- SpellSchool of the kicked spell
 		if ( ArenaLive:IsGUIDInUnitFrameCache(guid) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByGUID(guid) do
@@ -361,8 +374,9 @@ function CastBar:OnEvent(event, ...)
 					CastBar:LockoutCast(unitFrame[self.name], school)
 				end
 			end
-		end		
-	elseif ( event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_CHANNEL_START" ) then
+		end
+	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" ) then
+	-- elseif ( event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_CHANNEL_START" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
@@ -371,7 +385,7 @@ function CastBar:OnEvent(event, ...)
 				end
 			end
 		end
-	elseif ( event == "UNIT_SPELLCAST_DELAYED" or event == "UNIT_SPELLCAST_CHANNEL_UPDATE" ) then
+	--[[ elseif ( event == "UNIT_SPELLCAST_DELAYED" or event == "UNIT_SPELLCAST_CHANNEL_UPDATE" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
@@ -379,8 +393,9 @@ function CastBar:OnEvent(event, ...)
 					CastBar:UpdateCast(unitFrame[self.name], unit, event);
 				end
 			end
-		end		
-	elseif ( event == "UNIT_SPELLCAST_INTERRUPTED" or event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_STOP" or event == "UNIT_SPELLCAST_CHANNEL_STOP" or event == "UNIT_SPELLCAST_SUCCEEDED" ) then
+		end]]
+	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_FAILED" or event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" ) then
+	-- elseif ( event == "UNIT_SPELLCAST_INTERRUPTED" or event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_STOP" or event == "UNIT_SPELLCAST_CHANNEL_STOP" or event == "UNIT_SPELLCAST_SUCCEEDED" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
@@ -389,7 +404,7 @@ function CastBar:OnEvent(event, ...)
 				end
 			end
 		end
-	elseif ( event == "UNIT_SPELLCAST_INTERRUPTIBLE" or event == "UNIT_SPELLCAST_NOT_INTERRUPTIBLE" ) then
+	--[[elseif ( event == "UNIT_SPELLCAST_INTERRUPTIBLE" or event == "UNIT_SPELLCAST_NOT_INTERRUPTIBLE" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
@@ -397,7 +412,7 @@ function CastBar:OnEvent(event, ...)
 					CastBar:UpdateShield(unitFrame[self.name], event);
 				end
 			end
-		end
+		end]]
 	end
 
 end

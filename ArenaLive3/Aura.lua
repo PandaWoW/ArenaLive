@@ -15,7 +15,10 @@ local addonName, L = ...;
 ]]--
 -- Create new Handler and register for all important events:
 local Aura = ArenaLive:ConstructHandler("Aura", true, false, false);
-Aura:RegisterEvent("UNIT_AURA");
+Aura:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_AURA_APPLIED");
+Aura:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_AURA_REFRESH");
+Aura:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED_SPELL_AURA_REMOVED");
+-- Aura:RegisterEvent("UNIT_AURA");
 
 -- Let unit frames know that this handler can be enabled/disabled:
 Aura.canToggle = true;
@@ -513,9 +516,16 @@ function Aura:UpdateIconPosition(unitFrame, auraFrame, index)
 end
 
 function Aura:OnEvent(event, ...)
-	
-	if ( event == "UNIT_AURA" ) then
-		local filter = ...;
+
+	if ( event == "AURA_DISPLAY_UPDATE" ) then
+		-- TODO: Use this after option changes:
+		local addonName, groupType = ...;
+	else
+	-- if ( event == "UNIT_AURA" ) then
+		-- local filter = ...;
+		local srcGuid, src, _, _, destGuid, dest, _, _, spellID, spellName, lineID = select(4, ...);
+		local filter = ArenaLiveSpectator:GetUnitByGUID(destGuid);
+
 		if ( ArenaLive:IsUnitInUnitFrameCache(filter) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByUnit(filter) do
 				local frame = ArenaLive:GetUnitFrameByID(id);
@@ -524,9 +534,6 @@ function Aura:OnEvent(event, ...)
 				end
 			end
 		end
-	elseif ( event == "AURA_DISPLAY_UPDATE" ) then
-		-- TODO: Use this after option changes:
-		local addonName, groupType = ...;
 	end
 end
 
