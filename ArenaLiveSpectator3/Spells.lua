@@ -1198,7 +1198,7 @@ ArenaLiveSpectator.SpellDB = {
 			[GetSpellInfo'108194'] = { -- Asphyxiate
 				["action"] = "REPLACE",
 				["spellID"] = 108194,
-				["replace"] = 49576,
+				["replace"] = 47476,
 				["value"] = 30,				
 			},  
 			[GetSpellInfo'48743'] = { -- Death Pact

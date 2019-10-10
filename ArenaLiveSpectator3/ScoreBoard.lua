@@ -152,7 +152,7 @@ local RestoreIcon2 = [[Interface\PaperDollInfoFrame\UI-GearManager-Undo]]
 --UI-Taxi-Icon-Red x5
 
 -- Change speed button
-local speeds = {'1','1.5','2','3','5'}
+local speeds = {'7','15','20','25','30'}
 local SpeedFrame = CreateFrame('Button',nil,ArenaLiveSpectatorScoreBoard)
 SpeedFrame:SetSize(22,22)
 SpeedFrame:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard,-48,-15)
@@ -171,7 +171,7 @@ SpeedFrame:SetScript('OnClick',function(self, button)
 		self:SetID(1)
 		self:SetText('x1')
 	end
-	SendChatMessage('.sp sp '..speeds[self:GetID()],'EMOTE')
+	CommentatorSetMoveSpeed(speeds[self:GetID()])
 end)
 SpeedFrame.__icon = SpeedFrame:CreateTexture(nil,"BACKGROUND")
 SpeedFrame.__icon:SetTexture(BootsIcon)

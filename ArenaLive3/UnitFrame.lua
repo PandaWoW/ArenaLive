@@ -506,7 +506,7 @@ end
 		alwaysVisible (boolean): If true, the frame will allways be visible, even if it has no unit.
 		hasHeader (boolean): This is to inform the function if the frame is part of a frame group (e.g. Party frames, Arena Frames etc.) or not. DO NOT CONFUSE THIS WITH the frameGroup arg.
 ]]--
-function UnitFrame:ConstructObject(frame, addonName, frameGroup, leftClick, rightClick, menuFunc, alwaysVisible, hasHeader)
+function UnitFrame:ConstructObject(frame, addonName, frameGroup, leftClick, rightClick, menuFunc, alwaysVisible, hasHeader, middleClick)
 	
 	if ( InCombatLockdown() ) then
 		ArenaLive:Message (L["Couldn't construct new unit frame, because interface currently is in combat lockdown!"], "error", handlerName, frameName);
@@ -521,11 +521,12 @@ function UnitFrame:ConstructObject(frame, addonName, frameGroup, leftClick, righ
 	frame.hasHeader = hasHeader;
 	
 	-- Set up clicking scripts:
-	frame:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+	frame:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp");
 	frame:SetAttribute("*type1", leftClick or "target");
 	frame:SetAttribute("*type2", rightClick or "togglemenu");
+	frame:SetAttribute("*type3", middleClick or "target");
 	
-	if ( leftClick == "menu" or rightClick == "menu" ) then
+	if ( leftClick == "menu" or rightClick == "menu" or middleClick == "menu" ) then
 		frame.menu = menuFunc;
 	end
 	

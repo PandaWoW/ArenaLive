@@ -5,7 +5,7 @@ local function initialiseSideFrame(frame, group)
 	local prefix = frame:GetName();
 	local id = frame:GetID();
 	
-	ArenaLive:ConstructHandlerObject(frame, "UnitFrame", addonName, group, "target");
+	ArenaLive:ConstructHandlerObject(frame, "UnitFrame", addonName, group, "target", nil, function(self) CommentatorLookatPlayer(self.group == "Right" and 2 or 1, self:GetID()) end, nil, nil, "menu");
 	
 	frame.border = _G[prefix.."Border"];
 	frame.background = _G[prefix.."Background"];

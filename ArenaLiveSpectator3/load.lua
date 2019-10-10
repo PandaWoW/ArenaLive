@@ -2,6 +2,7 @@ local addonName, L = ...;
 
 local nameAsterisk = FOREIGN_SERVER_LABEL
 local deselect = GetCVar'deselectOnClick'
+local cameraPos;
 
 ArenaLiveSpectator.defaults = {
 	["Broadcast"] = true,
@@ -369,8 +370,7 @@ function ArenaLiveSpectator:Enable()
     ArenaLiveSpectator:PlayerUpdate();
 	self.enabled = true;
     self.hasStarted = true;
-	local numPlayers = CommentatorGetMapInfo(1)
-	ArenaLiveSpectator:SetNumPlayers(numPlayers)
+	ArenaLiveSpectator:SetNumPlayers(CommentatorGetMapInfo(1))
 end
 
 function ArenaLiveSpectator:Disable()
@@ -491,20 +491,30 @@ function ArenaLiveSpectator:OnEvent(event, ...)
             ArenaLiveSpectator:Enable();
         end
 		DelayEvent(2, ArenaLiveSpectator.PlayerUpdate);
+		cameraPos = {CommentatorGetCamera()};
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		ArenaLiveSpectator:Toggle();
 	elseif ( event == "PLAYER_TARGET_CHANGED" and self.enabled ) then
 		if ( self.enabled ) then
 			local database = ArenaLive:GetDBComponent(addonName);
 			if ( database.FollowTarget ) then
+				local teamId, playerId = 1, 1
 				if UnitIsPlayer("target") then
-					--CommentatorFollowUnit("target"); todo playerIndex and faction index
+					for j=1,2 do
+						for i=1, database.PlayMode do
+							if CommentatorGetPlayerInfo(j,i) == UnitName("target")then
+								teamId, playerId = j, i
+								break
+							end
+						end
+					end
+					CommentatorFollowPlayer(teamId, playerId)
 					ClearInspectPlayer()
 					NotifyInspect('target')
 				elseif not UnitExists ("target") then
-					--SendChatMessage(".spec view " .. UnitName"player", "EMOTE")
 					ClearInspectPlayer()
-				end--CommentatorFollowUnit("target"); DeadMouse
+					CommentatorSetCamera(unpack(cameraPos))
+				end
 			end
 			if ( database.HideTargetFrames or database.PlayMode > 3 ) then
 				for i = 1, database.PlayMode do
@@ -554,7 +564,6 @@ function ArenaLiveSpectator:PlayerUpdate()
 end
 
 function ArenaLiveSpectator:SetNumPlayers(numPlayers)
-print(numPlayers);
 	ArenaLive:GetDBComponent(addonName).PlayMode = numPlayers
 	ArenaLiveSpectator:SetUpSideFrames(numPlayers);
 	ArenaLiveSpectator:SetUpTargetFrames(numPlayers);
