@@ -513,6 +513,7 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 					NotifyInspect('target')
 				elseif not UnitExists ("target") then
 					ClearInspectPlayer()
+					CommentatorFollowPlayer(1,0) -- stop following
 					CommentatorSetCamera(unpack(cameraPos))
 				end
 			end
