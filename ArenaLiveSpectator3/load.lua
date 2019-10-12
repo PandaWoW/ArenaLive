@@ -550,6 +550,7 @@ end
 function ArenaLiveSpectator:Toggle()
 	local _, instanceType = IsInInstance();
 	if ( instanceType == "arena" and IsSpectator() ) then
+		ArenaLiveSpectator:Enable();
         CommentatorToggleMode();
 	else
 		ArenaLiveSpectator:Disable();
