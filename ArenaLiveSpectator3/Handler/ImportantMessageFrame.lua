@@ -128,7 +128,7 @@ function ImportantMessageFrame:CreateMessage(event, ...)
 		local spellID = select(5, ...);
 		local spellName, _, icon = GetSpellInfo(spellID)
 		if ( ArenaLiveSpectator.SpellDB["Resurrects"][spellID] ) then
-			local resName = NameText:GetNickname(unit.."target") or GetUnitName(unit.."target");
+			local resName = UnitName(unit.."target");
 			local _, resClass = UnitClass(unit.."target");
 			if ( resName and resClass ) then
 				local resClassColour = RAID_CLASS_COLORS[resClass].colorStr;

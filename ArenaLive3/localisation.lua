@@ -73,9 +73,6 @@ L["Successfully created new unit frame with the name %s!"] = "Successfully creat
 L["Tried to change %s's unit during combat lockdown. Adding it to the callback list..."] = "Tried to change %s's unit during combat lockdown. Adding it to the callback list...";
 L["Changed frequent update function for status bar %s to %s"] = "Changed frequent update function for status bar %s to %s";
 L["Entering arena, wiping Icon cooldown cache table..."] = "Entering arena, wiping Icon cooldown cache table...";
-L["Added nickname %s for player %s"] = "Added nickname %s for player %s";
-L["Removed nickname for player %s"] = "Removed nickname for player %s";
-L["Couldn't remove nickname for player %s, because there is no nickname registered for this player!"] = "Couldn't remove nickname for player %s, because there is no nickname registered for this player!";
 L["Tried to set up an invalid status bar type in Methods StatusBarText:ConstructObject. StatusBarType = %s. Valid options are \"HealthBar\" or \"PowerBar\""] = "Tried to set up an invalid status bar type in Methods StatusBarText:ConstructObject. StatusBarType = %s. Valid options are \"HealthBar\" or \"PowerBar\"";
 L["Chosen icon is already in use, searching for free icon..."] = "Chosen icon is already in use, searching for free icon...";
 L["Couldn't construct new icon group, because a group with the name %s already exists!"] = "Couldn't construct new icon group, because a group with the name %s already exists!";

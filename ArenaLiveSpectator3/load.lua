@@ -455,8 +455,7 @@ function ArenaLiveSpectator:OnEvent(event, ...)
         if self.enabled == false then
             ArenaLiveSpectator:Enable();
         end
-		ArenaLiveSpectator.PlayerUpdate();
-		-- DelayEvent(2, ArenaLiveSpectator.PlayerUpdate);
+		DelayEvent(2, ArenaLiveSpectator.PlayerUpdate);
 		cameraPos = {CommentatorGetCamera()};
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		ArenaLiveSpectator:Toggle();
