@@ -9,9 +9,9 @@ ArenaLiveSpectator.defaults = {
 	["FirstLogin"] = true,
 	["FollowTarget"] = true,
 	["HideTargetFrames"] = true,
-	["PlayMode"] = 3,
+	["PlayMode"] = 0,
 	["ShowScoreBoard"] = true,
-	["Version"] = "3.0.0b",
+	["Version"] = "3.0.0c",
 	["ImportantMessageFrame"] = {
 		["NumMaxMessages"] = 2,
 	},
@@ -365,12 +365,15 @@ function ArenaLiveSpectator:Enable()
 	self:Show();
 	ScoreboardTimer:Show();
 
-	--local database = ArenaLive:GetDBComponent(addonName);
 	ArenaLiveSpectatorHideUIButton:Show();
     ArenaLiveSpectator:PlayerUpdate();
 	self.enabled = true;
     self.hasStarted = true;
-	ArenaLiveSpectator:SetNumPlayers(CommentatorGetMapInfo(1))
+	if ArenaLive:GetDBComponent(addonName).PlayMode > 0 then
+		ArenaLiveSpectator:SetNumPlayers(ArenaLive:GetDBComponent(addonName).PlayMode)
+	else
+		ArenaLiveSpectator:SetNumPlayers(CommentatorGetMapInfo(1))
+	end
 end
 
 function ArenaLiveSpectator:Disable()
@@ -426,7 +429,7 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 
 	if ( event == "ADDON_LOADED" and filter == addonName ) then
         RegisterAddonMessagePrefix("ArenaLive");
-        
+
 		-- Initialise frames:
 		self:InitialiseSideFrames();
 		self:InitialiseTargetFrames();
@@ -434,53 +437,15 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 		ArenaLiveSpectatorScoreBoard:Initialise();
 		ArenaLiveSpectatorWarGameMenu:Initialise();
 		ArenaLive:ConstructHandlerObject(ArenaLiveSpectatorMessageFrame, "ImportantMessageFrame", addonName, nil)
-		
+
 		-- Set up hide normal UI button, it shows up if UIParent is somehow shown during a match:
 		ArenaLiveSpectatorHideUIButtonText:SetText(L["Hide normal UI"]);
 		local width = ArenaLiveSpectatorHideUIButtonText:GetWidth();
 		width = width + 30;
 		ArenaLiveSpectatorHideUIButton:SetWidth(width);
 		ArenaLiveSpectatorHideUIButton:SetScript("OnClick", ArenaLiveSpectatorHideUIButton.OnClick);
-		
-		-- Register addon prefix for receiving team data broadcasts:
-		-- local success = RegisterAddonMessagePrefix("ALSPEC");
-		-- if ( not success ) then
-			-- ArenaLive:Message(L["WARNING! Couldn't register addon message prefix for ArenaLive [Spectator]. You won't be able to receive broadcast data during this session."], "message");
-		-- end
-		
+
 		ArenaLive:Message(L["Spectator addon has been loaded successfully! Type /alspec to open the spectator war game menu or /alspec help for a list of available commands."], "message");
-	-- elseif ( event == "AL_SPEC_MATCH_START" ) then
-		-- -- Iterate through all callback functions that have registered for match start:
-		-- for callbackFunc in pairs(onMatchStartCallbackList) do
-			-- callbackFunc();
-			-- onMatchStartCallbackList[callbackFunc] = nil;
-		-- end
-	-- elseif ( event == "CHAT_MSG_ADDON" and filter == "ALSPEC" ) then
-		-- local prefix, message, channel, sender = ...;
-		-- local playerName = GetUnitName("player", true);
-		-- if ( sender == playerName) then
-			-- return;
-		-- end
-		-- local leftTeamName, leftTeamScore, rightTeamName, rightTeamScore = string.split(";", message);
-		-- ArenaLive:Message(L["Received team data from group leader (%s). Updating team entries..."], "message", sender);
-		
-		-- local database = ArenaLive:GetDBComponent(addonName);
-		-- database.TeamA.Name = leftTeamName;
-		-- database.TeamA.Score = tonumber(leftTeamScore);
-		-- database.TeamB.Name = rightTeamName;
-		-- database.TeamB.Score = tonumber(rightTeamScore);
-		
-		-- -- Update option frames:
-		-- ArenaLiveSpectatorWarGameMenuWarGamesLeftTeamName:UpdateShownValue();
-		-- ArenaLiveSpectatorWarGameMenuWarGamesLeftTeamScore:UpdateShownValue();
-		-- ArenaLiveSpectatorWarGameMenuWarGamesRightTeamName:UpdateShownValue();
-		-- ArenaLiveSpectatorWarGameMenuWarGamesRightTeamScore:UpdateShownValue();
-		
-		-- -- Update scoreboard display:
-		-- ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamA");
-		-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
-		-- ArenaLiveSpectatorScoreBoard:UpdateTeamName("TeamB");
-		-- ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
 	elseif ( event == "COMMENTATOR_PLAYER_UPDATE" ) then
 		-- "COMMENTATOR_PLAYER_UPDATE" fires a bit too early,
 		-- I use the new C_Timer to wait 2 seconds, before
@@ -490,7 +455,8 @@ function ArenaLiveSpectator:OnEvent(event, ...)
         if self.enabled == false then
             ArenaLiveSpectator:Enable();
         end
-		DelayEvent(2, ArenaLiveSpectator.PlayerUpdate);
+		ArenaLiveSpectator.PlayerUpdate();
+		-- DelayEvent(2, ArenaLiveSpectator.PlayerUpdate);
 		cameraPos = {CommentatorGetCamera()};
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		ArenaLiveSpectator:Toggle();
@@ -514,6 +480,7 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 				elseif not UnitExists ("target") then
 					ClearInspectPlayer()
 					CommentatorFollowPlayer(1,0) -- stop following
+					CommentatorLookatPlayer(1,0) -- stop looking
 					CommentatorSetCamera(unpack(cameraPos))
 				end
 			end
@@ -526,9 +493,6 @@ function ArenaLiveSpectator:OnEvent(event, ...)
 				end
 			end
 		end
-    elseif ( event == "START_TIMER" and filter == 1 and self.enabled ) then
-		local _, timeSeconds, totalTime = ...;
-		ArenaLiveSpectatorCountDown:SetTimer(timeSeconds, totalTime);
 	elseif ( event == "UI_SCALE_CHANGED" or event == "DISPLAY_SIZE_CHANGED" ) then
 		local screenHeight = math.ceil(GetScreenHeight());
 		local scale = 786 / screenHeight;
@@ -603,10 +567,10 @@ function ArenaLiveSpectator:UpdateDB()
 			end
 		end
 		
-		database.Version = "3.0.0b";
+		database.Version = "3.0.0c";
 	end
 	
-	if ( database.Version == "3.0.0b" ) then
+	if ( database.Version == "3.0.0c" ) then
 		if not database.ImportantMessageFrame then 
 			database['ImportantMessageFrame']=ArenaLiveSpectator.defaults.ImportantMessageFrame
 		end
@@ -622,20 +586,11 @@ function ArenaLiveSpectator:ValueToBoolean(value)
 end
 
 ArenaLive:ConstructAddon(ArenaLiveSpectator, addonName, true, ArenaLiveSpectator.defaults, false, "ALSPEC_Database");
--- ArenaLiveSpectator:RegisterEvent("AL_SPEC_MATCH_START"); -- Custom Event triggered by ArenaLiveSpectator:OnEvent() WORLD_STATE_UI_TIMER_UPDATE
 ArenaLiveSpectator:RegisterEvent("ADDON_LOADED");
--- ArenaLiveSpectator:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED");
--- ArenaLiveSpectator:RegisterEvent("BN_TOON_NAME_UPDATED");
--- ArenaLiveSpectator:RegisterEvent("CHAT_MSG_ADDON");
 ArenaLiveSpectator:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
 -- ArenaLiveSpectator:RegisterEvent("COMMENTATOR_MAP_UPDATE");
 ArenaLiveSpectator:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 ArenaLiveSpectator:RegisterEvent("DISPLAY_SIZE_CHANGED");
 ArenaLiveSpectator:RegisterEvent("PLAYER_ENTERING_WORLD");
 ArenaLiveSpectator:RegisterEvent("PLAYER_TARGET_CHANGED");
-ArenaLiveSpectator:RegisterEvent("START_TIMER");
 ArenaLiveSpectator:RegisterEvent("UI_SCALE_CHANGED");
--- ArenaLiveSpectator:RegisterEvent("UNIT_PET");
--- ArenaLiveSpectator:RegisterEvent("UNIT_AURA");
--- ArenaLiveSpectator:RegisterEvent("WORLD_STATE_UI_TIMER_UPDATE");
--- ArenaLiveSpectator:RegisterEvent("UPDATE_BATTLEFIELD_STATUS");

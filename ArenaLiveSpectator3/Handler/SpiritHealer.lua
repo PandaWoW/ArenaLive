@@ -2,7 +2,7 @@ local SpiritHealerFrame = ArenaLive:ConstructHandler("SpiritHealerFrame", true, 
 SpiritHealerFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
 SpiritHealerFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED"); --SpiritHealerFrame:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 
- playerStates = {};
+local playerStates = {};
 
 local function OnAnimStop(animation)
 	local frame = animation:GetParent();
@@ -35,13 +35,6 @@ function SpiritHealerFrame:UpdateNumPlayers()
 			playerStates[unit] = nil;
 		end
 	end
-		
-	-- Show/Hide frame to enable/disable OnUpdate script;
-	-- if ( numTeamA > 0 or numTeamB > 0 ) then
-		-- self:Show();
-	-- else
-		-- self:Hide();
-	-- end
 end
 
 function SpiritHealerFrame:Update(unitFrame)
@@ -86,8 +79,8 @@ function SpiritHealerFrame:OnEvent(event, timestamp, eventType, hideCaster, sour
 		end
 		-- 5384 feign death
 		-- 47788 guardian spirit
-		if eventType == "PARTY_KILL" or overkill and overkill > 0 then
-			DelayEvent(0.5,SpiritHealerFrame.UpdateNumPlayers)
+		if overkill and overkill > 0 then
+			DelayEvent(0.5, SpiritHealerFrame.UpdateNumPlayers)
 		end
 	end
 end
@@ -102,22 +95,3 @@ function SpiritHealerFrame:CallUpdateForUnit(unit)
 		end
 	end
 end
---[[
-local THROTTLE, elapsedTilNow = 0.1, 0;
-function SpiritHealerFrame:OnUpdate(elapsed)
-	elapsedTilNow = elapsedTilNow + elapsed;
-	if ( elapsedTilNow >= THROTTLE ) then
-		elapsedTilNow = 0;
-		for unit, isDeadOrGhost in pairs(playerStates) do
-			local name = GetSpellInfo(5384)
-			local feignDeath = UnitBuff(unit, name);
-			local newState = ArenaLiveSpectator:ValueToBoolean(UnitIsDeadOrGhost(unit) and not feignDeath);
-			if ( newState ~= isDeadOrGhost ) then
-				playerStates[unit] = newState;
-				SpiritHealerFrame:CallUpdateForUnit(unit);
-			end
-		end
-	end
-end
-
-SpiritHealerFrame:SetScript("OnUpdate", SpiritHealerFrame.OnUpdate);]]

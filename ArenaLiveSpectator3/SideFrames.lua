@@ -12,7 +12,7 @@ local function initialiseSideFrame(frame, group)
 	
 	frame:RegisterHandler(_G[prefix.."HealthBar"], "HealthBar", nil, _G[prefix.."HealthBarHealPredictionBar"], _G[prefix.."HealthBarAbsorbBar"], _G[prefix.."HealthBarAbsorbBarOverlay"], 32, _G[prefix.."HealthBarAbsorbBarFullHPIndicator"], nil, addonName, group);
 	frame:RegisterHandler(_G[prefix.."PowerBar"], "PowerBar", nil, addonName, group);
-	frame:RegisterHandler(_G[prefix.."Portrait"], "Portrait", nil, _G[prefix.."PortraitBackground"], _G[prefix.."PortraitTexture"],  _G[prefix.."PortraitThreeD"], frame);
+	frame:RegisterHandler(_G[prefix.."Portrait"], "Portrait", nil, _G[prefix.."PortraitBackground"], _G[prefix.."PortraitTexture"], frame);
 	frame:RegisterHandler(_G[prefix.."PortraitCCIndicator"], "CCIndicator", nil, _G[prefix.."PortraitCCIndicatorTexture"], _G[prefix.."PortraitCCIndicatorCooldown"], addonName);
 	frame:RegisterHandler(_G[prefix.."Name"], "NameText", nil, frame);
 	frame:RegisterHandler(_G[prefix.."HealthBarText"], "HealthBarText", nil, frame);
@@ -43,12 +43,14 @@ function ArenaLiveSpectator:SetUpSideFrames(numPlayers)
 			frame = _G["ALSPEC_LeftSideFramesFrame"..i];
 			self:UpdateSideFrameConstituents(frame);
 			frame:Enable();
-			frame:UpdateUnit("commentator"..i);--
+			frame:UpdateUnit("commentator"..i);
+			frame.unit = "commentator"..i;
 
 			frame = _G["ALSPEC_RightSideFramesFrame"..i];
 			self:UpdateSideFrameConstituents(frame)
 			frame:Enable();
 			frame:UpdateUnit("commentator"..5+i);
+			frame.unit = "commentator"..5+i;
 		else
 			frame = _G["ALSPEC_LeftSideFramesFrame"..i];
 			frame:Disable();
@@ -146,7 +148,7 @@ function ArenaLiveSpectator:UpdateSideFrameConstituents(frame)
 	
 	-- Update cast bar and cast history states:
 	frame:ToggleHandler("CastBar");
-	frame:ToggleHandler("CastHistory");	
+	frame:ToggleHandler("CastHistory");
 	
 	-- Grow cast history upwards if castbar is disabled:
 	if ( database.CastBar.Enabled ) then

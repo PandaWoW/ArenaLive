@@ -352,24 +352,13 @@ function Icon:SetTexture(frame, icon, iconType)
 			icon.texture:SetTexCoord(unpack(RACE_GENDER_ICON_TCOORDS[race][sex]));
 		end
 	elseif ( isPlayer and class and iconType == "class" ) then
+		if ArenaLive:GetSpecializationByUnit(unit) then
+			local _, _, _, specTexture = GetSpecializationInfoByID(ArenaLive:GetSpecializationByUnit(unit));
+			texture = specTexture;
+		else
 			texture = "Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes";
 			icon.texture:SetTexCoord(unpack(CLASS_ICON_TCOORDS[class]));
-	elseif ( iconType == "reaction" ) then
-		local red, green, blue;
-		
-		if ( frame.test ) then
-			red, green, blue = unpack(reaction);
-		else
-			red, green, blue = UnitSelectionColor(unit);
 		end
-
-		if ( not UnitPlayerControlled(unit) and UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit) ) then
-			icon.texture:SetTexture(0.5, 0.5, 0.5, 1);
-		else
-			icon.texture:SetTexture(red, green, blue, 1);
-		end
-		
-		return;
 	elseif ( iconType == "specialisation" ) then
 		--[[ Currently it is only possible to retrieve talent spec for "arena" and "player" unitIDs.
 			 For other unitIDs we would need to query the server via an inspect, which isn't very efficient. ]]
@@ -577,14 +566,6 @@ function Icon:OnEvent(event, ...)
 			for id, isRegistered in ArenaLive:GetAffectedUnitFramesByGUID(playerGUID) do
 				local frame = ArenaLive:GetUnitFrameByID(id);
 				Icon:Update(frame, "specialisation");
-			end
-		end
-	elseif ( event == "UNIT_FACTION" ) then
-		local unit = ...;
-		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
-			for id, isRegistered in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
-				local frame = ArenaLive:GetUnitFrameByID(id);
-				Icon:Update(frame, "reaction");
 			end
 		end
 	elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" ) then

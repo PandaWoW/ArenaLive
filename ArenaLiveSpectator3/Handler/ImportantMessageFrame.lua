@@ -105,7 +105,7 @@ end
 function ImportantMessageFrame:CreateMessage(event, ...)
 	
 	local unit = ...;
-	local name = NameText:GetNickname(unit) or GetUnitName(unit);
+	local name = UnitName(unit);
 	local _, class = UnitClass(unit);
 	if ( not name or not class ) then
 		return;
@@ -120,19 +120,6 @@ function ImportantMessageFrame:CreateMessage(event, ...)
 	else
 		team = "B";
 	end
-	
-	-- if ( event == "UNIT_CONNECTION" ) then --and unitCache[unit]
-		-- local isConnected = select(2, ...);
-		-- if ( isConnected ) then
-			-- texture = BNet_GetClientTexture();
-			-- texCoords = {0, 1, 0, 1}
-			-- msg = string.format(L["|c%s%s|r reconnected."], classColour, name);
-		-- else
-			-- texture = "Interface\\AddOns\\ArenaLiveSpectator3\\Textures\\Battlenet-Offlineicon";
-			-- texCoords = {0, 1, 0, 1}
-			-- msg = string.format(L["|c%s%s|r disconnected."], classColour, name);
-		-- end
-	-- else
     if ( event == "UNIT_HEALTH" ) then
 		msg = string.format(L["|c%s%s|r has low health."], classColour, name);
 		texture = "Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes";
@@ -202,7 +189,9 @@ function ImportantMessageFrame:OnEvent(event, ...)
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		if ( IsSpectator() ) then
 			feignDeathName = GetSpellInfo(5384);
-			DelayEvent(2,function()ImportantMessageFrame:UpdatePlayerCache()end);
+			-- DelayEvent(2,function()
+			ImportantMessageFrame:UpdatePlayerCache()
+			-- end);
 			self:Show();
 		else
 			self:Hide();

@@ -597,19 +597,18 @@ function CooldownTracker:OnEvent(event, ...)
 			-- Update cooldown info after match has
 			-- started to make sure for talent and
 			-- glyph switches etc.
-			-- ArenaLiveSpectator:PlayerUpdate()
-			-- self:ResetAll()
-			-- ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
+			ArenaLiveSpectator:PlayerUpdate()
 			self:ResetAll()
-			DelayEvent(2, function()ArenaLiveSpectator:PlayerUpdate()CooldownTracker:CallGatherForAll()end);
+			ArenaLiveSpectator:CallOnMatchStart(CooldownTracker.CallGatherForAll);
 		else
+			-- Reset CDs after end of match
 			local trashUnit
-			DelayEvent(1, function()for i=1,10 do
+			for i=1, 10 do
 				trashUnit = 'commentator'..i
 				CooldownTracker:UnregisterUnit(trashUnit)
-			end	end)
+			end
 			local iconParent
-			for i=1,5 do
+			for i=1, 5 do
 				trashUnit = 'Right'
 				iconParent = _G['ALSPEC_CDTrackers'.. trashUnit ..'Tracker'..i]
 				if iconParent.icon1 then
@@ -644,19 +643,11 @@ function CooldownTracker:OnEvent(event, ...)
 		if ( next(inspectQueue) ) then
 			CooldownTracker:CallInspect();
 		end
-	-- elseif ( event == "UNIT_NAME_UPDATE" and trackedUnits[unit] ) then
-		-- -- Reset old cooldown information for this unit and add to inspect queue:
-		-- print(event, ...)
-		-- CooldownTracker:ResetCooldownInfo(unit);
-		-- CooldownTracker:GatherCooldownInfo(unit, false);
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" )then
 		local srcGuid, src, _, _, destGuid, dest, _, _, spellID, spellName = select(4, ...);
 		unit = ArenaLiveSpectator:GetUnitByGUID(srcGuid);
 		if not unit and not spellID then return end
 		if not trackedUnits[unit] then return end
-	-- elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" and trackedUnits[unit] ) then
-		-- local spellID = select(5, ...);
-		
 		-- Dispels need to be filtered, because they only trigger when they dispel something.
 		-- Their cooldown is, therefore, triggered by COMBAT_LOG_EVENT_UNFILTERED_SPELL_DISPEL
 		if ( ArenaLiveSpectator.SpellDB.CooldownTypes[spellID] ~= "DISPEL" ) then
@@ -756,6 +747,10 @@ function CooldownTrackerClass:Disable()
 	self.enabled = false;
 end
 
+function ArenaLive:GetSpecializationByUnit(unit)
+	return trackedUnits[unit] and trackedUnits[unit].specID;
+end
+
 function CooldownTrackerClass:Update()
 	
 	local unit = self.unit;
@@ -770,14 +765,28 @@ function CooldownTrackerClass:Update()
 	-- Set class icon:
 	local _, class = UnitClass(unit);
 	if ( self.classIcon and class ) then
-		self.classIcon:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes");
-		self.classIcon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[class]));
+		if ArenaLive:GetSpecializationByUnit(unit) then
+			if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
+				for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
+					local frame = ArenaLive:GetUnitFrameByID(id);
+					if frame.unit then
+						ArenaLive:GetHandler("Portrait"):Update(frame)
+						break
+					end
+				end
+			end
+			local _, _, _, specTexture = GetSpecializationInfoByID(trackedUnits[unit].specID);
+			self.classIcon:SetTexture(specTexture);
+			self.classIcon:SetTexCoord(0,1,0,1);
+		else
+			self.classIcon:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes");
+			self.classIcon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[class]));
+		end
 	end
 	
 	-- Set name:
-	local name = NameText:GetNickname(unit) or GetUnitName(unit);
 	if ( self.nameText ) then
-		self.nameText:SetText(name);
+		self.nameText:SetText(UnitName(unit));
 	end	
 	
 	-- Set Cooldown icons:
@@ -1002,7 +1011,7 @@ function CooldownTrackerClass:UpdateUnit(unit)
 end
 
 function FixCooldownFrames()
-	if CommentatorGetMapInfo(1) > ArenaLive:GetDBComponent(addonName).PlayMode then
+	if CommentatorGetMapInfo(1) and CommentatorGetMapInfo(1) > ArenaLive:GetDBComponent(addonName).PlayMode then
 		ArenaLiveSpectator:SetNumPlayers(CommentatorGetMapInfo(1))
 	end
 	ArenaLiveSpectator:PlayerUpdate()

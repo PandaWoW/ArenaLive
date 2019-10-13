@@ -18,7 +18,6 @@ local addonName, L = ...;
 local NamePlate = ArenaLive:ConstructHandler("NamePlate", true, true);
 local CCIndicator = ArenaLive:GetHandler("CCIndicator");
 local HealthBar = ArenaLive:GetHandler("HealthBar");
-local NameText = ArenaLive:GetHandler("NameText");
 
 
 
@@ -560,7 +559,7 @@ function NamePlateClass:UpdateNameText()
 	local blizzPlate = self:GetParent();
 	local name;
 	if ( self.unit ) then
-		name = NameText:GetNickname(self.unit) or GetUnitName(self.unit) or blizzPlate.nameText:GetText();
+		name = UnitName(self.unit) or blizzPlate.nameText:GetText();
 	else
 		name = blizzPlate.nameText:GetText();
 	end

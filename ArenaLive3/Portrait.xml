@@ -14,9 +14,6 @@
 				<Texture name="$parentTexture" file="Interface\Icons\INV_Misc_QuestionMark" />
 			</Layer>
 		</Layers>
-		<Frames>
-			<PlayerModel name="$parentThreeD" setAllPoints="true" enableMouse="false" />
-		</Frames>
 	</Frame>
 
 </Ui>

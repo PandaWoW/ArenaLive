@@ -19,12 +19,8 @@ local addonName, L = ...;
 ]]--
 -- Create new Handler and register for all important events:
 local NameText = ArenaLive:ConstructHandler("NameText", true, false);
-NameText:RegisterEvent("UNIT_NAME_UPDATE");
 NameText:RegisterEvent("UNIT_FACTION");
 NameText:RegisterEvent("PLAYER_FLAGS_CHANGED");
-
--- Create a local table for name aliases
-local displayedNames = {};
 
 --[[
 ****************************************
@@ -59,11 +55,9 @@ function NameText:Update (unitFrame)
 	if ( unitFrame.test ) then
 		name = ArenaLive.testModeValues[unitFrame.test]["name"];
 	else
-		name = GetUnitName(unit);
+		name = UnitName(unit);
 	end
 
-	name = NameText:GetNickname(unit) or name;
-	
 	-- Check if unit is AFK or DND (Cool suggestion by Nick lul).
 	if ( UnitIsAFK(unit) ) then
 		tag = L["<AFK>"];
@@ -139,66 +133,6 @@ function NameText:SetTextObject(unitFrame)
 	local database = ArenaLive:GetDBComponent(unitFrame.addon, self.name, unitFrame.group);
 	local nameText = unitFrame[self.name];
 	nameText:SetFontObject(database.FontObject);
-end
-
-function NameText:AddNickname(keyName, nickname)
-	ArenaLive:CheckArgs(keyName, "string", nickname, "string");
-	
-	displayedNames[keyName] = nickname;
-	
-	ArenaLive:Message(L["Added nickname %s for player %s"], "debug", nickname, keyName);
-	
-	-- Update all unit frames
-	for id, unitFrame in ArenaLive:GetAllUnitFrames() do
-		if ( unitFrame.enabled and unitFrame[self.name] ) then
-			NameText:Update(unitFrame);
-		end
-	end
-end
-
-function NameText:RemoveNickname(keyName)
-	ArenaLive:CheckArgs(keyName, "string");
-	
-	if ( displayedNames[keyName] ) then
-		displayedNames[keyName] = nil;
-		
-		-- Update all unit frames
-		for id, unitFrame in ArenaLive:GetAllUnitFrames() do
-			if ( unitFrame.enabled and unitFrame[self.name] ) then
-				NameText:Update(unitFrame);
-			end
-		end
-		
-		ArenaLive:Message(L["Removed nickname for player %s"], "debug", keyName);
-	else
-		ArenaLive:Message(L["Couldn't remove nickname for player %s, because there is no nickname registered for this player!"], "debug", keyName);
-	end
-
-end
-
-
-function NameText:GetNickname(unit, keyName)
-	
-	local name, realm;
-	if ( unit ) then
-		name, realm = UnitName(unit);
-	
-		if ( not name ) then
-			return nil;
-		end
-	
-		if ( not realm or realm == "" ) then
-			realm = GetRealmName();
-		end
-	
-		name = name.."-"..realm;
-	else
-		ArenaLive:CheckArgs(keyName, "string");
-		name = keyName;
-	end
-	
-	return displayedNames[name];	
-	
 end
 
 function NameText:OnEvent(event, ...)

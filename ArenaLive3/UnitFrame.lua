@@ -19,8 +19,6 @@ UnitFrame:RegisterEvent("PLAYER_REGEN_ENABLED");
 UnitFrame:RegisterEvent("PLAYER_TARGET_CHANGED");
 UnitFrame:RegisterEvent("PLAYER_FOCUS_CHANGED");
 UnitFrame:RegisterEvent("UNIT_PET");
---UnitFrame:RegisterEvent("UNIT_CONNECTION");
-UnitFrame:RegisterEvent("UNIT_NAME_UPDATE");
 UnitFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
 
 -- Create a table to update frame's unit after combat lockdown fades if they tried to change it during combat lockdown
