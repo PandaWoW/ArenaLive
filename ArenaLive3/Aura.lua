@@ -526,7 +526,7 @@ function Aura:OnEvent(event, ...)
 		local filter = ArenaLiveSpectator:GetUnitByGUID(destGuid);
 
 		if ( ArenaLive:IsUnitInUnitFrameCache(filter) ) then
-			if not ArenaLive:GetAffectedUnitFramesByGUID(destGuid) then return end
+			if not select(2, ArenaLive:GetAffectedUnitFramesByGUID(destGuid)) then return end
 			for id in ArenaLive:GetAffectedUnitFramesByGUID(destGuid) do
 				local frame = ArenaLive:GetUnitFrameByID(id);
 				if ( frame[self.name] ) then

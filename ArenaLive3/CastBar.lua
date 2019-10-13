@@ -348,7 +348,6 @@ function CastBar:OnEvent(event, ...)
 	local srcGuid, src, _, _, guid, dest, _, _, spellID, spellName, lineID = select(4, ...);
 	local unit = ArenaLiveSpectator:GetUnitByGUID(srcGuid);
 	
-	-- local unit, _, _, lineID = ...;
 	if ( event == "PLAYER_ENTERING_WORLD" ) then
 		-- Update all cast bars after the loading screen finished:
 		for id, unitFrame in ArenaLive:GetAllUnitFrames() do
@@ -358,11 +357,10 @@ function CastBar:OnEvent(event, ...)
 		end
 	end
 	if not unit and not srcGuid then return end;
-	if not ArenaLive:GetAffectedUnitFramesByGUID(srcGuid) then return end
 	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_INTERRUPT" ) then
-		-- local guid = select(8, ...); -- DestGUID
 		local school = select(17, ...); -- SpellSchool of the kicked spell
 		if ( ArenaLive:IsGUIDInUnitFrameCache(guid) ) then
+			if not select(2, ArenaLive:GetAffectedUnitFramesByGUID(guid)) then return end
 			for id in ArenaLive:GetAffectedUnitFramesByGUID(guid) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
 				if ( unitFrame[self.name] and unitFrame[self.name]["enabled"] ) then
@@ -372,6 +370,7 @@ function CastBar:OnEvent(event, ...)
 		end
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
+			if not select(2, ArenaLive:GetAffectedUnitFramesByGUID(srcGuid)) then return end
 			for id in ArenaLive:GetAffectedUnitFramesByGUID(srcGuid) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
 				if ( unitFrame[self.name] and unitFrame[self.name]["enabled"] ) then
@@ -381,6 +380,7 @@ function CastBar:OnEvent(event, ...)
 		end
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_FAILED" or event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
+			if not select(2, ArenaLive:GetAffectedUnitFramesByGUID(srcGuid)) then return end
 			for id in ArenaLive:GetAffectedUnitFramesByGUID(srcGuid) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
 				if ( unitFrame[self.name] and unitFrame[self.name]["enabled"] ) then

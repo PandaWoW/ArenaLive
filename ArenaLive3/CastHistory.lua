@@ -497,7 +497,7 @@ function CastHistory:OnEvent (event, ...)
 	local unit = ArenaLiveSpectator:GetUnitByGUID(sourceGUID);
 
 	if not unit and not sourceGUID then return end
-	-- local unit, _, _, lineID, spellID = ...;
+	if not select(2, ArenaLive:GetAffectedUnitFramesByGUID(sourceGUID)) then return end
 	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByGUID(sourceGUID) do
