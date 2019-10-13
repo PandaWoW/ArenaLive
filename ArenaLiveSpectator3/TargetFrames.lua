@@ -9,6 +9,7 @@ local function OnUpdate(self, elapsed)
 	
 	if ( self.unit == "targettarget" ) then
 		self:Update();
+		self:UpdateUnit(self.unit)
 	end
 end
 

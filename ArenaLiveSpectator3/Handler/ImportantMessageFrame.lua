@@ -19,7 +19,6 @@ local NameText = ArenaLive:GetHandler("NameText");
 ImportantMessageFrame:RegisterEvent("COMMENTATOR_PLAYER_UPDATE");
 ImportantMessageFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
 ImportantMessageFrame:RegisterEvent("UNIT_AURA");
---ImportantMessageFrame:RegisterEvent("UNIT_CONNECTION");
 ImportantMessageFrame:RegisterEvent("UNIT_SPELLCAST_START");
 --ImportantMessageFrame:RegisterEvent("UNIT_HEALTH"); Deactivated until UNIT_HEALTH actually fires for spectated unitIDs
 
@@ -189,9 +188,9 @@ function ImportantMessageFrame:OnEvent(event, ...)
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		if ( IsSpectator() ) then
 			feignDeathName = GetSpellInfo(5384);
-			-- DelayEvent(2,function()
-			ImportantMessageFrame:UpdatePlayerCache()
-			-- end);
+			DelayEvent(2,function()
+				ImportantMessageFrame:UpdatePlayerCache()
+			end);
 			self:Show();
 		else
 			self:Hide();
@@ -220,8 +219,6 @@ function ImportantMessageFrame:OnEvent(event, ...)
 		elseif not UnitBuff(unit, GetSpellInfo'104270')then
 			unitDrinkingCache[unit] = nil;
 		end
-	-- elseif ( event == "UNIT_CONNECTION" and unitCache[unit] ) then
-		-- ImportantMessageFrame:CreateMessage(event, ...);
 	elseif ( event == "UNIT_HEALTH" and unitCache[unit] and UnitIsConnected(unit) ) then
 		-- Use health cache instead of UnitHealth and UnitHealthMax functions: 
 		local healthPercent = unitHealthCache[unit];

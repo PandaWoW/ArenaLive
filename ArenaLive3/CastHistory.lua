@@ -444,7 +444,6 @@ function CastHistory:SuccessfulCast (unitFrame, spellID, lineID)
 	if ( not castHistory.channeling and not castHistory.casting and not ArenaLive.spellDB.FilteredSpells[spellID] ) then
 		-- Instant cast:
 		CastHistory:Rotate(unitFrame, "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS", spellID, lineID);
-		-- CastHistory:Rotate(unitFrame, "UNIT_SPELLCAST_SUCCEEDED", spellID, lineID);
 	elseif ( castHistory.casting and castHistory.castingIcon and lineID == castHistory.lineID ) then
 		local icon = castHistory.castingIcon;
 		castHistory.castingIcon = nil;

@@ -611,6 +611,15 @@ function UnitFrame:OnEvent(event, ...)
 				end
 			end
 		end
+		if ( UnitExists("targettarget") ) then
+			if ( ArenaLive:IsUnitInUnitFrameCache("targettarget") ) then
+				for id, isRegistered in ArenaLive:GetAffectedUnitFramesByUnit("targettarget") do
+					local frame = self.UnitFrames[id];
+					frame:UpdateGUID();
+					frame:Update();
+				end
+			end
+		end
 	elseif ( event == "PLAYER_FOCUS_CHANGED" ) then
 		if ( UnitExists("focus") ) then
 			if ( ArenaLive:IsUnitInUnitFrameCache("focus") ) then
