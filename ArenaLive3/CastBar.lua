@@ -103,9 +103,6 @@ function CastBar:Update(unitFrame)
 	local event;
 	if ( not spell ) then
 		spell = UnitChannelInfo(unit);
-		-- event = "UNIT_SPELLCAST_CHANNEL_START"
-	-- else
-		-- event = "UNIT_SPELLCAST_START";
 	end
 	event = "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START"
 	
@@ -141,7 +138,6 @@ function CastBar:StartCast(castBar, unit, event)
 
 	local name, subText, text, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible, value, maxValue;
 	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" ) then
-	-- if ( event == "UNIT_SPELLCAST_START" ) then
 		if not UnitChannelInfo(unit) then
 			name, subText, text, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible = UnitCastingInfo(unit);
 			if ( not startTime ) then
@@ -247,10 +243,8 @@ function CastBar:StopCast(castBar, event, lineID)
 	end
 
 	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" and castBar.casting and lineID == castBar.lineID ) then
-	-- if ( event == "UNIT_SPELLCAST_SUCCEEDED" and castBar.casting and lineID == castBar.lineID ) then
 		CastBar:FinishCast(castBar, true);
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_FAILED" and castBar.casting  and lineID == castBar.lineID ) then
-	-- elseif ( event == "UNIT_SPELLCAST_FAILED" and castBar.casting  and lineID == castBar.lineID ) then
 		if ( castBar.text ) then
 			castBar.text:SetText(FAILED);
 		end	
@@ -363,7 +357,8 @@ function CastBar:OnEvent(event, ...)
 			end
 		end
 	end
-	if not unit then return end;
+	if not unit and not srcGuid then return end;
+	if not ArenaLive:GetAffectedUnitFramesByGUID(srcGuid) then return end
 	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_INTERRUPT" ) then
 		-- local guid = select(8, ...); -- DestGUID
 		local school = select(17, ...); -- SpellSchool of the kicked spell
@@ -376,43 +371,23 @@ function CastBar:OnEvent(event, ...)
 			end
 		end
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" ) then
-	-- elseif ( event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_CHANNEL_START" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
-			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
+			for id in ArenaLive:GetAffectedUnitFramesByGUID(srcGuid) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
 				if ( unitFrame[self.name] and unitFrame[self.name]["enabled"] ) then
-					CastBar:StartCast(unitFrame[self.name], unit, event);
+					CastBar:StartCast(unitFrame[self.name], unitFrame.unit, event);
 				end
 			end
 		end
-	--[[ elseif ( event == "UNIT_SPELLCAST_DELAYED" or event == "UNIT_SPELLCAST_CHANNEL_UPDATE" ) then
-		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
-			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
-				local unitFrame = ArenaLive:GetUnitFrameByID(id);
-				if ( unitFrame[self.name] and unitFrame[self.name]["enabled"] ) then
-					CastBar:UpdateCast(unitFrame[self.name], unit, event);
-				end
-			end
-		end]]
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_FAILED" or event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" ) then
-	-- elseif ( event == "UNIT_SPELLCAST_INTERRUPTED" or event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_STOP" or event == "UNIT_SPELLCAST_CHANNEL_STOP" or event == "UNIT_SPELLCAST_SUCCEEDED" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
-			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
+			for id in ArenaLive:GetAffectedUnitFramesByGUID(srcGuid) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
 				if ( unitFrame[self.name] and unitFrame[self.name]["enabled"] ) then
 					CastBar:StopCast(unitFrame[self.name], event, lineID);
 				end
 			end
 		end
-	--[[elseif ( event == "UNIT_SPELLCAST_INTERRUPTIBLE" or event == "UNIT_SPELLCAST_NOT_INTERRUPTIBLE" ) then
-		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
-			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
-				local unitFrame = ArenaLive:GetUnitFrameByID(id);
-				if ( unitFrame[self.name] and unitFrame[self.name]["enabled"] ) then
-					CastBar:UpdateShield(unitFrame[self.name], event);
-				end
-			end
-		end]]
 	end
 
 end

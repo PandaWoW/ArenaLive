@@ -32,6 +32,62 @@ function ArenaLiveSpectator:InitialiseSideFrames()
 		frame = _G["ALSPEC_RightSideFramesFrame"..i];
 		initialiseSideFrame(frame, "Right");
 	end
+	local barstosmooth = {    -- SMOOTH HEALTH AND POWER LOSE\GAIN ANIMATION
+        ALSPEC_LeftSideFramesFrame1HealthBar, ALSPEC_RightSideFramesFrame1PowerBar, ALSPEC_RightSideFramesFrame1CastBar,
+        ALSPEC_LeftSideFramesFrame2HealthBar, ALSPEC_RightSideFramesFrame2PowerBar, ALSPEC_RightSideFramesFrame2CastBar,
+        ALSPEC_LeftSideFramesFrame3HealthBar, ALSPEC_RightSideFramesFrame3PowerBar, ALSPEC_RightSideFramesFrame3CastBar,
+        ALSPEC_TargetFrameHealthBar, ALSPEC_TargetFramePowerBar, ALSPEC_TargetFrameCastBar,
+        ALSPEC_TargetTargetFrameHealthBar, ALSPEC_TargetTargetFramePowerBar, ALSPEC_TargetFrameCastBar
+    }
+ 
+    local smoothframe = CreateFrame'Frame'
+    smoothing = {}
+ 
+    local min, max = math.min, math.max
+    local function AnimationTick()
+        local limit = 30/GetFramerate()
+        for bar, value in pairs(smoothing) do
+            local cur = bar:GetValue()
+            local new = cur + min((value - cur)/3, max(value - cur, limit))
+            if new ~= value then new = value end
+            if cur == value or abs(new - value) < 2 then
+                bar:SetValue_(value)
+                smoothing[bar] = nil
+            else
+                bar:SetValue_(new)
+            end
+        end
+    end
+ 
+    local function SmoothSetValue(self, value)
+        local _, max = self:GetMinMaxValues()
+        if value == self:GetValue() or self._max and self._max ~= max then
+            smoothing[self] = nil
+            self:SetValue_(value)
+        else
+            smoothing[self] = value
+        end
+        self._max = max
+    end
+ 
+    for bar, value in pairs(smoothing) do
+        if bar.SetValue_ then bar.SetValue = SmoothSetValue end
+    end
+ 
+    local function SmoothBar(bar)
+        if not bar.SetValue_ then
+            bar.SetValue_ = bar.SetValue bar.SetValue = SmoothSetValue
+        end
+    end
+ 
+    local function ResetBar(bar)
+        if bar.SetValue_ then
+            bar.SetValue = bar.SetValue_ bar.SetValue_ = nil
+        end
+    end
+ 
+    smoothframe:SetScript('OnUpdate', function()AnimationTick()end) 
+    for _, v in pairs (barstosmooth) do if v then SmoothBar(v) end end
 end
 
 function ArenaLiveSpectator:SetUpSideFrames(numPlayers)

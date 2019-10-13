@@ -521,13 +521,13 @@ function Aura:OnEvent(event, ...)
 		-- TODO: Use this after option changes:
 		local addonName, groupType = ...;
 	else
-	-- if ( event == "UNIT_AURA" ) then
 		-- local filter = ...;
 		local srcGuid, src, _, _, destGuid, dest, _, _, spellID, spellName, lineID = select(4, ...);
 		local filter = ArenaLiveSpectator:GetUnitByGUID(destGuid);
 
 		if ( ArenaLive:IsUnitInUnitFrameCache(filter) ) then
-			for id in ArenaLive:GetAffectedUnitFramesByUnit(filter) do
+			if not ArenaLive:GetAffectedUnitFramesByGUID(destGuid) then return end
+			for id in ArenaLive:GetAffectedUnitFramesByGUID(destGuid) do
 				local frame = ArenaLive:GetUnitFrameByID(id);
 				if ( frame[self.name] ) then
 					self:Update(frame);

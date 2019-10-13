@@ -258,7 +258,7 @@ end
 function CastHistory:OnEnable(unitFrame)
 	local castHistory = unitFrame[self.name];
 	castHistory:Show();
-	--CastHistory:Update(unitFrame);
+	CastHistory:Update(unitFrame);
     
     CastHistory:Reset(unitFrame);
 end
@@ -270,7 +270,7 @@ function CastHistory:OnDisable (unitFrame)
 end
 
 function CastHistory:Update(unitFrame)
-	 --CastHistory:Reset(unitFrame);
+	CastHistory:Reset(unitFrame);
 end
 
 function CastHistory:Reset (unitFrame)
@@ -493,14 +493,14 @@ function CastHistory:UpdateBorder (castHistory, spellID, destGUID)
 end
 
 function CastHistory:OnEvent (event, ...)
-	local srcGuid, src, _, _, destGuid, dest, _, _, spellID, spellName, lineID = select(4, ...);
-	local unit = ArenaLiveSpectator:GetUnitByGUID(srcGuid);
+	local sourceGUID, src, _, _, destGuid, dest, _, _, spellID, spellName, lineID = select(4, ...);
+	local unit = ArenaLiveSpectator:GetUnitByGUID(sourceGUID);
 
+	if not unit and not sourceGUID then return end
 	-- local unit, _, _, lineID, spellID = ...;
 	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_START" ) then
-	-- if ( event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_CHANNEL_START" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
-			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
+			for id in ArenaLive:GetAffectedUnitFramesByGUID(sourceGUID) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
 				if ( unitFrame[self.name] and unitFrame[self.name]["enabled"] ) then
 					CastHistory:StartCast(unitFrame, event, spellID, lineID);
@@ -508,19 +508,17 @@ function CastHistory:OnEvent (event, ...)
 			end
 		end
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" ) then
-	-- elseif ( event == "UNIT_SPELLCAST_SUCCEEDED" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
-			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
+			for id in ArenaLive:GetAffectedUnitFramesByGUID(sourceGUID) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
 				if ( unitFrame[self.name] and unitFrame[self.name]["enabled"] ) then
-					CastHistory:SuccessfulCast (unitFrame, spellID, lineID);
+					CastHistory:SuccessfulCast(unitFrame, spellID, lineID);
 				end
 			end
 		end
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_STOP" ) then
-	-- elseif ( event == "UNIT_SPELLCAST_STOP" or event == "UNIT_SPELLCAST_CHANNEL_STOP" ) then
 		if ( ArenaLive:IsUnitInUnitFrameCache(unit) ) then
-			for id in ArenaLive:GetAffectedUnitFramesByUnit(unit) do
+			for id in ArenaLive:GetAffectedUnitFramesByGUID(sourceGUID) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
 				if ( unitFrame[self.name] and unitFrame[self.name]["enabled"] ) then
 					CastHistory:StopCast(unitFrame[self.name], event, lineID);
@@ -528,9 +526,6 @@ function CastHistory:OnEvent (event, ...)
 			end
 		end
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_DAMAGE" or event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_HEAL" or event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_SUCCESS" ) then
-		local sourceGUID = select(4, ...);
-		local spellID = select(12, ...);
-		local destGUID = select(8, ...);
 		if ( ArenaLive:IsGUIDInUnitFrameCache(sourceGUID) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByGUID(sourceGUID) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
@@ -540,8 +535,7 @@ function CastHistory:OnEvent (event, ...)
 			end	
 		end
 	elseif ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_INTERRUPT" ) then
-		local destGUID = select(8, ...);
-		local spellID = select(17, ...);
+		spellID = select(17, ...);
 		if ( ArenaLive:IsGUIDInUnitFrameCache(destGUID) ) then
 			for id in ArenaLive:GetAffectedUnitFramesByGUID(destGUID) do
 				local unitFrame = ArenaLive:GetUnitFrameByID(id);
