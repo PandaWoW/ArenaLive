@@ -108,6 +108,30 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
+				<FontString name="$parentScoreLeft" inherits="ArenaLiveSpectatorScoreBoardFont" justifyH="RIGHT" parentKey="scoreLeft">
+					<Size>
+						<AbsDimension x="40" y="28" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentCenterBG">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentScoreRight" inherits="ArenaLiveSpectatorScoreBoardFont" justifyH="LEFT" parentKey="scoreRight">
+					<Size>
+						<AbsDimension x="40" y="28" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativeTo="$parentCenterBG">
+							<Offset>
+								<AbsDimension x="2" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
 			</Layer>
 		</Layers>
 		<Frames>
@@ -120,6 +144,14 @@
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
+						<Texture name="$parentVS" file="Interface\AddOns\ArenaLiveSpectator3\Textures\VersusText" parentKey="vs">
+							<Size>
+								<AbsDimension x="64" y="32"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOP" />
+							</Anchors>
+						</Texture>
 						<Texture name="$parentIcon" file="Interface\LFGFRAME\UI-LFG-ICON-ROLES" parentKey="icon" hidden="true">
 							<TexCoords left="0.251" right="0.51" top="0" bottom="0.25"/>
 						</Texture>

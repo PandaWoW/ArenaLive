@@ -4,6 +4,17 @@ local DAMPENING_STACK_TIMER = 10; -- "If a match should last for 5 minutes, all 
 function ArenaLiveSpectatorScoreBoard:Initialise()
 	local database = ArenaLive:GetDBComponent(addonName);
 	
+	local teamAr, teamAg, teamAb = unpack(database.TeamA.Colour);
+	local teamBr, teamBg, teamBb = unpack(database.TeamB.Colour);
+
+	-- Set Team Colours:
+	self.scoreLeft:SetTextColor(teamAr, teamAg, teamAb);
+	self.scoreRight:SetTextColor(teamBr, teamBg, teamBb);
+
+	-- Set Texts:
+	ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
+	ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
+	
 	-- Set Scripts:
 	ArenaLiveSpectatorScoreBoardDampeningIndicator.anim:SetScript("OnPlay", self.OnAnimationPlay);
 	ArenaLiveSpectatorScoreBoardDampeningIndicator.anim:SetScript("OnFinished", self.OnAnimationFinished);
@@ -15,6 +26,22 @@ function ArenaLiveSpectatorScoreBoard:Reset()
 	ArenaLiveSpectatorScoreBoardDampeningIndicator:Reset();
 end
 
+function ArenaLiveSpectatorScoreBoard:UpdateTeamScore(team)
+	local text;
+	if ( team == "TeamA" ) then
+		text = self.scoreLeft;
+	elseif ( team == "TeamB" ) then
+		text = self.scoreRight;
+	else
+		ArenaLive:Message(L["%s: Invalid team %s. Use \"TeamA\"  or \"TeamB\""], "error", "ArenaLiveSpectatorScoreBoard:UpdateTeamName()", team);
+	end
+
+	if ( text ) then
+		local database = ArenaLive:GetDBComponent(addonName, nil, team);
+		text:SetText(database.Score);
+	end
+end
+
 function ArenaLiveSpectatorScoreBoard:OnAnimationPlay()
 	ArenaLiveSpectatorScoreBoard.dampeningIndicator.icon:Show();
 	ArenaLiveSpectatorScoreBoard.dampeningIndicator.text:Show();
@@ -23,6 +50,7 @@ function ArenaLiveSpectatorScoreBoard:OnAnimationPlay()
 end
 
 function ArenaLiveSpectatorScoreBoard:OnAnimationFinished(animation)
+	ArenaLiveSpectatorScoreBoard.dampeningIndicator.vs:SetAlpha(0);
 	ArenaLiveSpectatorScoreBoard.dampeningIndicator.icon:SetAlpha(1);
 end
 
@@ -65,16 +93,19 @@ end
 function ArenaLiveSpectatorScoreBoardDampeningIndicator:Reset()
 	self.icon:SetAlpha(0);
 	self.icon:Hide();
-	
+
 	self.text:SetAlpha(0);
 	self.text:Hide();
+
+	self.vs:SetAlpha(1);
+	self.vs:Show();
 end
 
 -- Change speed button
 local speeds = {'7','15','20','25','30'}
 local SpeedFrame = CreateFrame('Button',nil,ArenaLiveSpectatorScoreBoard)
 SpeedFrame:SetSize(22,22)
-SpeedFrame:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard,-48,15)
+SpeedFrame:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard,-48,-15)
 SpeedFrame:SetNormalFontObject(GameFontGreenLarge)
 SpeedFrame:SetText(SpeedFrame:GetText()or'x1')
 SpeedFrame:SetScript('OnShow',function(self)
@@ -114,7 +145,7 @@ LeaveButton.__icon:SetAllPoints()
 -- Reset player button
 local ResetPlayer = CreateFrame('Button',nil,ArenaLiveSpectatorScoreBoard,'SecureActionButtonTemplate')
 ResetPlayer:SetSize(28,28)
-ResetPlayer:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard,48,15)
+ResetPlayer:SetPoint('CENTER',ArenaLiveSpectatorScoreBoard,48,-16)
 ResetPlayer:SetAttribute('type','target')
 ResetPlayer:SetAttribute('unit','none')
 ResetPlayer:RegisterForClicks("AnyUp")

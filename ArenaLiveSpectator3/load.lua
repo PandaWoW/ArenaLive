@@ -17,13 +17,11 @@ ArenaLiveSpectator.defaults = {
 	},
 	["TeamA"] = {
 		["Name"] = "Gold Team",
-		["Leader"] = "",
 		["Score"] = 0,
 		["Colour"] = { 1, 0.83, 0, 1 }, -- Gold Team (old blue 0, 0.5, 1, 1)
 	},
 	["TeamB"] = {
 		["Name"] = "Green Team",
-		["Leader"] = "",
 		["Score"] = 0,
 		["Colour"] = { 0.39, 0.71, 0.33, 1 }, -- Green Team (old: red 1, 0.19, 0, 1)
 	},

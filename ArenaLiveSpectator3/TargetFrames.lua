@@ -7,7 +7,7 @@ local function OnUpdate(self, elapsed)
 		self:UpdateUnit(unit);
 	end
 	
-	if ( self.unit == "targettarget" ) then
+	if ( self.unit == "targettarget" or self.unit == "target" ) then
 		self:Update();
 		self:UpdateUnit(self.unit)
 	end
