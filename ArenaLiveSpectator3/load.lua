@@ -367,11 +367,7 @@ function ArenaLiveSpectator:Enable()
     ArenaLiveSpectator:PlayerUpdate();
 	self.enabled = true;
     self.hasStarted = true;
-	if ArenaLive:GetDBComponent(addonName).PlayMode > 0 then
-		ArenaLiveSpectator:SetNumPlayers(ArenaLive:GetDBComponent(addonName).PlayMode)
-	else
-		ArenaLiveSpectator:SetNumPlayers(CommentatorGetMapInfo(1))
-	end
+	ArenaLiveSpectator:SetNumPlayers(CommentatorGetMapInfo(1))
 end
 
 function ArenaLiveSpectator:Disable()
@@ -512,8 +508,8 @@ end
 function ArenaLiveSpectator:Toggle()
 	local _, instanceType = IsInInstance();
 	if ( instanceType == "arena" and IsSpectator() ) then
-		ArenaLiveSpectator:Enable();
-        CommentatorToggleMode();
+		CommentatorToggleMode();
+		DelayEvent(1,function()ArenaLiveSpectator:Enable()end);
 	else
 		ArenaLiveSpectator:Disable();
 		DelayEvent(1,function()WorldStateAlwaysUpFrame:Show()ConsoleExec("deselectOnClick "..deselect)end)
