@@ -16,7 +16,7 @@ local addonName, L = ...;
 
 -- Default values:
 ArenaLive.defaults = {
-	["Version"] = "3.1.1b",
+	["Version"] = "3.1.1c",
 	["Grid"] = {
 		["Shown"] = false,
 	},

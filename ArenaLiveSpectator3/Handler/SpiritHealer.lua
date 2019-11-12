@@ -17,6 +17,7 @@ end
 function SpiritHealerFrame:UpdateNumPlayers()
 	local numTeamA = CommentatorGetNumPlayers(2);
 	local numTeamB = CommentatorGetNumPlayers(1);
+	local deadCountA, deadCountB = 0, 0;
 	
 	for i = 1, 5 do
 		local unit = "commentator"..i;
@@ -26,6 +27,7 @@ function SpiritHealerFrame:UpdateNumPlayers()
 		else
 			playerStates[unit] = nil;
 		end
+		if playerStates[unit] then deadCountA = deadCountA + 1 end;
 		
 		unit = "commentator"..5+i;
 		if ( i <= numTeamB ) then
@@ -34,7 +36,13 @@ function SpiritHealerFrame:UpdateNumPlayers()
 		else
 			playerStates[unit] = nil;
 		end
+		if playerStates[unit] then deadCountB = deadCountB + 1 end;
 	end
+	ArenaLive:GetDBComponent("ArenaLiveSpectator3", nil, "TeamA").Score = numTeamA - deadCountA;
+	ArenaLive:GetDBComponent("ArenaLiveSpectator3", nil, "TeamB").Score = numTeamB - deadCountB;
+	ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamA");
+	ArenaLiveSpectatorScoreBoard:UpdateTeamScore("TeamB");
+	deadCountA, deadCountB = 0, 0;
 end
 
 function SpiritHealerFrame:Update(unitFrame)
@@ -49,6 +57,7 @@ function SpiritHealerFrame:Update(unitFrame)
 		frame.flash:Show();
 		frame.texture:Show();
 		frame.fadeOutAnim:Play();
+		unitFrame.dead = playerStates[unit];
 	end
 end
 
@@ -60,6 +69,7 @@ function SpiritHealerFrame:Reset(unitFrame)
 		frame.fadeOutAnim:Stop();
 	end
 	
+	unitFrame.dead = nil;
 	frame:Hide();
 end
 

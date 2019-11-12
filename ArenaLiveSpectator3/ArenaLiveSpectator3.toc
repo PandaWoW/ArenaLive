@@ -2,7 +2,7 @@
 ## Title: ArenaLive3 [Spectator]
 ## Notes: Spectator Mode UI for WoW Arenas.
 ## Author: Vadrak
-## Version: 3.0.0b
+## Version: 3.1.1c
 ## Dependencies: ArenaLive3
 ## SavedVariables: ALSPEC_Database
 load.xml
