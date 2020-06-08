@@ -9,9 +9,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
-    - name: Run a one-line script
-      run: ls -r
     - name: make archive
       run: zip -r ArenaLive-PandaWoW.zip ./ArenaLive3 ./ArenaLiveSpectator3
     - uses: dev-drprasad/delete-tag-and-release@v0.1.2
