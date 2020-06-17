@@ -353,6 +353,7 @@ end)
 ScoreboardTimer:Hide()
 
 function ArenaLiveSpectator:Enable()
+	ArenaLiveSpectator:SetNumPlayers(CommentatorGetMapInfo(1))
     -- Прячем отображение (*) на именах во фреймах указывающее на 
     --принадлежность к другому реалму
     -- TODO: опционально реализовать вместо (*) отображение реалма.
@@ -367,7 +368,6 @@ function ArenaLiveSpectator:Enable()
     ArenaLiveSpectator:PlayerUpdate();
 	self.enabled = true;
     self.hasStarted = true;
-	ArenaLiveSpectator:SetNumPlayers(CommentatorGetMapInfo(1))
 end
 
 function ArenaLiveSpectator:Disable()
