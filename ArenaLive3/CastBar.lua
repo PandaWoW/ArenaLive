@@ -113,7 +113,6 @@ function CastBar:Update(unitFrame)
 		-- Not casting so reset and hide castBar just in case:
 		CastBar:Reset(unitFrame);
 	end
-
 end
 
 
@@ -292,7 +291,6 @@ function CastBar:FinishCast(castBar, wasSuccessful)
 	
 	castBar:SetValue(castBar.maxValue);
 	castBar.animation:Play();
-
 end
 
 function CastBar:UpdateShield(castBar, event)
@@ -327,6 +325,17 @@ function CastBar:OnUpdate(elapsed)
 			self:Reset(castBar);
 		elseif ( castBar.casting ) then
 			castBar.value = castBar.value + elapsed;
+			
+            -- Check if unit casts/channels:
+            local spell = UnitCastingInfo(unitFrame.unit);
+            if ( not spell ) then
+                spell = UnitChannelInfo(unitFrame.unit);
+            end
+			
+            if ( not spell ) then
+                CastBar:FinishCast(castBar, false);
+                return;
+            end
 			
 			if ( castBar.value >= castBar.maxValue ) then
 				CastBar:FinishCast(castBar, true);

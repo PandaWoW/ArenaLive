@@ -409,7 +409,7 @@ function CastHistory:StartCast (unitFrame, event, spellID, lineID)
 	CastHistory:Rotate(unitFrame, event, spellID, lineID);
 end
 
-function CastHistory:StopCast (castHistory, event, lineID)
+function CastHistory:StopCast(castHistory, event, lineID)
 	
 	if ( event == "COMBAT_LOG_EVENT_UNFILTERED_SPELL_CAST_FAILED" and lineID ~= castHistory.lineID ) then
 	-- if ( event == "UNIT_SPELLCAST_STOP" and lineID ~= castHistory.lineID ) then
