@@ -511,8 +511,12 @@ function ArenaLiveSpectator:Toggle()
 		CommentatorToggleMode();
 		DelayEvent(1,function()ArenaLiveSpectator:Enable()end);
 	else
-		CameraZoomIn(100);
-		CameraZoomOut(GetCVar("cameraSavedDistance"));
+		if ( self.enabled == true ) then
+			ResetView(1);
+			SetView(1);
+			CameraZoomIn(100);
+		    CameraZoomOut(GetCVar("cameraSavedDistance"));
+		end
 		ArenaLiveSpectator:Disable();
 		DelayEvent(1,function()WorldStateAlwaysUpFrame:Show()ConsoleExec("deselectOnClick "..deselect)end)
 	end
